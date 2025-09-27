@@ -1,2 +1,2 @@
 # zenith1-project
-This is the project
+Project part 1
