@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sign_in"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp">
@@ -10,7 +11,7 @@
         android:id="@+id/signInText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_up"
+        android:text="@string/logo"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
@@ -19,13 +20,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="40dp" />
 
-    <!-- Sign In Button -->
-
     <TextView
         android:id="@+id/directToSignUpPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Already have an account? Sign in."
+        android:text="@string/redirect_to_sign_up"
         android:textColor="@android:color/black"
         android:textSize="15sp"
         android:textStyle="bold"

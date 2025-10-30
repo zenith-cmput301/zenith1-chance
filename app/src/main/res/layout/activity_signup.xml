@@ -2,11 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sign_up"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp">
 
-    <!-- Title -->
     <TextView
         android:id="@+id/signUpText"
         android:layout_width="wrap_content"
@@ -20,7 +20,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="40dp" />
 
-    <!-- Role selection -->
     <Spinner
         android:id="@+id/roles"
         android:layout_width="0dp"
@@ -32,7 +31,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="12dp" />
 
-    <!-- Full Name -->
     <EditText
         android:id="@+id/nameTextField"
         android:layout_width="0dp"
@@ -45,7 +43,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Email -->
     <EditText
         android:id="@+id/emailTextField"
         android:layout_width="0dp"
@@ -58,7 +55,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Sign Up Button -->
     <Button
         android:id="@+id/signUpButton"
         android:layout_width="0dp"
