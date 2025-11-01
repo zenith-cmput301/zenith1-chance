@@ -13,6 +13,10 @@
         android:theme="@style/Theme.EntrantsProfilePage">
         <activity
             android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EntrantsProfilePage" />
+        <activity
+            android:name=".ProfileActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
