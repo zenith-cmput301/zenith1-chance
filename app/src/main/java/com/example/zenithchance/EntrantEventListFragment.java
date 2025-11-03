@@ -84,7 +84,7 @@ public class EntrantEventListFragment extends Fragment {
     }
 
     /**
-     * This method set the correct filter that user choser.
+     * This method set the correct filter that user have chosen.
      *
      * @param newFilter The chosen filter.
      */
