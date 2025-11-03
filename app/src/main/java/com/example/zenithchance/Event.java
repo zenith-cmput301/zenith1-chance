@@ -11,10 +11,11 @@ import java.util.Date;
  */
 
 public class Event {
-    public Date date;
-    public String name;
-    public String location;
-    public String status;
+    private Date date;
+    private String name;
+    private String location;
+    private String organizer;
+    private String status;
 
     /**
      * Empty constructor for class Event.
@@ -32,11 +33,18 @@ public class Event {
      * @param status    entrant's status on event (waiting, chosen, accepted, declined)
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status) {
+    public Event(Date date, String name, String location, String status, String organizer) {
         this.date = date;
         this.name = name;
         this.location = location;
         this.status = status;
+        this.organizer = organizer;
     }
+
+    public Date getDate() { return this.date; }
+    public String getName() { return this.name; }
+    public String getLocation() { return this.location; }
+    public String getStatus() { return this.status; }
+    public String getOrganizer() { return this.organizer; }
 
 }

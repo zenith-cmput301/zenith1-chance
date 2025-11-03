@@ -22,6 +22,7 @@
         </activity>
 
         <activity android:name=".EntrantEventsActivity"/>
+        <activity android:name=".EntrantEventDetailsActivity"/>
 
     </application>
 

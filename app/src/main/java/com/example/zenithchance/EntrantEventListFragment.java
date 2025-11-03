@@ -1,5 +1,6 @@
 package com.example.zenithchance;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,7 +52,13 @@ public class EntrantEventListFragment extends Fragment {
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // attach adapter to fragment
-        adapter = new EventsAdapter();
+        adapter = new EventsAdapter(new ArrayList<>(), event -> {
+            Intent i = new Intent(requireContext(), EntrantEventDetailsActivity.class);
+            i.putExtra("event_name", event.getName());
+            i.putExtra("event_location", event.getLocation());
+            i.putExtra("event_status", event.getStatus());
+            startActivity(i);
+        });
         rv.setAdapter(adapter);
 
         return frag;
@@ -76,7 +83,7 @@ public class EntrantEventListFragment extends Fragment {
         Date now = new Date();
 
         for (Event e : list) {
-            boolean isUpcoming = !e.date.before(now);   // today is also counted as "Upcoming"
+            boolean isUpcoming = !e.getDate().before(now);   // today is also counted as "Upcoming"
             if (upcoming) { if (isUpcoming) filtered.add(e); }
             else { if (!isUpcoming) filtered.add(e); }
         }

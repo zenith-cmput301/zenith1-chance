@@ -5,13 +5,13 @@ import com.google.firebase.firestore.Exclude;
 
 public abstract class User {
 
-    private String email;
-    private String name;
-    private String deviceId;
-    private String type;
+    protected String email;
+    protected String name;
+    protected String deviceId;
+    protected String type;
 
     @Exclude
-    private String userId; // matches Firestore doc ID, not stored as field
+    protected String userId; // matches Firestore doc ID, not stored as field
 
     public User() { } // required empty constructor for Firestore
 

@@ -1,5 +1,8 @@
 package com.example.zenithchance;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,16 @@ import java.util.Locale;
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
     private List<Event> eventList = new ArrayList<>();
     private final SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+    private OnEventClickListener listener;
+
+    public interface OnEventClickListener {
+        void onEventClick(Event event);
+    }
+
+    public EventsAdapter(List<Event> events, OnEventClickListener listener) {
+        if (events != null) eventList.addAll(events);
+        this.listener = listener;
+    }
 
     /**
      * Method to refreshes the UI with updated list.
@@ -33,7 +46,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
      */
     public void setItems(List<Event> items) {
         eventList.clear();
-        eventList.addAll(items);
+        if (items != null) eventList.addAll(items);
         notifyDataSetChanged();
     }
 
@@ -61,10 +74,14 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
      */
     public void onBindViewHolder(EventVH h, int position) {
         Event e = eventList.get(position);
-        h.name.setText(e.name);
-        h.location.setText(e.location);
-        h.status.setText(e.status);
-        h.date.setText(fmt.format(e.date)); // formatting date
+        h.name.setText(e.getName());
+        h.location.setText(e.getLocation());
+        h.status.setText(e.getStatus());
+        h.date.setText(fmt.format(e.getDate())); // formatting date
+
+        h.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onEventClick(e);
+        });
     }
 
     /**
