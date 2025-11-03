@@ -10,9 +10,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class for the list of events inside Entrant's My Events page.
@@ -44,6 +46,7 @@ public class EntrantEventListFragment extends Fragment {
      * @return                      Inflated view.
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
         // inflates fragment
         View frag = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
@@ -57,6 +60,9 @@ public class EntrantEventListFragment extends Fragment {
             i.putExtra("event_name", event.getName());
             i.putExtra("event_location", event.getLocation());
             i.putExtra("event_status", event.getStatus());
+            i.putExtra("event_organizer", event.getOrganizer());
+            i.putExtra("event_time", fmt.format(event.getDate()));
+            i.putExtra("event_description", event.getDescription());
             startActivity(i);
         });
         rv.setAdapter(adapter);

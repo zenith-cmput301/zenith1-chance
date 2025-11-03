@@ -14,14 +14,15 @@ public class EntrantEventDetailsActivity extends AppCompatActivity {
 
         TextView name = findViewById(R.id.event_name);
         TextView location = findViewById(R.id.location);
-        // TextView time = findViewById(R.id.time);
-        // TextView desc = findViewById(R.id.description);
+        TextView organizer = findViewById(R.id.organizer_name);
+        TextView time = findViewById(R.id.time);
+        TextView desc = findViewById(R.id.description);
 
         Intent i = getIntent();
         name.setText(i.getStringExtra("event_name"));
         location.setText(i.getStringExtra("event_location"));
-        // status.setText(i.getStringExtra("event_status"));
-        // time.setText(i.getStringExtra("event_time"));
-        // desc.setText(i.getStringExtra("event_description"));
+        organizer.setText(i.getStringExtra("event_organizer"));
+        time.setText(i.getStringExtra("event_time"));
+        desc.setText(i.getStringExtra("event_description"));
     }
 }

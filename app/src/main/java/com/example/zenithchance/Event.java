@@ -16,6 +16,7 @@ public class Event {
     private String location;
     private String organizer;
     private String status;
+    private String description;
 
     /**
      * Empty constructor for class Event.
@@ -33,12 +34,13 @@ public class Event {
      * @param status    entrant's status on event (waiting, chosen, accepted, declined)
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer) {
+    public Event(Date date, String name, String location, String status, String organizer, String description) {
         this.date = date;
         this.name = name;
         this.location = location;
         this.status = status;
         this.organizer = organizer;
+        this.description = description;
     }
 
     public Date getDate() { return this.date; }
@@ -46,5 +48,6 @@ public class Event {
     public String getLocation() { return this.location; }
     public String getStatus() { return this.status; }
     public String getOrganizer() { return this.organizer; }
+    public String getDescription() { return this.description; }
 
 }
