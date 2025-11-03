@@ -1,4 +1,4 @@
-package com.example.entrantsprofilepage;
+package com.example.zenithchance;
 
 import android.os.Bundle;
 

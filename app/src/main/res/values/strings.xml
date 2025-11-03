@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Entrants Profile Page</string>
+    <string name="app_name">ZenithChance</string>
     <string name="delete_profile_text">Delete Profile</string>
     <string name="edit_profile_text">Edit Profile</string>
     <string name="email_text">Email</string>
@@ -8,4 +8,10 @@
     <string name="all_events_text">All Events</string>
     <string name="my_events_text">My Events</string>
     <string name="profile_text">Profile</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="enter_your_name">Enter your name</string>
+    <string name="sign_in_with_device_id">Sign in with Device ID.</string>
+    <string name="logo">ZenithChance</string>
+    <string name="redirect_to_sign_up">Don\'t have an account? Sign up.</string>
 </resources>
