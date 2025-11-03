@@ -3,6 +3,10 @@ package com.example.zenithchance;
 import com.google.firebase.firestore.Exclude;
 
 
+/**
+ * This class represents a User object.
+ * This class is the superclass for entrants, organizers, and admins.
+ */
 public abstract class User {
 
     private String email;
@@ -26,7 +30,8 @@ public abstract class User {
     public void setName(String name) { this.name = name; }
 
     public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+
+    public void setDeviceId(String userDeviceId) { this.deviceId = userDeviceId; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
