@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,7 +26,10 @@ import java.util.List;
  * @see EventsAdapter
  */
 public class EntrantEventListFragment extends Fragment {
+    private boolean upcoming = true;
     private EventsAdapter adapter;
+    private RecyclerView rv;
+    private List<Event> list = new ArrayList<>();
 
     /**
      * Method to inflate the list of events inside Entrant's My Events page.
@@ -44,37 +48,51 @@ public class EntrantEventListFragment extends Fragment {
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // inflates fragment
-        View root = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
+        View frag = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
         // set fragment as vertical scroll list
-        RecyclerView rv = root.findViewById(R.id.recycler_events);
+        rv = frag.findViewById(R.id.recycler_events);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // attach adapter to fragment
         adapter = new EventsAdapter();
         rv.setAdapter(adapter);
 
-        loadEventsOnce(); // initialize lists
-        return root;
+        loadEvents(); // initialize lists
+        return frag;
     }
 
     /**
-     * This method initialize the list of events from Firebase.
+     * This method loads the list of events from Firebase.
      */
-    private void loadEventsOnce() {
+    private void loadEvents() {
         FirebaseFirestore.getInstance()
                 .collection("events")
                 .orderBy("date")
                 .get()
                 .addOnSuccessListener(snaps -> {
-                    List<Event> list = new ArrayList<>();
+                    list.clear();
                     for (DocumentSnapshot d : snaps) {
                         Event e = d.toObject(Event.class);
                         if (e != null) list.add(e);
                     }
-                    adapter.setItems(list);
+                    filter();
                 })
                 .addOnFailureListener(e -> Log.e("EventsList", "Firestore load failed", e));
     }
+
+    private void filter() {
+        List<Event> filtered = new ArrayList<>();
+        Date now = new Date();
+
+        for (Event e : list) {
+            boolean isUpcoming = !e.date.before(now);   // today is also counted as "Upcoming"
+            if (upcoming) { if (isUpcoming) filtered.add(e); }
+            else { if (!isUpcoming) filtered.add(e); }
+        }
+        adapter.setItems(filtered);
+    }
+
+    public void setFilter(boolean filter) { upcoming = filter; }
 }
 

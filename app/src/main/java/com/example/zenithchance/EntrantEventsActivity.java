@@ -1,8 +1,10 @@
 package com.example.zenithchance;
 
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * This class represents an Entrant's My Events page.
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * @see EntrantEventListFragment
  */
 public class EntrantEventsActivity extends AppCompatActivity {
+    private EntrantEventListFragment eventListFrag;
 
     /**
      * This method initialize My Events page.
@@ -25,12 +28,32 @@ public class EntrantEventsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.entrant_my_events);
 
-        // initialize list fragment into container
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.eventsFragmentContainer, new EntrantEventListFragment())
+        // inflate/recover the fragment
+        FragmentManager fm = getSupportFragmentManager();
+        eventListFrag = (EntrantEventListFragment) fm.findFragmentByTag("entrant_event_list");
+
+        if (eventListFrag == null) {
+            eventListFrag = new EntrantEventListFragment();
+            fm.beginTransaction()
+                    .replace(R.id.eventsFragmentContainer, eventListFrag, "entrant_event_list")
                     .commit();
         }
+
+        // wire buttons
+        Button upcomingButton = findViewById(R.id.upcoming_events); // default
+        Button pastButton = findViewById(R.id.past_events);
+
+        upcomingButton.setOnClickListener(v -> {
+            eventListFrag.setFilter(true);
+            upcomingButton.setEnabled(false);
+            pastButton.setEnabled(true);
+        });
+
+        pastButton.setOnClickListener(v -> {
+            eventListFrag.setFilter(false);
+            pastButton.setEnabled(false);
+            upcomingButton.setEnabled(true);
+        });
     }
 }
 
