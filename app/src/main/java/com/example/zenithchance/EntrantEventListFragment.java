@@ -16,26 +16,55 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for the list of events inside Entrant's My Events page.
+ *
+ * @author Percy
+ * @version 1.0
+ * @see Event
+ * @see EventsAdapter
+ */
 public class EntrantEventListFragment extends Fragment {
     private EventsAdapter adapter;
 
+    /**
+     * Method to inflate the list of events inside Entrant's My Events page.
+     *
+     * @param inflater              The LayoutInflater object that can be used to inflate
+     *                              any views in the fragment,
+     * @param container             If non-null, this is the parent view that the fragment's
+     *                              UI should be attached to.
+     *                              The fragment should not add the view itself,
+     *                              but this can be used to generate the
+     *                              LayoutParams of the view.
+     * @param savedInstanceState    If non-null, this fragment is being re-constructed
+     *                              from a previous saved state as given here.
+     *
+     * @return                      Inflated view.
+     */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // inflates fragment
         View root = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
+        // set fragment as vertical scroll list
         RecyclerView rv = root.findViewById(R.id.recycler_events);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // attach adapter to fragment
         adapter = new EventsAdapter();
         rv.setAdapter(adapter);
 
-        loadEventsOnce(); // simple one-shot fetch; we can switch to realtime later
+        loadEventsOnce(); // initialize lists
         return root;
     }
 
+    /**
+     * This method initialize the list of events from Firebase.
+     */
     private void loadEventsOnce() {
         FirebaseFirestore.getInstance()
                 .collection("events")
-                .orderBy("date") // earliest → latest
+                .orderBy("date")
                 .get()
                 .addOnSuccessListener(snaps -> {
                     List<Event> list = new ArrayList<>();

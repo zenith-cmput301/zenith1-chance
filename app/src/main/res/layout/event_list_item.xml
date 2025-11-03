@@ -47,7 +47,7 @@
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toEndOf="@id/event_image"
             app:layout_constraintTop_toBottomOf="@id/event_date"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/event_status"/>
 
         <ImageView
             android:id="@+id/location_icon"
