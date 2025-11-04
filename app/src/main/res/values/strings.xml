@@ -14,4 +14,8 @@
     <string name="sign_in_with_device_id">Sign in with Device ID.</string>
     <string name="logo">ZenithChance</string>
     <string name="redirect_to_sign_up">Don\'t have an account? Sign up.</string>
+    <string name="notifications_set_to_dont_change_this">Notifications Set To:</string>
+    <string name="togglebuttontext">ToggleButton</string>
+    <string name="notifications">Notifications</string>
+    <string name="confirmButton">Confirm</string>
 </resources>
