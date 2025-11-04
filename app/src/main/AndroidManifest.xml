@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.entrantsprofilepage"
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
@@ -13,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EntrantsProfilePage">
         <activity
+            android:name=".NotificationsActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -21,6 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".SignInActivity" />
 
         <activity android:name=".EntrantEventsActivity"/>
         <activity android:name=".EntrantEventDetailsActivity"/>
