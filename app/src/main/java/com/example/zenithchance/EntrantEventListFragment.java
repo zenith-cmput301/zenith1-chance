@@ -1,7 +1,7 @@
 package com.example.zenithchance;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +10,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class for the list of events inside Entrant's My Events page.
@@ -25,10 +25,13 @@ import java.util.List;
  * @see EventsAdapter
  */
 public class EntrantEventListFragment extends Fragment {
+    private boolean upcoming = true;
     private EventsAdapter adapter;
+    private RecyclerView rv;
+    private List<Event> list = new ArrayList<>();
 
     /**
-     * Method to inflate the list of events inside Entrant's My Events page.
+     * Method to inflate fragment and attach adapter.
      *
      * @param inflater              The LayoutInflater object that can be used to inflate
      *                              any views in the fragment,
@@ -43,38 +46,64 @@ public class EntrantEventListFragment extends Fragment {
      * @return                      Inflated view.
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
         // inflates fragment
-        View root = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
+        View frag = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
         // set fragment as vertical scroll list
-        RecyclerView rv = root.findViewById(R.id.recycler_events);
+        rv = frag.findViewById(R.id.recycler_events);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // attach adapter to fragment
-        adapter = new EventsAdapter();
+        adapter = new EventsAdapter(new ArrayList<>(), event -> {
+            Intent i = new Intent(requireContext(), EntrantEventDetailsActivity.class);
+            i.putExtra("event_name", event.getName());
+            i.putExtra("event_location", event.getLocation());
+            i.putExtra("event_status", event.getStatus());
+            i.putExtra("event_organizer", event.getOrganizer());
+            i.putExtra("event_time", fmt.format(event.getDate()));
+            i.putExtra("event_description", event.getDescription());
+            startActivity(i);
+        });
         rv.setAdapter(adapter);
 
-        loadEventsOnce(); // initialize lists
-        return root;
+        return frag;
     }
 
     /**
-     * This method initialize the list of events from Firebase.
+     * This method updates the fragment with given list of events.
+     *
+     * @param events List of events to display.
      */
-    private void loadEventsOnce() {
-        FirebaseFirestore.getInstance()
-                .collection("events")
-                .orderBy("date")
-                .get()
-                .addOnSuccessListener(snaps -> {
-                    List<Event> list = new ArrayList<>();
-                    for (DocumentSnapshot d : snaps) {
-                        Event e = d.toObject(Event.class);
-                        if (e != null) list.add(e);
-                    }
-                    adapter.setItems(list);
-                })
-                .addOnFailureListener(e -> Log.e("EventsList", "Firestore load failed", e));
+    public void setEvents(List<Event> events) {
+        list.clear();
+        list.addAll(events);
+        filter();
+    }
+
+    /**
+     * This method filters displaying data based on upcoming or past events.
+     */
+    private void filter() {
+        List<Event> filtered = new ArrayList<>();
+        Date now = new Date();
+
+        for (Event e : list) {
+            boolean isUpcoming = !e.getDate().before(now);   // today is also counted as "Upcoming"
+            if (upcoming) { if (isUpcoming) filtered.add(e); }
+            else { if (!isUpcoming) filtered.add(e); }
+        }
+        adapter.setItems(filtered);
+    }
+
+    /**
+     * This method set the correct filter that user have chosen.
+     *
+     * @param newFilter The chosen filter.
+     */
+    public void setFilter(boolean newFilter) {
+        upcoming = newFilter;
+        filter();
     }
 }
 

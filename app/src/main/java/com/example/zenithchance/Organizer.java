@@ -1,13 +1,10 @@
 package com.example.zenithchance;
 
-
-/**
- * This class represents Organizer users.
- */
 public class Organizer extends User {
 
-    public Organizer() {
-        setType("organizer");
-    }
+    public Organizer(){}
 
+    public Organizer(String name) {
+        this.name = name;
+    }
 }
