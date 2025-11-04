@@ -23,6 +23,7 @@
 
         <activity android:name=".EntrantEventsActivity"/>
         <activity android:name=".EntrantEventDetailsActivity"/>
+        <activity android:name=".OrganizerEventsActivity" />
 
     </application>
 
