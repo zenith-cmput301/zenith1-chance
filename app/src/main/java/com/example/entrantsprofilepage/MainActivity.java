@@ -14,29 +14,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
+
+        Fragment AllEvents = new AllEventsFragment();
+        Fragment MyEvents = new MyEventsFragment();
+        Fragment Profile = new ProfileFragment();
+
+        setCurrentFragment(AllEvents);
+
         bottomNav.setOnItemSelectedListener(item -> {
-            Fragment selected = null;
-            switch (item.getItemId()) {
-                case R.id.nav_all_events:
-                    selected = new AllEventsFragment();
-                    break;
-                case R.id.nav_my_events:
-                    selected = new MyEventsFragment();
-                    break;
-                case R.id.nav_profile:
-                    selected = new ProfileFragment();
-                    break;
+            if (item.getItemId() == R.id.nav_all_events) {
+                setCurrentFragment(AllEvents);
+            } else if (item.getItemId() == R.id.nav_my_events) {
+                setCurrentFragment(MyEvents);
+            } else {
+                setCurrentFragment(Profile);
             }
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, selected)
-                    .commit();
             return true;
         });
+    }
+        private void setCurrentFragment(Fragment fragment) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .commit();
 
-        // Default fragment
-        if (savedInstanceState == null) {
-            bottomNav.setSelectedItemId(R.id.nav_all_events);
-        }
     }
 }

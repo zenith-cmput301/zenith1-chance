@@ -45,5 +45,6 @@ dependencies {
     //    Glide: Dependencies added  for processing image URLs better
     implementation("com.github.bumptech.glide:glide:5.0.5")
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
+    implementation("com.google.android.material:material:1.12.0")
 
 }

@@ -56,7 +56,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
 
         Glide.with(context)
                 .load(event.getImageUrl())
-                .placeholder(R.drawable.ic_action_name_person)
+                .placeholder(R.drawable.ic_my_events)
                 .into(holder.imageView);
 
         holder.itemView.setOnClickListener(v ->
