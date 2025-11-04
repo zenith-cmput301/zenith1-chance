@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-// reads and writes users from Firebase database
+/**
+ * This class reads and writes Users to the Firestore database.
+ */
 public final class UserManager {
     // Singleton
     private static final UserManager shared = new UserManager();
@@ -25,7 +27,12 @@ public final class UserManager {
             FirebaseFirestore.getInstance().collection("users");
     private ListenerRegistration listener;
 
-    /** Listener for user collection. */
+
+    /**
+     * Starts a listener; useful for operations that require real-time updates.
+     * @return ListenerRegistration
+     * This is a listener for the Firebase "users" collection,
+     */
     public ListenerRegistration startListener() {
         listener = userCollection.addSnapshotListener((value, error) -> {
             if (error != null) {
@@ -60,6 +67,10 @@ public final class UserManager {
         });
         return listener;
     }
+
+    /**
+     * Stops a listener that has been started.
+     */
     public void stopListener() {
         if (listener != null) {
             listener.remove();
@@ -68,7 +79,11 @@ public final class UserManager {
     }
 
 
-    /** Add a user to Firestore */
+    /**
+     * Adds a user to the Firestore "users" collection.
+     * @param user
+     * This is the user to be added to the users collection.
+     */
     public void addUser(User user) {
         String type = user.getType();
         if (type == null) { System.out.println("addUser: type is null"); return; }
@@ -85,7 +100,11 @@ public final class UserManager {
                 .addOnFailureListener(e -> System.err.println("addUser failed: " + e.getMessage()));
     }
 
-    /** Delete a user from Firestore */
+    /**
+     * Deletes a user to the Firestore "users" collection.
+     * @param user
+     * This is the user to be deleted from the users collection.
+     */
     public void deleteUser(User user) {
         String id = user.getUserId();
         if (id == null || id.isEmpty()) {
@@ -96,14 +115,22 @@ public final class UserManager {
                 .addOnFailureListener(e -> System.err.println("deleteUser failed: " + e.getMessage()));
     }
 
-    /** Update name */
+    /**
+     * Updates a user's name in the Firestore "users" collection using their document id.
+     * @param user
+     * This is the user to have their name updated.
+     */
     public void updateUserName(User user) {
         String id = user.getUserId();
         if (id == null || id.isEmpty()) return;
         userCollection.document(id).update("name", user.getName());
     }
 
-    /** Update email */
+    /**
+     * Updates a user's email in the Firestore "users" collection using their document id.
+     * @param user
+     * This is the user to have their email updated.
+     */
     public void updateUserEmail(User user) {
         String id = user.getUserId();
         if (id == null || id.isEmpty()) return;
