@@ -3,4 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="Red">#D71F11</color>
+    <color name="theme_color">#703BE7</color>
+    <color name="subtheme_color">#adadad</color>
 </resources>
