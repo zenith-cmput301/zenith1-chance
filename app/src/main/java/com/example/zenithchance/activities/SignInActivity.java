@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.zenithchance.EntrantMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Admin;

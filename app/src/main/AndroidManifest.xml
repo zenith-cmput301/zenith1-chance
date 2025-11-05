@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.EntrantMainActivity" />
+        <activity android:name=".EntrantMainActivity" />
         <activity android:name=".activities.OrganizerEventsActivity" />
         <activity android:name=".activities.AdminMenuActivity" />
 
