@@ -15,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
-
+// Converted to EntrantEventsFragment
 /**
  * This class represents an Entrant's My Events page.
  *

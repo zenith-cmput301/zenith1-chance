@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.fragments.AllEventsFragment;
 import com.example.zenithchance.fragments.EntrantEventListFragment;
+import com.example.zenithchance.fragments.EntrantEventsFragment;
 import com.example.zenithchance.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -22,7 +23,7 @@ public class EntrantNavigationHelper {
                 selected = new AllEventsFragment();
             }
             else if (id == R.id.nav_my_events) {
-                selected = new EntrantEventListFragment();
+                selected = new EntrantEventsFragment();
             }
             else if (id == R.id.nav_profile) {
                 selected = new ProfileFragment();
