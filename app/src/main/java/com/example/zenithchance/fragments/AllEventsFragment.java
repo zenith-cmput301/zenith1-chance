@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.activities.EntrantEventDetailsActivity;
+import com.example.zenithchance.adapters.AllEventsAdapter;
 import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
@@ -28,7 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class AllEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private EventsAdapter adapter;
+    private AllEventsAdapter adapter;
     private List<Event> allEvents = new ArrayList<>();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -39,23 +40,21 @@ public class AllEventsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
-
-        adapter = new EventsAdapter(new ArrayList<>(), event -> {
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new AllEventsAdapter(requireContext(), new ArrayList<>(), event -> {
             Intent i = new Intent(requireContext(), EntrantEventDetailsActivity.class);
             i.putExtra("event_name", event.getName());
             i.putExtra("event_location", event.getLocation());
-            i.putExtra("event_status", event.getStatus());
             i.putExtra("event_organizer", event.getOrganizer());
-            i.putExtra("event_time", fmt.format(event.getDate()));
+            i.putExtra("event_time", new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault()).format(event.getDate()));
             i.putExtra("event_description", event.getDescription());
+            i.putExtra("event_image_url", event.getImageUrl());
             startActivity(i);
         });
 
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
-
         return view;
     }
 
@@ -67,13 +66,10 @@ public class AllEventsFragment extends Fragment {
                     allEvents.clear();
                     for (DocumentSnapshot doc : snaps) {
                         Event event = doc.toObject(Event.class);
-                        if (event != null) {
-                            allEvents.add(event);
-                        }
+                        if (event != null) allEvents.add(event);
                     }
-                    adapter.setItems(allEvents);
+                    adapter.updateList(allEvents);
                 })
                 .addOnFailureListener(e -> Log.e("AllEventsFragment", "Error fetching events", e));
     }
 }
-

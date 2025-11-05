@@ -21,6 +21,9 @@ public final class UserManager {
     // Singleton
     private static final UserManager shared = new UserManager();
     public static UserManager getInstance() { return shared; }
+
+    private User currentUser;
+
     private UserManager() {}
 
     private final List<Entrant> entrants = new ArrayList<>();
@@ -30,6 +33,14 @@ public final class UserManager {
     private final CollectionReference userCollection =
             FirebaseFirestore.getInstance().collection("users");
     private ListenerRegistration listener;
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
 
     /**

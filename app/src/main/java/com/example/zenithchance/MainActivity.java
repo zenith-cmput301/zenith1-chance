@@ -12,10 +12,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        // Go straight to My Events page
-        startActivity(new Intent(this, OrganizerEventsActivity.class));
-
+        EntrantNavigationHelper.setupBottomNav(this); // <--- YES just this one line
     }
-
 }

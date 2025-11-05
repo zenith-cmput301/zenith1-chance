@@ -2,6 +2,7 @@ package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -155,6 +156,8 @@ public class SignUpActivity extends AppCompatActivity {
         Toast.makeText(this, "Account created: " + role, Toast.LENGTH_SHORT).show();
 
         // After account is created, direct to default screen
+        startActivity(new Intent(this, SignInActivity.class));
+        finish();
     }
 
     /**
@@ -163,9 +166,15 @@ public class SignUpActivity extends AppCompatActivity {
      * Returns the device id.
      */
     private String getAndroidDeviceId() {
-
-        return "device_id";
-
+        try {
+            return Settings.Secure.getString(
+                    getContentResolver(),
+                    Settings.Secure.ANDROID_ID
+            );
+        } catch (Exception e) {
+            return null;
+        }
+    }
         // get the current device id
         // REFERENCE: https://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id
         /* try {
@@ -179,4 +188,3 @@ public class SignUpActivity extends AppCompatActivity {
         }
     } */
     }
-}

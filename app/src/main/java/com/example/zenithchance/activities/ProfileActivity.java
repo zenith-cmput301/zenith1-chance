@@ -55,7 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.fragment_profile);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -66,9 +66,9 @@ public class ProfileActivity extends AppCompatActivity {
         deleteProfile = findViewById(R.id.deleteProfileButton);
         editProfile = findViewById(R.id.editProfileButton);
         notificationPage = findViewById(R.id.notificationButton);
-        allEventsNavigationBar = findViewById(R.id.allEventsBar);
-        myEventsNavigationBar = findViewById(R.id.myEventsBar);
-        profileNavigationBar = findViewById(R.id.profileBar);
+//        allEventsNavigationBar = findViewById(R.id.allEventsBar);
+//        myEventsNavigationBar = findViewById(R.id.myEventsBar);
+//        profileNavigationBar = findViewById(R.id.profileBar);
         confirmEdits = findViewById(R.id.confirm_button);
 
         // Initializing Information Text:
@@ -137,8 +137,7 @@ public class ProfileActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         ArrayList<String> updatedList = result.getData().getStringArrayListExtra("notificationList");
-
-//                        COMMENTED OUT: CAUSING ERRORS - TO RESOLVE
+//
 //                        if (updatedList != null) {
 ////                            notificationAdapter.clear();
 ////                            notificationAdapter.addAll(updatedList);

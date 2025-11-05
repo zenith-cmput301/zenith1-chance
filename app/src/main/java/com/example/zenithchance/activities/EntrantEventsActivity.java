@@ -39,7 +39,7 @@ public class EntrantEventsActivity extends AppCompatActivity {
      */
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.entrant_my_events);
+        setContentView(R.layout.fragment_entrant_my_events);
 
         // inflate/recover the fragment
         FragmentManager fm = getSupportFragmentManager();
