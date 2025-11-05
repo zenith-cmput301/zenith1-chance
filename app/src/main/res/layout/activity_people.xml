@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    tools:context=".PeopleActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="People"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:layout_margin="16dp">
+
+        <ImageView
+            android:id="@+id/imgEvent"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="16dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvEventTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Concert"
+                android:textStyle="bold"
+                android:textSize="19sp"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/tvEventDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7 December, 2025"
+                android:textSize="11sp"
+                android:textColor="#000000"
+                app:layout_constraintTop_toTopOf="@id/iconCalendar"
+                app:layout_constraintStart_toEndOf="@id/iconCalendar"
+                android:layout_marginStart="12dp"/>
+
+            <TextView
+                android:id="@+id/tvEventTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Wednesday, 2-7 pm"
+                android:textSize="11sp"
+                android:textColor="#777777"
+                app:layout_constraintTop_toBottomOf="@id/tvEventDate"
+                app:layout_constraintStart_toStartOf="@id/tvEventDate"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/btnWaiting"
+            android:layout_width="81dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="Waiting"
+            android:textColor="#000000" />
+
+        <Button
+            android:id="@+id/btnChosen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chosen"
+            android:backgroundTint="#E0E0E0"
+            android:textColor="#000000"
+            android:layout_margin="4dp" />
+
+        <Button
+            android:id="@+id/btnAccepted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accepted"
+            android:backgroundTint="#E0E0E0"
+            android:textColor="#000000"
+            android:layout_margin="4dp" />
+
+        <Button
+            android:id="@+id/btnDeclined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Declined"
+            android:backgroundTint="#E0E0E0"
+            android:textColor="#000000"
+            android:layout_margin="4dp" />
+    </LinearLayout>
+
+    <ListView
+    android:id="@+id/listPeople"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/btnExport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EXPORT"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#5C6EF8"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:paddingHorizontal="32dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="8dp"
+        android:background="#F8F8F8">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
