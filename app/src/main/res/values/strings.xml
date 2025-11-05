@@ -14,4 +14,9 @@
     <string name="sign_in_with_device_id">Sign in with Device ID.</string>
     <string name="logo">ZenithChance</string>
     <string name="redirect_to_sign_up">Don\'t have an account? Sign up.</string>
+    <string name="event_name_blank">Enter an event name</string>
+    <string name="event_date_blank">mm/dd/yyyy hh:mm</string>
+    <string name="event_location_blank">Enter a location</string>
+    <string name="event_description_blank">Enter a description</string>
+
 </resources>

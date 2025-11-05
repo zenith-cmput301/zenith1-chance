@@ -51,8 +51,8 @@ public class EntrantEventsActivityTest {
             Date past   = new Date(now - TimeUnit.DAYS.toMillis(7));
 
             ArrayList<Event> sample = new ArrayList<>();
-            sample.add(new Event(future, "Future Hackathon", "UofA", "Waiting", "UofA", "lorem ipsum"));
-            sample.add(new Event(past,   "Past Contest",     "ETLC", "Accepted", "ETLC club", "lorem ipsum"));
+//            sample.add(new Event(future, "Future Hackathon", "UofA", "Waiting", "UofA", "lorem ipsum"));
+//            sample.add(new Event(past,   "Past Contest",     "ETLC", "Accepted", "ETLC club", "lorem ipsum"));
 
             // Push data into the fragment (the fragment internally filters by date).
             frag.setEvents(sample);

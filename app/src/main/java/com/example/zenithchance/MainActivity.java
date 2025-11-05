@@ -1,5 +1,7 @@
 package com.example.zenithchance;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -16,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Go straight to My Events page
-        startActivity(new Intent(this, EntrantEventsActivity.class));
+        startActivity(new Intent(this, OrganizerEventsActivity.class));
 
     }
+
 }

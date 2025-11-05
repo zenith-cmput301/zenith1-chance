@@ -9,5 +9,4 @@ public class Organizer extends User {
     public Organizer() {
         setType("organizer");
     }
-
 }
