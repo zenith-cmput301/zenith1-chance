@@ -3,6 +3,7 @@ package com.example.zenithchance.fragments;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,14 +22,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.zenithchance.R;
 import com.example.zenithchance.activities.NotificationsActivity;
+import com.example.zenithchance.activities.SignInActivity;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.User;
 
 
-// WORK IN PROGRESS :
-// Implement Correct Delete functionality so that user is delted from firebase
-// Fetch and Display username from firebase correctly
-// Edit and update in firebase correctly
 public class ProfileFragment extends Fragment {
 
     User myUser;
@@ -63,42 +62,74 @@ public class ProfileFragment extends Fragment {
 
         // Load profile info
         if (myUser != null) {
-            usernameDisplay.setText(myUser.getUserId());
+            usernameDisplay.setText(myUser.getName());
             emailDisplay.setText(myUser.getEmail());
         }
 
         // Edit profile
-        editProfile.setOnClickListener(v -> editInformation.setVisibility(VISIBLE));
-
-        confirmEdits.setOnClickListener(v -> {
-            myUser.setUserId(editUsername.getText().toString());
-            usernameDisplay.setText(myUser.getUserId());
-
-            myUser.setEmail(editEmail.getText().toString());
-            emailDisplay.setText(myUser.getEmail());
-
-            editInformation.setVisibility(GONE);
+        editProfile.setOnClickListener(v -> {
+            if (myUser != null) {
+                editUsername.setText(myUser.getName());   // prefill with current name
+                editEmail.setText(myUser.getEmail());     // prefill with current email
+            }
+            editInformation.setVisibility(VISIBLE);       // show the edit panel
         });
+
 
         // Confirm Edits
         confirmEdits.setOnClickListener(v -> {
-            myUser.setUserId(editUsername.getText().toString());
-            myUser.setEmail(editEmail.getText().toString());
+            String newName = editUsername.getText().toString().trim();
+            String newEmail = editEmail.getText().toString().trim();
 
-            UserManager.getInstance().updateUserName(myUser);
-            UserManager.getInstance().updateUserEmail(myUser);
+            // Check if user left both fields empty
+            if (newName.isEmpty() && newEmail.isEmpty()) {
+                Toast.makeText(getContext(), "Please enter a name or email to update.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Only update name if not blank
+            if (!newName.isEmpty()) {
+                myUser.setName(newName);
+                UserManager.getInstance().updateUserName(myUser);
+            } else {
+                editUsername.setText(myUser.getName());
+            }
 
-            usernameDisplay.setText(myUser.getUserId());
+            // Only update email if not blank
+            if (!newEmail.isEmpty()) {
+                myUser.setEmail(newEmail);
+                UserManager.getInstance().updateUserEmail(myUser);
+            } else {
+                editEmail.setText(myUser.getEmail());
+            }
+
+            // Refresh Display
+            usernameDisplay.setText(myUser.getName());
             emailDisplay.setText(myUser.getEmail());
 
+            //  Hide the edit panel
             editInformation.setVisibility(View.GONE);
         });
 
         // Delete profile
         deleteProfile.setOnClickListener(v -> {
-            UserManager.getInstance().deleteUser(myUser);
-            // TODO: redirect to sign-in screen
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Profile Warning!")
+                    .setMessage("Are you sure you want to delete your profile?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        // Delete user and redirect to SignIn
+                        UserManager.getInstance().deleteUser(myUser);
+                        Intent intent = new Intent(getActivity(), SignInActivity.class);
+                        startActivity(intent);
+                        requireActivity().finish();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> {
+                        // Dismiss dialog
+                        dialog.dismiss();
+                    })
+                    .setCancelable(true)
+                    .show();
         });
+
 
         // Notifications
         notificationPage.setOnClickListener(v -> {

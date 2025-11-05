@@ -6,6 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zenithchance.EntrantNavigationHelper;
 import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.EntrantEventListFragment;
+import com.example.zenithchance.models.Event;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.List;
+// SIGN-IN Page redirects to EntrantMainActivity
 
 public class EntrantMainActivity extends AppCompatActivity {
 

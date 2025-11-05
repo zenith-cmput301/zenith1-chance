@@ -28,7 +28,7 @@ import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.User;
 
 import java.util.ArrayList;
-
+// Converted to: ProfileFragment
 /**
  * This is a class that uses the User class/subclasses, to display profile information.
  * TO DO: Connect to delete user function, connect with Sabrina's User class

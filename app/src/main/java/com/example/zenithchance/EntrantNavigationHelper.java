@@ -37,5 +37,8 @@ public class EntrantNavigationHelper {
 
             return false;
         });
+
+        // Set default tab to All Events
+        bottomNav.setSelectedItemId(R.id.nav_all_events);
     }
 }
