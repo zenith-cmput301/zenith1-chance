@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,9 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.zenithchance.R;
+
+public class OrganizerEventDetailsActivity extends AppCompatActivity {
 
     private Button btnPeople;
     private Button btnEdit;
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         btnPeople.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, com.example.organizer.PeopleActivity.class);
+                Intent intent = new Intent(OrganizerEventDetailsActivity.this, PeopleActivity.class);
                 startActivity(intent);
             }
         });

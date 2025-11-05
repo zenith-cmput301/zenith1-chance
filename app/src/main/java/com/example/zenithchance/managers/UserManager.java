@@ -1,5 +1,9 @@
-package com.example.zenithchance;
+package com.example.zenithchance.managers;
 
+import com.example.zenithchance.models.Admin;
+import com.example.zenithchance.models.Entrant;
+import com.example.zenithchance.models.Organizer;
+import com.example.zenithchance.models.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;

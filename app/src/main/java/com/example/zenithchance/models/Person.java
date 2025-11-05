@@ -1,4 +1,4 @@
-package com.example.organizer;
+package com.example.zenithchance.models;
 
 public class Person {
     private String name;

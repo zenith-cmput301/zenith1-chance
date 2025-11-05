@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,11 +8,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import java.io.Serializable;
+import com.example.zenithchance.models.Event;
+import com.example.zenithchance.R;
 
 /**
  * Class for the UI used in event creation and modification

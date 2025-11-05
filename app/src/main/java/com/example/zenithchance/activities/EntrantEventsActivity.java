@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.activities;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +7,9 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.EntrantEventListFragment;
+import com.example.zenithchance.models.Event;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 

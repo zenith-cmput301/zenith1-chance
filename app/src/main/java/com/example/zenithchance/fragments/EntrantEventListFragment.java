@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,11 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.zenithchance.activities.EntrantEventDetailsActivity;
+import com.example.zenithchance.R;
+import com.example.zenithchance.adapters.EventsAdapter;
+import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
