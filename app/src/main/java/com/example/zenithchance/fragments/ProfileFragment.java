@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.fragments;
 
 import androidx.fragment.app.Fragment;
 

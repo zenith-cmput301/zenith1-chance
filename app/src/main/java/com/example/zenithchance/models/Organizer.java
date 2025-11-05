@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.models;
 
 
 /**

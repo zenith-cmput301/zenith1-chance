@@ -1,4 +1,4 @@
-package com.example.zenithchance;
+package com.example.zenithchance.activities;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -22,6 +22,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.zenithchance.R;
+import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.User;
 
 import java.util.ArrayList;
 
@@ -133,11 +137,13 @@ public class ProfileActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         ArrayList<String> updatedList = result.getData().getStringArrayListExtra("notificationList");
-                        if (updatedList != null) {
-                            notificationAdapter.clear();
-                            notificationAdapter.addAll(updatedList);
-                            notificationAdapter.notifyDataSetChanged();
-                        }
+
+//                        COMMENTED OUT: CAUSING ERRORS - TO RESOLVE
+//                        if (updatedList != null) {
+////                            notificationAdapter.clear();
+////                            notificationAdapter.addAll(updatedList);
+////                            notificationAdapter.notifyDataSetChanged();
+//                        }
                     }
                 }
         );

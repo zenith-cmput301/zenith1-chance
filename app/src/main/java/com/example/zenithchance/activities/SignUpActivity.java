@@ -1,10 +1,7 @@
-package com.example.zenithchance;
-
-import static java.security.AccessController.getContext;
+package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +14,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.zenithchance.models.Admin;
+import com.example.zenithchance.models.Entrant;
+import com.example.zenithchance.models.Organizer;
+import com.example.zenithchance.R;
+import com.example.zenithchance.models.User;
+import com.example.zenithchance.managers.UserManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Locale;

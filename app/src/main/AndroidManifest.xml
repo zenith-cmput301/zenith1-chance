@@ -10,13 +10,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Organizer">
-        <activity android:name=".PeopleActivity" />
+
+        android:theme="@style/Theme.EntrantsProfilePage">
+        <activity android:name=".activities.PeopleActivity" />
         <activity
-            android:name=".NotificationsActivity"
+            android:name=".activities.NotificationsActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.OrganizerEventDetailsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,15 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".SignInActivity" />
+        <activity android:name=".activities.SignUpActivity" />
+        <activity android:name=".activities.SignInActivity" />
 
-        <activity android:name=".EntrantEventsActivity"/>
-        <activity android:name=".EntrantEventDetailsActivity"/>
-        <activity android:name=".OrganizerEventsActivity" />
-
-        <activity android:name=".SignUpActivity"/>
-        <activity android:name=".SignInActivity"/>
+        <activity android:name=".activities.EntrantEventsActivity"/>
+        <activity android:name=".activities.EntrantEventDetailsActivity"/>
+        <activity android:name=".activities.OrganizerEventsActivity" />
     </application>
 
 </manifest>

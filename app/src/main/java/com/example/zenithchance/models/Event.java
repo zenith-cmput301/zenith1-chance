@@ -1,6 +1,7 @@
-package com.example.zenithchance;
+package com.example.zenithchance.models;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Date;
 
 /**
@@ -21,6 +22,8 @@ public class Event implements Serializable {
     private Boolean geolocation_required;
     private Date registration_date;
     private Integer max_entrants;
+
+    private String imageUrl;
 
 //    Unique event ID for routing during QR code scanning to be implemented down the line
 //    private Integer event_id;
@@ -46,7 +49,7 @@ public class Event implements Serializable {
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Integer max_entrants) {
+    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Integer max_entrants, String imageUrl) {
         this.date = date;
         this.name = name;
         this.location = location;
@@ -74,6 +77,8 @@ public class Event implements Serializable {
     public Date getRegistrationDate() { return this.registration_date; }
     public Integer getMaxEntrants() { return this.max_entrants; }
 
+    public String getImageUrl() { return this.imageUrl; }
+
     /**
      *
      * Setters
@@ -89,4 +94,6 @@ public class Event implements Serializable {
     public void setLocation(String location) { this.location = location; }
     public void setName(String name) { this.name = name; }
     public void setDate(Date date) { this.date = date; }
+
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

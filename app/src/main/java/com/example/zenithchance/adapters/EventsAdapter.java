@@ -1,8 +1,5 @@
-package com.example.zenithchance;
+package com.example.zenithchance.adapters;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +8,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.zenithchance.models.Event;
+import com.example.zenithchance.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
