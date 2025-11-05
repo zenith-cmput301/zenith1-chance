@@ -1,4 +1,4 @@
-package com.example.entrantsprofilepage;
+package com.example.zenithchance;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -18,9 +18,9 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private Context context;
-    private List<Event> events;
+    private List<com.example.entrantsprofilepage.Event> events;
 
-    public EventAdapter(Context context, List<Event> events) {
+    public EventAdapter(Context context, List<com.example.entrantsprofilepage.Event> events) {
         this.context = context;
         this.events = events;
     }
