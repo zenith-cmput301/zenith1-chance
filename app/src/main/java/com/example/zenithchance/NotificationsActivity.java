@@ -10,6 +10,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
@@ -40,19 +45,29 @@ public class NotificationsActivity extends AppCompatActivity {
             return insets;
         });
 
-        Adapter notificationAdapter = new ArrayAdapter<>(this, R.layout.activity_notifications, notificationList);
 
         // Initializing Buttons:
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
 
         // This sends you to the profileActivity page!
+        Intent intent = getIntent();
+        ArrayList notificationList = intent.getExtras().getStringArrayList("notificationList");
+        if (notificationList == null){
+            notificationList = new ArrayList<>();
+        }
+        ListView notificationsListView= findViewById(R.id.notificationListView);
+        Adapter notificationAdapter = new ArrayAdapter<>(this, R.layout.activity_notifications, notificationList);
 
+        notificationsListView.setAdapter((ListAdapter) notificationAdapter);
+
+
+        ArrayList finalNotificationList = notificationList;
         backArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
-                resultIntent.putStringArrayListExtra("notificationList", notificationList); // Might be able to delete this
+                resultIntent.putStringArrayListExtra("notificationList", finalNotificationList); // Might be able to delete this
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }});

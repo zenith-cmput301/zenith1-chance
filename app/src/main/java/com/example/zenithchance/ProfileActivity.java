@@ -3,6 +3,7 @@ package com.example.zenithchance;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -126,18 +127,12 @@ public class ProfileActivity extends AppCompatActivity {
 
         // This sends you to the NotificationActivity page!
 
-        ActivityResultLauncher<Intent> notificationActivityLauncher;
-        Adapter notificationAdapter = new ArrayAdapter<>(this, R.layout.activity_notifications, notificationList);
-        notificationActivityLauncher = registerForActivityResult(
+        ActivityResultLauncher<Intent> notificationActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         ArrayList<String> updatedList = result.getData().getStringArrayListExtra("notificationList");
-                        if (updatedList != null) {
-                            notificationAdapter.clear();
-                            notificationAdapter.addAll(updatedList);
-                            notificationAdapter.notifyDataSetChanged();
-                        }
+
                     }
                 }
         );
