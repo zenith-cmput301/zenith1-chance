@@ -16,14 +16,11 @@ import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.models.Event;
-import com.example.zenithchance.adapters.EventAdapter;
-import com.example.zenithchance.EventList;
 import com.example.zenithchance.R;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
