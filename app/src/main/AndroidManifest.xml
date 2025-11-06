@@ -10,21 +10,29 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+
         android:theme="@style/Theme.EntrantsProfilePage">
+        <activity android:name=".activities.PeopleActivity" />
         <activity
-            android:name=".NotificationsActivity"
+            android:name=".activities.NotificationsActivity"
             android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+
+<!--        The Sign-in page should remain the first point of entry in our Application! -->
+        <activity android:name=".activities.SignInActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".SignInActivity" />
+        <activity android:name=".EntrantMainActivity" />
+        <activity android:name=".activities.OrganizerEventsActivity" />
+        <activity android:name=".AdminMainActivity" />
+
+        <activity android:name=".activities.SignUpActivity" />
+        <activity android:name=".activities.OrganizerEventDetailsActivity" />
+
+        <activity android:name=".activities.EntrantEventDetailsActivity"/>
     </application>
 
 </manifest>

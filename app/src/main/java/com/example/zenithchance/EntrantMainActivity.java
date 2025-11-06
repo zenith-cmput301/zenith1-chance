@@ -5,14 +5,16 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zenithchance.navigation.EntrantNavigationHelper;
+// SIGN-IN Page redirects to EntrantMainActivity
 
-public class MainActivity extends AppCompatActivity {
+public class EntrantMainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_entrant_main);
 
-        EntrantNavigationHelper.setupBottomNav(this); // <--- YES just this one line
+        // Set up the bottom navigation using the helper
+        EntrantNavigationHelper.setupBottomNav(this);
     }
 }
