@@ -92,15 +92,15 @@ public class EntrantEventDetailsFragment extends Fragment {
                                     Event eventForLocal, String eventName) {
         actionBtn.setOnClickListener(null); // clear previous listener
 
-        // Case 1: Not enrolled
-        if (!currentEntrant.isInAnyListByName(eventName)) {
+        // Case 1: Enroll
+        if (!currentEntrant.isInAnyList(eventDocId)) {
             actionBtn.setText("Enroll");
             actionBtn.setEnabled(true);
             enrollWaiting(eventDocId, actionBtn, eventForLocal);
         }
 
-        // Case 2: Enrolled but want to drop
-        else if (currentEntrant.isInWaitingList(eventName)) {
+        // Case 2: Enrolled but wants to drop
+        else if (currentEntrant.isInWaitingListById(eventDocId)) {
             actionBtn.setText("Drop Waiting List");
             actionBtn.setEnabled(true);
             dropWaitingList(eventDocId, actionBtn, eventForLocal);

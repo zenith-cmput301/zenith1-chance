@@ -15,47 +15,24 @@ import java.util.List;
  * This class represents Entrant users.
  */
 public class Entrant extends User {
-    private ArrayList<Event> onWaiting = new ArrayList<>();
-    private ArrayList<Event> onInvite = new ArrayList<Event>();
-    private ArrayList<Event> onAccepted = new ArrayList<Event>();
+    private ArrayList<String> onWaiting = new ArrayList<String>();
+    private ArrayList<String> onInvite = new ArrayList<String>();
+    private ArrayList<String> onAccepted = new ArrayList<String>();
 
     public Entrant() { setType("entrant"); }
 
-    /**
-     * Check if event is in given list
-     *
-     * @param list          List to check in
-     * @param eventName     Event to check
-     * @return              true if yes, false otherwise
-     */
-    private boolean containsByName(ArrayList<Event> list, String eventName) {
-        if (eventName == null) return false;
-        for (Event e : list) {
-            if (e != null && eventName.equals(e.getName())) return true;
-        }
-        return false;
+    private boolean containsId(ArrayList<String> list, String id) {
+        return list != null && list.contains(id);
     }
 
-    /**
-     * Check if event is currently associated with entrant
-     *
-     * @param eventName Event to check
-     * @return          true if yes, false otherwise
-     */
-    public boolean isInAnyListByName(String eventName) {
-        return containsByName(onWaiting, eventName)
-                || containsByName(onInvite, eventName)
-                || containsByName(onAccepted, eventName);
+    public boolean isInAnyList(String eventDocId) {
+        return containsId(onWaiting, eventDocId)
+                || containsId(onInvite, eventDocId)
+                || containsId(onAccepted, eventDocId);
     }
 
-    /**
-     * Check if entrant is in this event's waiting list
-     *
-     * @param eventName Event to check
-     * @return          true if yes, false otherwise
-     */
-    public boolean isInWaitingList(String eventName) {
-        return containsByName(onWaiting, eventName);
+    public boolean isInWaitingListById(String eventDocId) {
+        return containsId(onWaiting, eventDocId);
     }
 
     /**
@@ -77,18 +54,14 @@ public class Entrant extends User {
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
         WriteBatch batch = db.batch();
-        batch.update(userRef,  "onWaiting",  FieldValue.arrayUnion(event.getName()));
+        batch.update(userRef,  "onWaiting",  FieldValue.arrayUnion(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
         batch.commit().addOnSuccessListener(v -> {
-            if (!containsByName(onWaiting, event.getName())) {
-                onWaiting.add(event);
-                event.addWaitingList(uid);
-            }
+            if (!onWaiting.contains(eventDocId)) onWaiting.add(eventDocId);
+            if (event != null) event.addWaitingList(uid);
             if (onSuccess != null) onSuccess.run();
-        }).addOnFailureListener(e -> {
-            if (onError != null) onError.accept(e);
-        });
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
     /**
@@ -110,16 +83,14 @@ public class Entrant extends User {
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
         WriteBatch batch = db.batch();
-        batch.update(userRef,  "onWaiting",  FieldValue.arrayRemove(targetName));
+        batch.update(userRef,  "onWaiting",  FieldValue.arrayRemove(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayRemove(uid));
 
         batch.commit().addOnSuccessListener(v -> {
-            onWaiting.removeIf(e -> targetName.equals(e.getName()));
+            onWaiting.remove(eventDocId);
             event.removeFromWaitingList(uid);
             if (onSuccess != null) onSuccess.run();
-        }).addOnFailureListener(e -> {
-            if (onError != null) onError.accept(e);
-        });
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
 
@@ -127,30 +98,16 @@ public class Entrant extends User {
      * Getters
      * @return list of events
      */
-    public ArrayList<Event> getOnWaiting() {
+    public ArrayList<String> getOnWaiting() {
         return onWaiting;
     }
 
-    public ArrayList<Event> getOnInvite() {
+    public ArrayList<String> getOnInvite() {
         return onInvite;
     }
 
-    public ArrayList<Event> getOnAccepted() {
+    public ArrayList<String> getOnAccepted() {
         return onAccepted;
     }
 
-    /**
-     * Setters
-     */
-    public void setOnWaiting(ArrayList<Event> onWaiting) {
-        this.onWaiting = onWaiting;
-    }
-
-    public void setOnInvite(ArrayList<Event> onInvite) {
-        this.onInvite = onInvite;
-    }
-
-    public void setOnAccepted(ArrayList<Event> onAccepted) {
-        this.onAccepted = onAccepted;
-    }
 }
