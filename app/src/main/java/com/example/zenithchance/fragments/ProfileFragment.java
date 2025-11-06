@@ -1,6 +1,5 @@
 package com.example.zenithchance.fragments;
 
-import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import android.app.AlertDialog;
@@ -24,9 +23,13 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.activities.NotificationsActivity;
 import com.example.zenithchance.activities.SignInActivity;
 import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.User;
 
-// TODO: Handle Exceptions: Invalid emails while editing
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+
+
 public class ProfileFragment extends Fragment {
 
     User myUser;
@@ -95,9 +98,17 @@ public class ProfileFragment extends Fragment {
             }
 
             // Only update email if not blank
-            if (!newEmail.isEmpty()) {
+            if (!newEmail.isEmpty() &&
+                    android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
+                // Checks if Email is valid, borrowed from SignUpActivity!
                 myUser.setEmail(newEmail);
                 UserManager.getInstance().updateUserEmail(myUser);
+            } else if (!newEmail.isEmpty()) {
+                editEmail.setError("Enter a valid email or leave blank");
+                editEmail.requestFocus();
+                confirmEdits.setEnabled(true);
+                return;
+
             } else {
                 editEmail.setText(myUser.getEmail());
             }
@@ -141,4 +152,5 @@ public class ProfileFragment extends Fragment {
 
         return view;
     }
+
 }
