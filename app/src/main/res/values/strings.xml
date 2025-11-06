@@ -28,4 +28,11 @@
     <string name="profile">Profile</string>
     <string name="my_events">My Events</string>
     <string name="all_events">All Events</string>
+    <string name="delete">DELETE</string>
+    <string name="search_profiles">Search profiles</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="organizer">Organizer</string>
+    <string name="browse_profiles">Browse Profiles</string>
+    <string name="event_name">Event Name</string>
 </resources>

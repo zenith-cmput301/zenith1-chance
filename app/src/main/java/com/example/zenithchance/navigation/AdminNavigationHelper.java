@@ -10,7 +10,6 @@ import com.example.zenithchance.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class AdminNavigationHelper {
-
     public static void setupBottomNav(AppCompatActivity activity) {
         BottomNavigationView bottomNav = activity.findViewById(R.id.adminBottomNavigationView);
 
@@ -35,5 +34,7 @@ public class AdminNavigationHelper {
 
             return false;
         });
+
+        bottomNav.setSelectedItemId(R.id.nav_admin_menu);
     }
 }
