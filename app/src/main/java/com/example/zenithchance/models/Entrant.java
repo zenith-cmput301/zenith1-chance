@@ -112,7 +112,7 @@ public class Entrant extends User {
 
         batch.commit().addOnSuccessListener(v -> {
             onInvite.remove(eventDocId);
-            if (!getOnAccepted().contains(eventDocId)) onAccepted.add(eventDocId);
+            if (!onAccepted.contains(eventDocId)) onAccepted.add(eventDocId);
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
@@ -124,7 +124,15 @@ public class Entrant extends User {
         DocumentReference userRef  = db.collection("users").document(uid);
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
+        WriteBatch batch = db.batch();
+        batch.update(userRef,  "onInvite",  FieldValue.arrayRemove(eventDocId));
+        batch.update(eventRef, "invitedList", FieldValue.arrayRemove(uid));
+        batch.update(eventRef, "declinedList", FieldValue.arrayUnion(uid));
 
+        batch.commit().addOnSuccessListener(v -> {
+            getOnInvite().remove(eventDocId);
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
 
