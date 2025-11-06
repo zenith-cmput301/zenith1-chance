@@ -4,6 +4,7 @@ import com.example.zenithchance.models.Admin;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Organizer;
 import com.example.zenithchance.models.User;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,11 +21,15 @@ import java.util.List;
 public final class UserManager {
     // Singleton
     private static final UserManager shared = new UserManager();
-    public static UserManager getInstance() { return shared; }
+
+    public static UserManager getInstance() {
+        return shared;
+    }
 
     private User currentUser;
 
-    private UserManager() {}
+    private UserManager() {
+    }
 
     private final List<Entrant> entrants = new ArrayList<>();
     private final List<Organizer> organizers = new ArrayList<>();
@@ -45,6 +50,7 @@ public final class UserManager {
 
     /**
      * Starts a listener; useful for operations that require real-time updates.
+     *
      * @return ListenerRegistration
      * This is a listener for the Firebase "users" collection,
      */
@@ -64,13 +70,22 @@ public final class UserManager {
                 String type = doc.getString("type");
                 if ("entrant".equals(type)) {
                     Entrant e = doc.toObject(Entrant.class);
-                    if (e != null) { e.setUserId(doc.getId()); entrants.add(e); }
+                    if (e != null) {
+                        e.setUserId(doc.getId());
+                        entrants.add(e);
+                    }
                 } else if ("organizer".equals(type)) {
                     Organizer o = doc.toObject(Organizer.class);
-                    if (o != null) { o.setUserId(doc.getId()); organizers.add(o); }
+                    if (o != null) {
+                        o.setUserId(doc.getId());
+                        organizers.add(o);
+                    }
                 } else if ("admin".equals(type)) {
                     Admin a = doc.toObject(Admin.class);
-                    if (a != null) { a.setUserId(doc.getId()); admins.add(a); }
+                    if (a != null) {
+                        a.setUserId(doc.getId());
+                        admins.add(a);
+                    }
                 } else {
                     System.out.println("User doc with missing/unknown type: " + doc.getId());
                 }
@@ -96,12 +111,15 @@ public final class UserManager {
 
     /**
      * Adds a user to the Firestore "users" collection.
-     * @param user
-     * This is the user to be added to the users collection.
+     *
+     * @param user This is the user to be added to the users collection.
      */
     public void addUser(User user) {
         String type = user.getType();
-        if (type == null) { System.out.println("addUser: type is null"); return; }
+        if (type == null) {
+            System.out.println("addUser: type is null");
+            return;
+        }
         type = type.toLowerCase();
         if (!(type.equals("entrant") || type.equals("organizer") || type.equals("admin"))) {
             System.out.println("addUser: invalid type: " + type);
@@ -113,12 +131,14 @@ public final class UserManager {
         user.setUserId(docRef.getId());
         docRef.set(user)
                 .addOnFailureListener(e -> System.err.println("addUser failed: " + e.getMessage()));
+
+
     }
 
     /**
-     * Deletes a user to the Firestore "users" collection.
-     * @param user
-     * This is the user to be deleted from the users collection.
+     * Deletes a user from the Firestore "users" collection.
+     *
+     * @param user This is the user to be deleted from the users collection.
      */
     public void deleteUser(User user) {
         String id = user.getUserId();
@@ -131,9 +151,26 @@ public final class UserManager {
     }
 
     /**
+     * Deletes a user from the Firestore "users" collection using the userId.
+     *
+     * @param userId This is the userId of the user to be deleted from the users collection.
+     */
+    public void deleteUserById(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            System.out.println("deleteUserById called with empty ID");
+            return;
+        }
+
+        userCollection.document(userId).delete()
+                .addOnSuccessListener(aVoid -> System.out.println("Deleted user " + userId))
+                .addOnFailureListener(e -> System.err.println("deleteUserById failed: " + e.getMessage()));
+    }
+
+
+    /**
      * Updates a user's name in the Firestore "users" collection using their document id.
-     * @param user
-     * This is the user to have their name updated.
+     *
+     * @param user This is the user to have their name updated.
      */
     public void updateUserName(User user) {
         String id = user.getUserId();
@@ -145,8 +182,8 @@ public final class UserManager {
 
     /**
      * Updates a user's email in the Firestore "users" collection using their document id.
-     * @param user
-     * This is the user to have their email updated.
+     *
+     * @param user This is the user to have their email updated.
      */
     public void updateUserEmail(User user) {
         String id = user.getUserId();
@@ -156,7 +193,54 @@ public final class UserManager {
                 .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
     }
 
-    public List<Entrant> getEntrants() { return entrants; }
-    public List<Organizer> getOrganizers() { return organizers; }
-    public List<Admin> getAdmins() { return admins; }
+    // asynchronous functions that fetch users. Start a background network call immediately.
+    public Task<List<Entrant>> fetchEntrants() {
+        return userCollection.whereEqualTo("type", "entrant")
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    entrants.clear();
+                    for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                        Entrant e = doc.toObject(Entrant.class);
+                        if (e != null) {
+                            e.setUserId(doc.getId());
+                            entrants.add(e);
+                        }
+                    }
+
+                    System.out.println("Fetched entrants: " + entrants.size());
+                    return new ArrayList<>(entrants);
+                });
+    }
+
+    public Task<List<Organizer>> fetchOrganizers() {
+        return userCollection.whereEqualTo("type", "organizer")
+                .get()
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    organizers.clear();
+                    for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                        Organizer o = doc.toObject(Organizer.class);
+                        if (o != null) {
+                            o.setUserId(doc.getId());
+                            organizers.add(o);
+                        }
+                    }
+
+                    System.out.println("Fetched organizers: " + organizers.size());
+                    return new ArrayList<>(organizers);
+                });
+    }
+
+
+
+
+
+
 }
