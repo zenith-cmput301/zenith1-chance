@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,8 @@ public class PeopleActivity extends AppCompatActivity {
     private List<Person> filteredList = new ArrayList<>();
     private ArrayAdapter<String> adapter;
 
+    private FirebaseFirestore db;
+    private String eventId;
     private String currentFilter = "All";
 
     @Override
@@ -34,42 +38,77 @@ public class PeopleActivity extends AppCompatActivity {
         btnExport = findViewById(R.id.btnExport);
         listPeople = findViewById(R.id.listPeople);
 
-        // Load mock data
-        loadPeopleData();
+        db = FirebaseFirestore.getInstance();
 
-        // Initially show all people
-        updateListView(peopleList);
+        eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null) {
+            Toast.makeText(this, "No event ID provided", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // --- Set up filter button clicks ---
+        loadPeopleFromFirestore();
+
         btnWaiting.setOnClickListener(v -> setFilter("Waiting"));
         btnChosen.setOnClickListener(v -> setFilter("Chosen"));
         btnAccepted.setOnClickListener(v -> setFilter("Accepted"));
         btnDeclined.setOnClickListener(v -> setFilter("Declined"));
 
-        // Export button (placeholder)
         btnExport.setOnClickListener(v ->
                 Toast.makeText(this, "Export feature coming soon!", Toast.LENGTH_SHORT).show()
         );
     }
 
-    private void loadPeopleData() {
-        peopleList.clear();
-        peopleList.add(new Person("Alice Johnson", "Waiting"));
-        peopleList.add(new Person("Bob Smith", "Chosen"));
-        peopleList.add(new Person("Catherine Lee", "Accepted"));
-        peopleList.add(new Person("David Brown", "Declined"));
-        peopleList.add(new Person("Emily Davis", "Accepted"));
-        peopleList.add(new Person("Frank Wilson", "Waiting"));
-        peopleList.add(new Person("Grace Miller", "Chosen"));
+    private void loadPeopleFromFirestore() {
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(eventDoc -> {
+                    if (eventDoc.exists()) {
+                        List<String> waitingList = (List<String>) eventDoc.get("waitingList");
+                        if (waitingList == null || waitingList.isEmpty()) {
+                            Toast.makeText(this, "No people in waiting list", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        peopleList.clear();
+                        for (String userId : waitingList) {
+                            db.collection("users").document(userId)
+                                    .get()
+                                    .addOnSuccessListener(userDoc -> {
+                                        if (userDoc.exists()) {
+                                            String name = userDoc.getString("name");
+                                            String status = userDoc.getString("status");
+                                            if (name == null) name = "Unknown User";
+                                            if (status == null) status = "Waiting";
+
+                                            peopleList.add(new Person(name, status));
+                                            updateListView(peopleList);
+                                        }
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(this, "Error loading user: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                    );
+                        }
+                    } else {
+                        Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error loading event: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void setFilter(String status) {
         currentFilter = status;
-        Toast.makeText(this, "Filtering: " + status, Toast.LENGTH_SHORT).show();
         filterPeople(status);
     }
 
     private void filterPeople(String status) {
+        if (status.equalsIgnoreCase("All")) {
+            updateListView(peopleList);
+            return;
+        }
+
         filteredList.clear();
         for (Person p : peopleList) {
             if (p.getStatus().equalsIgnoreCase(status)) {
@@ -84,6 +123,7 @@ public class PeopleActivity extends AppCompatActivity {
         for (Person p : list) {
             names.add(p.getName() + " (" + p.getStatus() + ")");
         }
+
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, names);
         listPeople.setAdapter(adapter);
     }
