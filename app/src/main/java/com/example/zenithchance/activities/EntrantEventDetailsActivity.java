@@ -31,7 +31,7 @@ public class EntrantEventDetailsActivity extends AppCompatActivity {
         Intent i = getIntent();
 
         //  To display the image/poster in Event Details
-        ImageView image = findViewById(R.id.event_image);
+        ImageView image = findViewById(R.id.header_image);
         String imageUrl = i.getStringExtra("event_image_url");
         Glide.with(this)
                 .load(imageUrl)

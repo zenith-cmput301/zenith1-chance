@@ -1,11 +1,10 @@
 package com.example.zenithchance;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.zenithchance.activities.OrganizerEventsActivity;
+import com.example.zenithchance.navigation.EntrantNavigationHelper;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -40,7 +40,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         Bundle args = getArguments();
 
         // Initializing views that may require modification
-        eventImage = root.findViewById(R.id.event_image);
+        eventImage = root.findViewById(R.id.organizer_event_image);
         eventName = root.findViewById(R.id.event_name_box);
         eventDate = root.findViewById(R.id.event_date_box);
         eventRegistration = root.findViewById(R.id.event_registration_box);

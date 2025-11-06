@@ -27,12 +27,11 @@
         </activity>
         <activity android:name=".EntrantMainActivity" />
         <activity android:name=".activities.OrganizerEventsActivity" />
-        <activity android:name=".activities.AdminMenuActivity" />
+        <activity android:name=".AdminMainActivity" />
 
         <activity android:name=".activities.SignUpActivity" />
         <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
-        <activity android:name=".activities.EntrantEventsActivity"/>
         <activity android:name=".activities.EntrantEventDetailsActivity"/>
     </application>
 

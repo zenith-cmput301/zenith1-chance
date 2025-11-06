@@ -1,13 +1,12 @@
-package com.example.zenithchance;
+package com.example.zenithchance.navigation;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.zenithchance.R;
 import com.example.zenithchance.fragments.AllEventsFragment;
-import com.example.zenithchance.fragments.EntrantEventListFragment;
 import com.example.zenithchance.fragments.EntrantEventsFragment;
 import com.example.zenithchance.fragments.ProfileFragment;
-import com.example.zenithchance.models.Entrant;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
