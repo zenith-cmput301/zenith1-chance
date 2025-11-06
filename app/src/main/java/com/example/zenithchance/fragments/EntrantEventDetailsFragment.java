@@ -100,10 +100,21 @@ public class EntrantEventDetailsFragment extends Fragment {
         }
 
         // Case 2: Enrolled but wants to drop
-        else if (currentEntrant.isInWaitingListById(eventDocId)) {
+        else if (currentEntrant.isInWaitingList(eventDocId)) {
             actionBtn.setText("Drop Waiting List");
             actionBtn.setEnabled(true);
             dropWaitingList(eventDocId, actionBtn, eventForLocal);
+        }
+
+        // Case 3: Invited, waiting to accept or decline
+        else if (currentEntrant.isInInvitedList(eventDocId)) {
+
+        }
+
+        else {
+            actionBtn.setText("To be implemented");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
         }
 
 

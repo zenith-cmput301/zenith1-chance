@@ -31,8 +31,12 @@ public class Entrant extends User {
                 || containsId(onAccepted, eventDocId);
     }
 
-    public boolean isInWaitingListById(String eventDocId) {
+    public boolean isInWaitingList(String eventDocId) {
         return containsId(onWaiting, eventDocId);
+    }
+
+    public boolean isInInvitedList(String eventDocId) {
+        return containsId(onInvite, eventDocId);
     }
 
     /**
