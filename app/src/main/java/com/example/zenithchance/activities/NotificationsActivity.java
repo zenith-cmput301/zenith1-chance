@@ -6,6 +6,11 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +22,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.zenithchance.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class NotificationsActivity extends AppCompatActivity {
 
@@ -36,21 +43,39 @@ public class NotificationsActivity extends AppCompatActivity {
             return insets;
         });
 
-        Adapter notificationAdapter = new ArrayAdapter<>(this, R.layout.activity_notifications, notificationList);
-
-        // Initializing Buttons:
+        // Initialize buttons
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
 
-        // This sends you to the profileActivity page!
+        // === intent + extras handling ===
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
 
-        backArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent resultIntent = new Intent();
-                resultIntent.putStringArrayListExtra("notificationList", notificationList); // Might be able to delete this
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            }});
+        if (extras != null) {
+            notificationList = extras.getStringArrayList("notificationList");
+        }
 
-    }}
+        if (notificationList == null) {
+            // Provide a backup list
+            notificationList = new ArrayList<>();
+            notificationList.add("No notifications available");
+        }
+
+        // === Setting up ListView ===
+        ListView notificationsListView = findViewById(R.id.notificationListView);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_list_item_1,
+                notificationList
+        );
+        notificationsListView.setAdapter(adapter);
+
+        // === Implementing Back Button ===
+        backArrow.setOnClickListener(v -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putStringArrayListExtra("notificationList", notificationList);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
+    }
+}
