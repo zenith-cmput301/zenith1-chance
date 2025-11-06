@@ -76,7 +76,6 @@ public class SignUpActivity extends AppCompatActivity {
     // The following function is from OpenAI, ChatGPT, "How to validate fields for User class?", 2025-11-2
 
     private void onSignUpButtonTap() {
-        signUpButton.setEnabled(false);
 
         String name = nameField.getText() == null ? "" : nameField.getText().toString().trim();
         String email = emailField.getText() == null ? "" : emailField.getText().toString().trim();
@@ -153,6 +152,8 @@ public class SignUpActivity extends AppCompatActivity {
         user.setEmail(email);
         user.setDeviceId(deviceId);
         user.setType(role);
+
+        UserManager.getInstance().addUser(user);
 
         // persist to Firestore, then set current user and route
         FirebaseFirestore.getInstance()
