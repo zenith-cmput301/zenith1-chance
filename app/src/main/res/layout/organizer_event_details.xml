@@ -39,6 +39,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
+        android:src="@drawable/ic_action_name_calender"
         app:tint="#5A4FCF" />
 
     <TextView
@@ -70,6 +71,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="24dp"
         android:layout_marginTop="12dp"
+        android:src="@drawable/ic_location"
         app:tint="#5A4FCF" />
 
     <TextView
