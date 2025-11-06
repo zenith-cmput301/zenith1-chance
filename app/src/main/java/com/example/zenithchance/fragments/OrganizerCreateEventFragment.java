@@ -38,7 +38,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         View root = inflater.inflate(R.layout.organizer_create_event, container, false);
 
         // Initializing views that may require modification
-        eventImage = root.findViewById(R.id.event_image);
+        eventImage = root.findViewById(R.id.organizer_event_image);
         eventName = root.findViewById(R.id.event_name_box);
         eventDate = root.findViewById(R.id.event_date_box);
         eventRegistration = root.findViewById(R.id.event_registration_box);
