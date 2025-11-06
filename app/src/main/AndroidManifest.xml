@@ -34,6 +34,8 @@
 
         <activity android:name=".activities.EntrantEventsActivity"/>
         <activity android:name=".activities.EntrantEventDetailsActivity"/>
+        <activity android:name=".activities.AdminBrowseProfilesActivity" />
+
     </application>
 
 </manifest>

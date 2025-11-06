@@ -115,10 +115,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private String getAndroidDeviceId() {
         try {
-            return Settings.Secure.getString(
-                    getContentResolver(),
-                    Settings.Secure.ANDROID_ID
-            );
+            return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         } catch (Exception e) {
             return null;
         }
