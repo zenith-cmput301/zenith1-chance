@@ -10,7 +10,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Organizer">
+        android:theme="@style/Theme.EntrantsProfilePage"
+        tools:ignore="DuplicateActivity">
         <activity android:name=".PeopleActivity" />
         <activity
             android:name=".NotificationsActivity"
@@ -31,8 +32,9 @@
         <activity android:name=".EntrantEventDetailsActivity"/>
         <activity android:name=".OrganizerEventsActivity" />
 
-        <activity android:name=".SignUpActivity"/>
-        <activity android:name=".SignInActivity"/>
+        <activity android:name=".SignUpActivity"
+        <activity android:name=".SignInActivity"
+            tools:ignore="DuplicateActivity" />
     </application>
 
 </manifest>
