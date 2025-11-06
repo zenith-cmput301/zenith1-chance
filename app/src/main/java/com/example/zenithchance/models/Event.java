@@ -30,6 +30,7 @@ public class Event implements Serializable {
     private ArrayList<Entrant> acceptedList;
     private ArrayList<Entrant> declinedList;
 
+    private String docId;
 
 //    private ArrayList<Entrant> waiting_list;
 
@@ -76,7 +77,6 @@ public class Event implements Serializable {
         this.declinedList = new ArrayList<Entrant>();
     }
 
-
     /**
      *
      * Getters
@@ -97,6 +97,7 @@ public class Event implements Serializable {
     public ArrayList<Entrant> getInvitedList() { return invitedList; }
     public ArrayList<Entrant> getAcceptedList() { return acceptedList; }
     public ArrayList<Entrant> getDeclinedList() { return declinedList; }
+    public String getDocId() { return docId; }
 
     /**
      *
@@ -119,4 +120,5 @@ public class Event implements Serializable {
     public void setInvitedList(ArrayList<Entrant> invitedList) { this.invitedList = invitedList; }
     public void setAcceptedList(ArrayList<Entrant> acceptedList) { this.acceptedList = acceptedList; }
     public void setDeclinedList(ArrayList<Entrant> declinedList) { this.declinedList = declinedList; }
+    public void setDocId(String docId) { this.docId = docId; }
 }

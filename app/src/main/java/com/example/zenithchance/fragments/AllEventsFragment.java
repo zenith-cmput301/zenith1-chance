@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.adapters.AllEventsAdapter;
 import com.example.zenithchance.adapters.EventsAdapter;
+import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -54,7 +55,13 @@ public class AllEventsFragment extends Fragment {
             bundle.putString("event_time", fmt.format(event.getDate()));
             bundle.putString("event_description", event.getDescription());
             bundle.putString("event_image_url", event.getImageUrl());
+            bundle.putString("event_doc_id", event.getDocId());
             fragment.setArguments(bundle);
+
+            if (requireActivity() instanceof EntrantProviderInterface) {
+                EntrantProviderInterface provider = (EntrantProviderInterface) requireActivity();
+                fragment.setCurrentEntrant(provider.getCurrentEntrant());
+            }
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -79,7 +86,10 @@ public class AllEventsFragment extends Fragment {
                     List<Event> eventList = new ArrayList<>();
                     for (DocumentSnapshot doc : snaps) {
                         Event event = doc.toObject(Event.class);
-                        if (event != null) eventList.add(event);
+                        if (event != null) {
+                            event.setDocId(doc.getId());
+                            eventList.add(event);
+                        }
                     }
                     adapter.updateList(eventList);
                 })
