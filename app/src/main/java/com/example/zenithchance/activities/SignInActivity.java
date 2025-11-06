@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.zenithchance.AdminMainActivity;
 import com.example.zenithchance.EntrantMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.managers.UserManager;
@@ -91,7 +92,7 @@ public class SignInActivity extends AppCompatActivity {
                         } else if (user instanceof Organizer) {
                             startActivity(new Intent(this, OrganizerEventsActivity.class));
                         } else if (user instanceof Admin) {
-                            startActivity(new Intent(this, AdminMenuActivity.class));
+                            startActivity(new Intent(this, AdminMainActivity.class));
                         }
 
                         finish();
