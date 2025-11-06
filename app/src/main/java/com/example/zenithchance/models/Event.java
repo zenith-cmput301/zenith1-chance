@@ -26,17 +26,12 @@ public class Event implements Serializable {
     private Date finalDeadline;
     private Integer max_entrants;
     private String imageUrl;
-    private ArrayList<String> waitingList = new ArrayList<>();
-    private ArrayList<Entrant> invitedList = new ArrayList<Entrant>();
-    private ArrayList<Entrant> acceptedList = new ArrayList<Entrant>();
-    private ArrayList<Entrant> declinedList = new ArrayList<Entrant>();
+    private ArrayList<String> waitingList = new ArrayList<String>();
+    private ArrayList<String> invitedList = new ArrayList<String>();
+    private ArrayList<String> acceptedList = new ArrayList<String>();
+    private ArrayList<String> declinedList = new ArrayList<String>();
 
     private String docId;
-
-//    private ArrayList<Entrant> waiting_list;
-
-//    Unique event ID for routing during QR code scanning to be implemented down the line
-//    private Integer event_id;
 
     /**
      * Empty constructor for class Event.
@@ -98,9 +93,9 @@ public class Event implements Serializable {
     public Integer getMaxEntrants() { return this.max_entrants; }
     public String getImageUrl() { return this.imageUrl; }
     public ArrayList<String> getWaitingList() { return waitingList; }
-    public ArrayList<Entrant> getInvitedList() { return invitedList; }
-    public ArrayList<Entrant> getAcceptedList() { return acceptedList; }
-    public ArrayList<Entrant> getDeclinedList() { return declinedList; }
+    public ArrayList<String> getInvitedList() { return invitedList; }
+    public ArrayList<String> getAcceptedList() { return acceptedList; }
+    public ArrayList<String> getDeclinedList() { return declinedList; }
     public String getDocId() { return docId; }
 
     /**

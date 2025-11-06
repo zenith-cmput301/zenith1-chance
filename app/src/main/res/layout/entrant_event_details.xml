@@ -130,7 +130,7 @@
         app:layout_constraintTop_toBottomOf="@id/details_section"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/event_action_button">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:id="@+id/description"
@@ -139,6 +139,40 @@
             android:textSize="16sp"
             android:lineSpacingExtra="4dp"/>
     </ScrollView>
+
+    <!-- Invite Accept/Decline buttons -->
+    <LinearLayout
+        android:id="@+id/invite_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_decline"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Decline" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_accept"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Accept" />
+    </LinearLayout>
 
     <!-- Action Button -->
     <com.google.android.material.button.MaterialButton
