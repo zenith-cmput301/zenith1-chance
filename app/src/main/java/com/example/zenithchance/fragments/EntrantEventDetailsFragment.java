@@ -85,32 +85,36 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         // Case 1: To enroll
         if (!inSomeList) {
-            String finalEventName = eventName;
-            String finalEventDocId = eventDocId;
-
-            actionBtn.setOnClickListener( v -> {
-                actionBtn.setEnabled(false);   // prevent double taps
-                actionBtn.setText("Enrolling…");
-
-                currentEntrant.enrollInWaiting(
-                        eventForLocal,
-                        finalEventDocId,
-                        // success
-                        () -> {
-                            actionBtn.setText("Enrolled");
-                            actionBtn.setEnabled(false);
-                            Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
-                        },
-                        // fail to enroll due to firebase shenanigans
-                        e -> {
-                            actionBtn.setText("Enroll");
-                            actionBtn.setEnabled(true);
-                            Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                );
-            });
+            enrollWaiting(eventDocId, actionBtn, eventForLocal);
         }
 
         return view;
+    }
+
+    public void enrollWaiting(String eventDocId,
+                              com.google.android.material.button.MaterialButton actionBtn,
+                              Event eventForLocal) {
+
+        actionBtn.setOnClickListener( v -> {
+            actionBtn.setEnabled(false);   // prevent double taps
+            actionBtn.setText("Enrolling…");
+
+            currentEntrant.enrollInWaiting(
+                    eventForLocal,
+                    eventDocId,
+                    // success
+                    () -> {
+                        actionBtn.setText("Enrolled");
+                        actionBtn.setEnabled(false);
+                        Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
+                    },
+                    // fail to enroll due to firebase shenanigans
+                    e -> {
+                        actionBtn.setText("Enroll");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
     }
 }
