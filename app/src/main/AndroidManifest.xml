@@ -32,7 +32,6 @@
         <activity android:name=".activities.SignUpActivity" />
         <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
-        <activity android:name=".activities.EntrantEventsActivity"/>
         <activity android:name=".activities.EntrantEventDetailsActivity"/>
     </application>
 
