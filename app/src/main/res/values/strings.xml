@@ -19,4 +19,8 @@
     <string name="event_location_blank">Enter a location</string>
     <string name="event_description_blank">Enter a description</string>
 
+    <string name="notifications_set_to_dont_change_this">Notifications Set To:</string>
+    <string name="togglebuttontext">ToggleButton</string>
+    <string name="notifications">Notifications</string>
+    <string name="confirmButton">Confirm</string>
 </resources>
