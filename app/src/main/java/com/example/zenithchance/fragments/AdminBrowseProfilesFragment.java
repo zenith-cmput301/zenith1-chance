@@ -35,11 +35,7 @@ public class AdminBrowseProfilesFragment extends Fragment {
         // Fragment UI lives here
         View view = inflater.inflate(R.layout.admin_browse_profiles, container, false);
 
-        // Optional: hook up the toolbar to the activity (if you want an ActionBar here)
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        // If you want to show title / menu via ActionBar:
-        // AppCompatActivity act = (AppCompatActivity) requireActivity();
-        // act.setSupportActionBar(toolbar);
 
         LinearLayout listContainer = view.findViewById(R.id.listContainer);
         LayoutInflater li = LayoutInflater.from(requireContext());
@@ -85,10 +81,6 @@ public class AdminBrowseProfilesFragment extends Fragment {
                     System.err.println("Failed to fetch profiles: " + e.getMessage());
                 });
 
-        // If you previously had AdminNavigationHelper.setupBottomNav(this),
-        // move that logic here ONLY if the nav views are inside this fragment's layout.
-        // Example (if your helper supports a View parameter):
-        // AdminNavigationHelper.setupBottomNav(view);
 
         return view;
     }
