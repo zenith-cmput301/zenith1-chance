@@ -1,5 +1,6 @@
 package com.example.zenithchance.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -81,11 +82,14 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        boolean inSomeList = currentEntrant.isInAnyListByName(eventName);
-
         // Case 1: To enroll
-        if (!inSomeList) {
+        if (!currentEntrant.isInAnyListByName(eventName)) {
             enrollWaiting(eventDocId, actionBtn, eventForLocal);
+        }
+
+        // Case 2: If in waiting list, entrant can drop out of waiting list
+        else if (currentEntrant.isInWaitingList(eventName)) {
+            dropWaitingList(eventDocId, actionBtn, eventForLocal);
         }
 
         return view;
@@ -96,7 +100,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                               Event eventForLocal) {
 
         actionBtn.setOnClickListener( v -> {
-            actionBtn.setEnabled(false);   // prevent double taps
+            actionBtn.setEnabled(false);   // prevent double taps during transition
             actionBtn.setText("Enrolling…");
 
             currentEntrant.enrollInWaiting(
@@ -104,8 +108,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                     eventDocId,
                     // success
                     () -> {
-                        actionBtn.setText("Enrolled");
-                        actionBtn.setEnabled(false);
+                        actionBtn.setText("Drop Waiting List");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(true);
                         Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
                     },
                     // fail to enroll due to firebase shenanigans
@@ -116,5 +121,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                     }
             );
         });
+    }
+
+    public void dropWaitingList(String eventDocId,
+                              com.google.android.material.button.MaterialButton actionBtn,
+                              Event eventForLocal) {
+
     }
 }

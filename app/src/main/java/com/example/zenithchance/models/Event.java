@@ -66,13 +66,6 @@ public class Event implements Serializable {
     }
 
     /**
-     * Adds entrant to this event's waiting list
-     */
-    public void addWaiting(Entrant entrant) {
-        // TODO: given entrant, add to local waiting list AND on Firebase's document "events", this event's array field "waitingList"
-    }
-
-    /**
      *
      * Getters
      *

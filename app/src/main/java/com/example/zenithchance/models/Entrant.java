@@ -89,12 +89,22 @@ public class Entrant extends User {
      * Check if event is currently associated with entrant
      *
      * @param eventName Event to check
-     * @return          true if yes, false otherwsie
+     * @return          true if yes, false otherwise
      */
     public boolean isInAnyListByName(String eventName) {
         return containsByName(onWaiting, eventName)
                 || containsByName(onInvite, eventName)
                 || containsByName(onAccepted, eventName);
+    }
+
+    /**
+     * Check if entrant is in this event's waiting list
+     *
+     * @param eventName Event to check
+     * @return          true if yes, false otherwise
+     */
+    public boolean isInWaitingList(String eventName) {
+        return containsByName(onWaiting, eventName);
     }
 
     /**
@@ -123,6 +133,24 @@ public class Entrant extends User {
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
         batch.commit().addOnSuccessListener(v -> { if (onSuccess != null) onSuccess.run(); });
+    }
+
+    /**
+     * Drop entrant out of event's waiting list
+     *
+     * @param event         Event to enroll in
+     * @param eventDocId    Event's Firestore document id
+     * @param onSuccess
+     * @param onError
+     */
+    public void dropWaiting(Event event, String eventDocId, Runnable onSuccess,
+                                java.util.function.Consumer<Exception> onError) {
+        String uid = getUserId();
+
+        // Drop locally
+        String targetName = event.getName();
+        onWaiting.removeIf(e -> targetName.equals(e.getName()));
+
     }
 
 
