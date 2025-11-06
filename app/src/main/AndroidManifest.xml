@@ -16,21 +16,24 @@
         <activity
             android:name=".activities.NotificationsActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.OrganizerEventDetailsActivity"
+
+<!--        The Sign-in page should remain the first point of entry in our Application! -->
+        <activity android:name=".activities.SignInActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".EntrantMainActivity" />
+        <activity android:name=".activities.OrganizerEventsActivity" />
+        <activity android:name=".activities.AdminMenuActivity" />
+
         <activity android:name=".activities.SignUpActivity" />
-        <activity android:name=".activities.SignInActivity" />
+        <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
         <activity android:name=".activities.EntrantEventsActivity"/>
         <activity android:name=".activities.EntrantEventDetailsActivity"/>
-        <activity android:name=".activities.OrganizerEventsActivity" />
     </application>
 
 </manifest>

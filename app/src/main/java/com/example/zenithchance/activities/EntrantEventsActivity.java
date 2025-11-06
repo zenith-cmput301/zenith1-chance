@@ -15,7 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
-
+// Converted to EntrantEventsFragment
 /**
  * This class represents an Entrant's My Events page.
  *
@@ -39,7 +39,7 @@ public class EntrantEventsActivity extends AppCompatActivity {
      */
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.entrant_my_events);
+        setContentView(R.layout.fragment_entrant_my_events);
 
         // inflate/recover the fragment
         FragmentManager fm = getSupportFragmentManager();

@@ -2,6 +2,7 @@ package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,7 +13,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.zenithchance.EntrantMainActivity;
 import com.example.zenithchance.R;
+import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.Admin;
+import com.example.zenithchance.models.Entrant;
+import com.example.zenithchance.models.Organizer;
+import com.example.zenithchance.models.User;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -58,12 +65,36 @@ public class SignInActivity extends AppCompatActivity {
                     if (!snap.isEmpty()) {
                         DocumentSnapshot doc = snap.getDocuments().get(0);
                         String type = doc.getString("type");
-                        String name = doc.getString("name");
-                        String email = doc.getString("email");
 
-                        // success message, redirect to home page
+                        User user = null;
+
+                        // Convert document into correct User subclass and assign ID
+                        if ("entrant".equals(type)) {
+                            user = doc.toObject(Entrant.class);
+                        } else if ("organizer".equals(type)) {
+                            user = doc.toObject(Organizer.class);
+                        } else if ("admin".equals(type)) {
+                            user = doc.toObject(Admin.class);
+                        }
+
+                        if (user != null) {
+                            user.setUserId(doc.getId());
+                            UserManager.getInstance().setCurrentUser(user);
+                        }
+
+                        // Optional: Display welcome message
+                        String name = doc.getString("name");
                         Toast.makeText(this, "Welcome back" + (name != null ? ", " + name : "") + "!", Toast.LENGTH_SHORT).show();
 
+                        if (user instanceof Entrant) {
+                            startActivity(new Intent(this, EntrantMainActivity.class));
+                        } else if (user instanceof Organizer) {
+                            startActivity(new Intent(this, OrganizerEventsActivity.class));
+                        } else if (user instanceof Admin) {
+                            startActivity(new Intent(this, AdminMenuActivity.class));
+                        }
+
+                        finish();
                     } else {
                         // if there is no account in Firebase with the current device id, show error message and encourage to
                         // redirect to the sign up screen.
@@ -82,18 +113,13 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private String getAndroidDeviceId() {
-        return "device_id";
-        /*
-        // get the current device id
         try {
-            return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
+            return Settings.Secure.getString(
+                    getContentResolver(),
+                    Settings.Secure.ANDROID_ID
+            );
         } catch (Exception e) {
             return null;
         }
     }
-    */
-    }
-
-
 }

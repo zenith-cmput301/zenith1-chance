@@ -21,6 +21,9 @@ public final class UserManager {
     // Singleton
     private static final UserManager shared = new UserManager();
     public static UserManager getInstance() { return shared; }
+
+    private User currentUser;
+
     private UserManager() {}
 
     private final List<Entrant> entrants = new ArrayList<>();
@@ -30,6 +33,14 @@ public final class UserManager {
     private final CollectionReference userCollection =
             FirebaseFirestore.getInstance().collection("users");
     private ListenerRegistration listener;
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
 
     /**
@@ -127,7 +138,9 @@ public final class UserManager {
     public void updateUserName(User user) {
         String id = user.getUserId();
         if (id == null || id.isEmpty()) return;
-        userCollection.document(id).update("name", user.getName());
+        userCollection.document(id).update("name", user.getName())
+                .addOnSuccessListener(aVoid -> System.out.println("Name updated"))
+                .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
     }
 
     /**
@@ -138,7 +151,9 @@ public final class UserManager {
     public void updateUserEmail(User user) {
         String id = user.getUserId();
         if (id == null || id.isEmpty()) return;
-        userCollection.document(id).update("email", user.getEmail());
+        userCollection.document(id).update("email", user.getEmail())
+                .addOnSuccessListener(aVoid -> System.out.println("E-mail updated"))
+                .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
     }
 
     public List<Entrant> getEntrants() { return entrants; }

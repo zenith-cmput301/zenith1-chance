@@ -6,29 +6,46 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
+import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
+/**
+ * For smooth display of All Event items fetched from Firebase
+ *
+ * @author Kiran
+ * @version 1.0
+ * @see com.example.zenithchance.fragments.AllEventsFragment
+ */
+public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.EventViewHolder> {
+
+    public interface OnEventClickListener {
+        void onEventClick(Event event);
+    }
 
     private Context context;
-    private List<com.example.zenithchance.models.Event> events;
+    private List<Event> events;
+    private OnEventClickListener listener;
 
     SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
-    public EventAdapter(Context context, List<com.example.zenithchance.models.Event> events) {
+    public AllEventsAdapter(Context context, List<Event> events, OnEventClickListener listener) {
         this.context = context;
         this.events = events;
+        this.listener = listener;
+    }
+
+    public void updateList(List<Event> newList) {
+        this.events = newList;
+        notifyDataSetChanged();
     }
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
@@ -48,13 +65,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.event_list_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.all_events_list_item, parent, false);
         return new EventViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+
         holder.nameText.setText(event.getName());
         holder.dateText.setText(fmt.format(event.getDate()));
         holder.locationText.setText(event.getLocation());
@@ -64,9 +82,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
                 .placeholder(R.drawable.ic_my_events)
                 .into(holder.imageView);
 
-        holder.itemView.setOnClickListener(v ->
-                Toast.makeText(context, "Clicked: " + event.getName(), Toast.LENGTH_SHORT).show()
-        );
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onEventClick(event);
+        });
     }
 
     @Override
