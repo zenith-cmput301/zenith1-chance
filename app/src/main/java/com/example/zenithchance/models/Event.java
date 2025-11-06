@@ -2,6 +2,7 @@ package com.example.zenithchance.models;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -24,6 +25,8 @@ public class Event implements Serializable {
     private Integer max_entrants;
 
     private String imageUrl;
+
+//    private ArrayList<Entrant> waiting_list;
 
 //    Unique event ID for routing during QR code scanning to be implemented down the line
 //    private Integer event_id;
