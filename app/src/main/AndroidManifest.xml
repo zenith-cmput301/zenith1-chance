@@ -18,7 +18,7 @@
             android:exported="false" />
 
 <!--        The Sign-in page should remain the first point of entry in our Application! -->
-        <activity android:name=".activities.SignInActivity"
+        <activity android:name=".activities.SignUpActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -29,7 +29,6 @@
         <activity android:name=".activities.OrganizerEventsActivity" />
         <activity android:name=".AdminMainActivity" />
 
-        <activity android:name=".activities.SignUpActivity" />
         <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
         <activity android:name=".activities.EntrantEventDetailsActivity"/>
