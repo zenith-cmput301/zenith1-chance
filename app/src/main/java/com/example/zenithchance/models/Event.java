@@ -31,6 +31,8 @@ public class Event implements Serializable {
     private ArrayList<Entrant> declinedList;
 
 
+//    private ArrayList<Entrant> waiting_list;
+
 //    Unique event ID for routing during QR code scanning to be implemented down the line
 //    private Integer event_id;
 

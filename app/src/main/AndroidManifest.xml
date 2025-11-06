@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".EntrantMainActivity" />
-        <activity android:name=".activities.OrganizerEventsActivity" />
+        <activity android:name=".OrganizerMainActivity" />
         <activity android:name=".AdminMainActivity" />
 
         <activity android:name=".activities.SignUpActivity" />
