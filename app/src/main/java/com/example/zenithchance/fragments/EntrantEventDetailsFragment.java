@@ -120,8 +120,20 @@ public class EntrantEventDetailsFragment extends Fragment {
             respondInvitation(eventDocId, inviteActions, actionBtn, acceptBtn, declineBtn, eventForLocal);
         }
 
+        // Case 4: Accepted/Declined
+        else if (currentEntrant.isInAcceptedList(eventDocId)) {
+            actionBtn.setText("Accepted");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
+        }
+        else if (currentEntrant.isInDeclinedList(eventDocId)) {
+            actionBtn.setText("Declined");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
+        }
+
         else {
-            actionBtn.setText("To be implemented");
+            actionBtn.setText("Unexpected: Which status is the entrant on?");
             actionBtn.setTextColor(Color.WHITE);
             actionBtn.setEnabled(false);
         }
@@ -248,11 +260,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                     () -> {
                         Toast.makeText(requireContext(), "Invite declined", Toast.LENGTH_SHORT).show();
                         inviteActions.setVisibility(View.GONE);
-                        actionBtn.setText("Enroll");
+                        actionBtn.setText("Declined");
                         actionBtn.setTextColor(Color.WHITE);
-                        actionBtn.setEnabled(true);
+                        actionBtn.setEnabled(false);
                         actionBtn.setVisibility(View.VISIBLE);
-                        enrollWaiting(eventDocId, actionBtn, eventForLocal); // rebind to enrolling behavior
                     },
                     e -> {
                         declineBtn.setText("Decline");
