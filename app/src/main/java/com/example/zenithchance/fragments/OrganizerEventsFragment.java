@@ -19,9 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class EntrantEventsFragment extends Fragment {
-
+public class OrganizerEventsFragment extends Fragment {
     private EntrantEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
 
@@ -31,7 +29,7 @@ public class EntrantEventsFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_entrant_my_events, container, false);
+        View view = inflater.inflate(R.layout.fragment_organizer_my_events, container, false);
 
         // Inflate
         FragmentManager fm = getChildFragmentManager(); // IMPORTANT: child fragment
@@ -53,6 +51,7 @@ public class EntrantEventsFragment extends Fragment {
 //        TODO: Show event details on clicking an event
         Button upcomingButton = view.findViewById(R.id.upcoming_events);
         Button pastButton = view.findViewById(R.id.past_events);
+        Button createEventButton = view.findViewById(R.id.create_event_button);
         upcomingButton.setEnabled(false);
 
         upcomingButton.setOnClickListener(v -> {
@@ -67,12 +66,20 @@ public class EntrantEventsFragment extends Fragment {
             upcomingButton.setEnabled(true);
         });
 
+        // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
+
+        createEventButton.setOnClickListener(v -> {
+            OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, createFragment)
+                    .commit();
+        });
+
+
+
         return view;
     }
 
-    /**
-     * This method fetch all events on Firestore.
-     */
     private void getEvents() {
         FirebaseFirestore.getInstance()
                 .collection("events")

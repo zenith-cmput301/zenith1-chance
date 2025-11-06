@@ -2,7 +2,9 @@ package com.example.zenithchance.models;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The representative class for all Events.
@@ -21,9 +23,17 @@ public class Event implements Serializable {
     private String description;
     private Boolean geolocation_required;
     private Date registration_date;
+    private Date finalDeadline;
     private Integer max_entrants;
-
     private String imageUrl;
+    private ArrayList<String> waitingList = new ArrayList<>();
+    private ArrayList<Entrant> invitedList = new ArrayList<Entrant>();
+    private ArrayList<Entrant> acceptedList = new ArrayList<Entrant>();
+    private ArrayList<Entrant> declinedList = new ArrayList<Entrant>();
+
+    private String docId;
+
+//    private ArrayList<Entrant> waiting_list;
 
 //    Unique event ID for routing during QR code scanning to be implemented down the line
 //    private Integer event_id;
@@ -46,10 +56,11 @@ public class Event implements Serializable {
      * @param description           event description
      * @param geolocation_required  boolean representing if geolocation is toggled
      * @param registration_date     date in which to close registration
+     * @param finalDeadline         date of finalizing attendees
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Integer max_entrants, String imageUrl) {
+    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants, String imageUrl) {
         this.date = date;
         this.name = name;
         this.location = location;
@@ -58,9 +69,17 @@ public class Event implements Serializable {
         this.description = description;
         this.geolocation_required = geolocation_required;
         this.registration_date = registration_date;
+        this.finalDeadline = finalDeadline;
         this.max_entrants = max_entrants;
     }
 
+    public void addWaitingList(String uid) {
+        if (!waitingList.contains(uid)) waitingList.add(uid);
+    }
+
+    public void removeFromWaitingList(String uid) {
+        this.waitingList.remove(uid);
+    }
 
     /**
      *
@@ -75,9 +94,14 @@ public class Event implements Serializable {
     public String getDescription() { return this.description; }
     public Boolean getGeolocationRequired() { return this.geolocation_required; }
     public Date getRegistrationDate() { return this.registration_date; }
+    public Date getFinalDeadline() { return this.finalDeadline; }
     public Integer getMaxEntrants() { return this.max_entrants; }
-
     public String getImageUrl() { return this.imageUrl; }
+    public ArrayList<String> getWaitingList() { return waitingList; }
+    public ArrayList<Entrant> getInvitedList() { return invitedList; }
+    public ArrayList<Entrant> getAcceptedList() { return acceptedList; }
+    public ArrayList<Entrant> getDeclinedList() { return declinedList; }
+    public String getDocId() { return docId; }
 
     /**
      *
@@ -86,14 +110,10 @@ public class Event implements Serializable {
      */
 
     public void setMaxEntrants(Integer max_entrants) { this.max_entrants = max_entrants; }
-    public void setRegistrationDate(Date registration_date) { this.registration_date = registration_date; }
-    public void setGeolocationRequired(Boolean geolocation_required) { this.geolocation_required = geolocation_required; }
     public void setDescription(String description) { this.description = description; }
     public void setStatus(String status) { this.status = status; }
     public void setOrganizer(String organizer) { this.organizer = organizer; }
     public void setLocation(String location) { this.location = location; }
     public void setName(String name) { this.name = name; }
-    public void setDate(Date date) { this.date = date; }
-
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setDocId(String docId) { this.docId = docId; }
 }

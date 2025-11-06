@@ -21,7 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.zenithchance.R;
 import com.example.zenithchance.activities.NotificationsActivity;
-import com.example.zenithchance.activities.SignInActivity;
+import com.example.zenithchance.activities.SignUpActivity;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.User;
@@ -128,8 +128,8 @@ public class ProfileFragment extends Fragment {
                     .setMessage("Are you sure you want to delete your profile?")
                     .setPositiveButton("Yes", (dialog, which) -> {
                         // Delete user and redirect to SignIn
-                        UserManager.getInstance().deleteUser(myUser);
-                        Intent intent = new Intent(getActivity(), SignInActivity.class);
+                        UserManager.getInstance().deleteUserById(myUser.getUserId());
+                        Intent intent = new Intent(getActivity(), SignUpActivity.class);
                         startActivity(intent);
                         requireActivity().finish();
                     })

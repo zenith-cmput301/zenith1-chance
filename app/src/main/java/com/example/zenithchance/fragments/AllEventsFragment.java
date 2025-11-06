@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.adapters.AllEventsAdapter;
 import com.example.zenithchance.adapters.EventsAdapter;
+import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,7 +31,7 @@ public class AllEventsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private AllEventsAdapter adapter;
-    private List<Event> allEvents = new ArrayList<>();
+    private List<Event> events = new ArrayList<>();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -38,18 +39,35 @@ public class AllEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_all_events, container, false);
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new AllEventsAdapter(requireContext(), new ArrayList<>(), event -> {
-            Intent i = new Intent(requireContext(), EntrantEventDetailsActivity.class);
-            i.putExtra("event_name", event.getName());
-            i.putExtra("event_location", event.getLocation());
-            i.putExtra("event_organizer", event.getOrganizer());
-            i.putExtra("event_time", new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault()).format(event.getDate()));
-            i.putExtra("event_description", event.getDescription());
-            i.putExtra("event_image_url", event.getImageUrl());
-            startActivity(i);
+        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+
+        // Create adapter
+        adapter = new AllEventsAdapter(requireContext(), events, event -> {
+
+            EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("event_name", event.getName());
+            bundle.putString("event_location", event.getLocation());
+            bundle.putString("event_organizer", event.getOrganizer());
+            bundle.putString("event_time", fmt.format(event.getDate()));
+            bundle.putString("event_description", event.getDescription());
+            bundle.putString("event_image_url", event.getImageUrl());
+            bundle.putString("event_doc_id", event.getDocId());
+            fragment.setArguments(bundle);
+
+            if (requireActivity() instanceof EntrantProviderInterface) {
+                EntrantProviderInterface provider = (EntrantProviderInterface) requireActivity();
+                fragment.setCurrentEntrant(provider.getCurrentEntrant());
+            }
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
         recyclerView.setAdapter(adapter);
@@ -59,17 +77,23 @@ public class AllEventsFragment extends Fragment {
     }
 
     private void loadAllEvents() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         db.collection("events")
                 .orderBy("date")
                 .get()
                 .addOnSuccessListener(snaps -> {
-                    allEvents.clear();
+                    List<Event> eventList = new ArrayList<>();
                     for (DocumentSnapshot doc : snaps) {
                         Event event = doc.toObject(Event.class);
-                        if (event != null) allEvents.add(event);
+                        if (event != null) {
+                            event.setDocId(doc.getId());
+                            eventList.add(event);
+                        }
                     }
-                    adapter.updateList(allEvents);
+                    adapter.updateList(eventList);
                 })
                 .addOnFailureListener(e -> Log.e("AllEventsFragment", "Error fetching events", e));
     }
 }
+
