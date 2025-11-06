@@ -70,6 +70,9 @@ public class EntrantEventsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * This method fetch all events on Firestore.
+     */
     private void getEvents() {
         FirebaseFirestore.getInstance()
                 .collection("events")
