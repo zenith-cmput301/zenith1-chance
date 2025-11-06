@@ -52,6 +52,8 @@ public class SignUpActivity extends AppCompatActivity {
             return insets;
         });
 
+        signInWithDeviceId();
+
 
         userRoles = findViewById(R.id.roles);
         nameField = findViewById(R.id.nameTextField);
@@ -110,11 +112,10 @@ public class SignUpActivity extends AppCompatActivity {
         // Check if a user already exists for this device. If yes, sign them in directly.
         FirebaseFirestore.getInstance()
                 .collection("users")
-                .whereEqualTo("deviceId", deviceId)
-                .limit(1)
+                .document(deviceId)
                 .get()
-                .addOnSuccessListener(snap -> {
-                    if (!snap.isEmpty()) {
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
                         Toast.makeText(this, "An account for this device already exists. Signing you in.", Toast.LENGTH_SHORT).show();
                         signInWithDeviceId();
                     } else {
@@ -125,8 +126,8 @@ public class SignUpActivity extends AppCompatActivity {
                     Toast.makeText(this, "Could not verify device: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     signUpButton.setEnabled(true);
                 });
-    }
 
+    }
 
     /**
      * This creates a User object and adds to Firebase.
@@ -141,27 +142,18 @@ public class SignUpActivity extends AppCompatActivity {
      */
     // The following function is from OpenAI, ChatGPT, "How to create a new user?", 2025-11-2
     private void createUser(String name, String email, String deviceId, String role) {
-        // Build the right subclass
-        User user;
-        switch (role) {
-            case "organizer": user = new Organizer(); break;
-            case "admin": user = new Admin(); break;
-            default: user = new Entrant();
-        }
+        User user = "organizer".equals(role) ? new Organizer()
+                : "admin".equals(role) ? new Admin()
+                : new Entrant();
+
         user.setName(name);
         user.setEmail(email);
         user.setDeviceId(deviceId);
         user.setType(role);
 
-        UserManager.getInstance().addUser(user);
-
-        // persist to Firestore, then set current user and route
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .add(user)
-                .addOnSuccessListener(docRef -> {
-                    user.setUserId(docRef.getId());
-                    UserManager.getInstance().setCurrentUser(user);
+        UserManager.getInstance().addUser(user)
+                .addOnSuccessListener(u -> {
+                    UserManager.getInstance().setCurrentUser(u);
                     Toast.makeText(this, "Account created: " + role, Toast.LENGTH_SHORT).show();
                     routeToHomeByType(role);
                     finish();
@@ -171,6 +163,7 @@ public class SignUpActivity extends AppCompatActivity {
                     signUpButton.setEnabled(true);
                 });
     }
+
 
     /**
      * This gets the device id.
@@ -196,14 +189,13 @@ public class SignUpActivity extends AppCompatActivity {
         // check for a user with the device id
         FirebaseFirestore.getInstance()
                 .collection("users")
-                .whereEqualTo("deviceId", deviceId)
-                .limit(1)
+                .document(deviceId)
                 .get()
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Sign-in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show())
-                .addOnSuccessListener(snap -> {
-                    if (!snap.isEmpty()) {
-                        DocumentSnapshot doc = snap.getDocuments().get(0);
+                        Toast.makeText(this, "Sign-in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                )
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
                         String type = doc.getString("type");
 
                         User user = null;
@@ -212,6 +204,7 @@ public class SignUpActivity extends AppCompatActivity {
                         else if ("admin".equals(type)) user = doc.toObject(Admin.class);
 
                         if (user != null) {
+
                             user.setUserId(doc.getId());
                             UserManager.getInstance().setCurrentUser(user);
                         }
@@ -227,6 +220,7 @@ public class SignUpActivity extends AppCompatActivity {
                         signUpButton.setEnabled(true);
                     }
                 });
+
     }
 
     private void routeToHomeByType(String type) {

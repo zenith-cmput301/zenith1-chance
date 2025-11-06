@@ -32,7 +32,7 @@ public class AdminBrowseProfilesFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        // Fragment UI lives here
+
         View view = inflater.inflate(R.layout.admin_browse_profiles, container, false);
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);

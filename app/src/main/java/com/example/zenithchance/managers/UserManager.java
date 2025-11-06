@@ -5,6 +5,7 @@ import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Organizer;
 import com.example.zenithchance.models.User;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -12,7 +13,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 
 /**
@@ -110,30 +114,35 @@ public final class UserManager {
 
 
     /**
-     * Adds a user to the Firestore "users" collection.
+     * Adds a user to the Firestore "users" collection with the deviceId as the docId.
      *
      * @param user This is the user to be added to the users collection.
      */
-    public void addUser(User user) {
+    public Task<User> addUser(User user) {
         String type = user.getType();
-        if (type == null) {
-            System.out.println("addUser: type is null");
-            return;
-        }
-        type = type.toLowerCase();
+        if (type == null) return Tasks.forException(new IllegalArgumentException("type is null"));
+        type = type.toLowerCase(Locale.US);
         if (!(type.equals("entrant") || type.equals("organizer") || type.equals("admin"))) {
-            System.out.println("addUser: invalid type: " + type);
-            return;
+            return Tasks.forException(new IllegalArgumentException("invalid type: " + type));
         }
         user.setType(type);
 
-        DocumentReference docRef = userCollection.document();
-        user.setUserId(docRef.getId());
-        docRef.set(user)
-                .addOnFailureListener(e -> System.err.println("addUser failed: " + e.getMessage()));
+        String deviceId = user.getDeviceId();
+        if (deviceId == null || deviceId.isEmpty()) {
+            return Tasks.forException(new IllegalArgumentException("deviceId is required"));
+        }
 
+        DocumentReference docRef = userCollection.document(deviceId); // use deviceId as doc id
+        user.setUserId(deviceId); // keep in-memory id consistent
 
+        // calling again overwrites the same doc (good for retries)
+        return docRef.set(user)
+                .continueWith(task -> {
+                    if (!task.isSuccessful()) throw task.getException();
+                    return user;
+                });
     }
+
 
     /**
      * Deletes a user from the Firestore "users" collection.
@@ -195,12 +204,10 @@ public final class UserManager {
 
     // asynchronous functions that fetch users. Start a background network call immediately.
     public Task<List<Entrant>> fetchEntrants() {
-        return userCollection.whereEqualTo("type", "entrant")
+        return userCollection.whereIn("type", Arrays.asList("entrant", "Entrant"))
                 .get()
                 .continueWith(task -> {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
+                    if (!task.isSuccessful()) throw Objects.requireNonNull(task.getException());
 
                     entrants.clear();
                     for (DocumentSnapshot doc : task.getResult().getDocuments()) {
@@ -210,19 +217,15 @@ public final class UserManager {
                             entrants.add(e);
                         }
                     }
-
-                    System.out.println("Fetched entrants: " + entrants.size());
                     return new ArrayList<>(entrants);
                 });
     }
 
     public Task<List<Organizer>> fetchOrganizers() {
-        return userCollection.whereEqualTo("type", "organizer")
+        return userCollection.whereIn("type", Arrays.asList("organizer", "Organizer"))
                 .get()
                 .continueWith(task -> {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
+                    if (!task.isSuccessful()) throw Objects.requireNonNull(task.getException());
 
                     organizers.clear();
                     for (DocumentSnapshot doc : task.getResult().getDocuments()) {
@@ -232,15 +235,9 @@ public final class UserManager {
                             organizers.add(o);
                         }
                     }
-
-                    System.out.println("Fetched organizers: " + organizers.size());
                     return new ArrayList<>(organizers);
                 });
     }
-
-
-
-
 
 
 }
