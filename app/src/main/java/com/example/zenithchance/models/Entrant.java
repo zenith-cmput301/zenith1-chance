@@ -87,7 +87,7 @@ public class Entrant extends User {
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
         WriteBatch batch = db.batch();
-        batch.update(userRef,  "onWaiting",  FieldValue.arrayRemove(eventDocId));
+        batch.update(userRef,  "onWaiting", FieldValue.arrayRemove(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayRemove(uid));
 
         batch.commit().addOnSuccessListener(v -> {
@@ -95,6 +95,36 @@ public class Entrant extends User {
             event.removeFromWaitingList(uid);
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+    }
+
+    public void acceptInvite(Event event, String eventDocId, Runnable onSuccess,
+                             java.util.function.Consumer<Exception> onError) {
+        String uid = getUserId();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(uid);
+        DocumentReference eventRef = db.collection("events").document(eventDocId);
+
+        WriteBatch batch = db.batch();
+        batch.update(userRef,  "onInvite", FieldValue.arrayRemove(eventDocId));
+        batch.update(userRef,  "onAccepted", FieldValue.arrayUnion(eventDocId));
+        batch.update(eventRef, "invitedList", FieldValue.arrayRemove(uid));
+        batch.update(eventRef, "acceptedList", FieldValue.arrayUnion(uid));
+
+        batch.commit().addOnSuccessListener(v -> {
+            onInvite.remove(eventDocId);
+            if (!getOnAccepted().contains(eventDocId)) onAccepted.add(eventDocId);
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+    }
+
+    public void declineInvite(Event event, String eventDocId, Runnable onSuccess,
+                              java.util.function.Consumer<Exception> onError) {
+        String uid = getUserId();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef  = db.collection("users").document(uid);
+        DocumentReference eventRef = db.collection("events").document(eventDocId);
+
+
     }
 
 

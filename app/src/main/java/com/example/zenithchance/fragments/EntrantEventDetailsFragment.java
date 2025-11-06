@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
+import com.google.android.material.button.MaterialButton;
 
 public class EntrantEventDetailsFragment extends Fragment {
     private Entrant currentEntrant;
@@ -44,7 +45,10 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView time = view.findViewById(R.id.time);
         TextView desc = view.findViewById(R.id.description);
         ImageView image = view.findViewById(R.id.header_image);
-        com.google.android.material.button.MaterialButton actionBtn = view.findViewById(R.id.event_action_button);
+        MaterialButton actionBtn = view.findViewById(R.id.event_action_button);
+        ViewGroup inviteActions = view.findViewById(R.id.invite_actions);
+        MaterialButton acceptBtn  = view.findViewById(R.id.btn_accept);
+        MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
 
         String eventName = null;
         String eventDocId = null;
@@ -82,14 +86,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        bindActionForState(eventDocId, actionBtn, eventForLocal, eventName);
+        bindActionForState(eventDocId, eventForLocal, eventName, inviteActions, actionBtn, acceptBtn, declineBtn);
 
         return view;
     }
 
-    private void bindActionForState(String eventDocId,
-                                    com.google.android.material.button.MaterialButton actionBtn,
-                                    Event eventForLocal, String eventName) {
+    private void bindActionForState(String eventDocId, Event eventForLocal, String eventName,
+                                    ViewGroup inviteActions,
+                                    MaterialButton actionBtn,
+                                    MaterialButton acceptBtn,
+                                    MaterialButton declineBtn) {
         actionBtn.setOnClickListener(null); // clear previous listener
 
         // Case 1: Enroll
@@ -108,6 +114,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         // Case 3: Invited, waiting to accept or decline
         else if (currentEntrant.isInInvitedList(eventDocId)) {
+            // switch default buttons to accept/decline buttons
+            actionBtn.setVisibility(View.GONE);
+            inviteActions.setVisibility(View.VISIBLE);
+
 
         }
 
@@ -127,13 +137,12 @@ public class EntrantEventDetailsFragment extends Fragment {
      * @param actionBtn         Button to wire
      * @param eventForLocal     Event to enroll
      */
-    public void enrollWaiting(String eventDocId,
-                              com.google.android.material.button.MaterialButton actionBtn,
+    public void enrollWaiting(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
 
         actionBtn.setOnClickListener( v -> {
             actionBtn.setEnabled(false);   // prevent double taps during transition
-            actionBtn.setText("Enrolling…");
+            actionBtn.setText("Enrolling...");
 
             currentEntrant.enrollInWaiting(
                     eventForLocal,
@@ -166,13 +175,12 @@ public class EntrantEventDetailsFragment extends Fragment {
      * @param actionBtn         Button to wire
      * @param eventForLocal     Event to drop from
      */
-    public void dropWaitingList(String eventDocId,
-                              com.google.android.material.button.MaterialButton actionBtn,
+    public void dropWaitingList(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
 
         actionBtn.setOnClickListener(v-> {
             actionBtn.setEnabled(false); // prevent double taps while transitioning
-            actionBtn.setText("Dropping…");
+            actionBtn.setText("Dropping...");
 
             currentEntrant.dropWaiting(
                     eventForLocal,
@@ -194,6 +202,17 @@ public class EntrantEventDetailsFragment extends Fragment {
                         Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
             );
+        });
+    }
+
+    public void respondInvitation(String eventDocId,
+                                  MaterialButton acceptBtn, MaterialButton declineBtn,
+                                  Event eventForLocal) {
+
+        acceptBtn.setOnClickListener(v-> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            acceptBtn.setText("Accepting...");
         });
     }
 }
