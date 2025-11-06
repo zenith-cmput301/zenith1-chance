@@ -1,148 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/entrant_event_details"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
+    <!-- Header Image -->
     <ImageView
         android:id="@+id/header_image"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/theme_color"
+        android:layout_width="0dp"
+        android:layout_height="220dp"
         android:scaleType="centerCrop"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Event Name -->
     <TextView
         android:id="@+id/event_name"
-        android:layout_width="250dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:text="Event name"
-        android:textSize="40dp"
+        android:text="@string/event_name"
+        android:textStyle="bold"
+        android:textSize="28sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintTop_toBottomOf="@id/header_image"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header_image" />
+        app:layout_constraintEnd_toStartOf="@id/qr" />
 
-    <ImageView
-        android:id="@+id/time_icon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/ic_action_name_calender"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/event_name"
-        app:tint="@color/theme_color" />
-
-    <ImageView
-        android:id="@+id/location_icon_big"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/location"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time_icon"
-        app:tint="@color/theme_color" />
-
-    <ImageView
-        android:id="@+id/organizer_icon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="15dp"
-        android:src="@drawable/building"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/location_icon_big"
-        app:tint="@color/theme_color" />
-
-    <TextView
-        android:id="@+id/time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:text="Wed, Apr 28, 5:30 PM"
-        android:textSize="15dp"
-        app:layout_constraintBottom_toBottomOf="@+id/time_icon"
-        app:layout_constraintStart_toEndOf="@+id/time_icon"
-        app:layout_constraintTop_toTopOf="@+id/time_icon" />
-
-    <TextView
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:text="UofA"
-        android:textSize="15dp"
-        app:layout_constraintBottom_toBottomOf="@+id/location_icon_big"
-        app:layout_constraintStart_toEndOf="@+id/location_icon_big"
-        app:layout_constraintTop_toTopOf="@+id/location_icon_big" />
-
-    <TextView
-        android:id="@+id/organizer_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:text="301 Grinders Club"
-        android:textSize="15dp"
-        app:layout_constraintBottom_toBottomOf="@+id/organizer_icon"
-        app:layout_constraintStart_toEndOf="@+id/organizer_icon"
-        app:layout_constraintTop_toTopOf="@+id/organizer_icon" />
-
+    <!-- QR Code (Optional) -->
     <ImageView
         android:id="@+id/qr"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="15dp"
-        android:background="@color/subtheme_color"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/event_name"
-        app:layout_constraintTop_toBottomOf="@id/header_image" />
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_margin="20dp"
+        app:layout_constraintTop_toBottomOf="@id/header_image"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/description_container"
+    <!-- Event Details List -->
+    <LinearLayout
+        android:id="@+id/details_section"
+        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="15dp"
-        app:layout_constraintTop_toBottomOf="@id/organizer_icon"
-        app:layout_constraintBottom_toTopOf="@id/event_action_button"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintTop_toBottomOf="@id/event_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Time Row -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_action_name_calender"
+                app:tint="@color/theme_color"/>
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_marginStart="12dp"
+                android:text="Wed, Apr 28 • 5:30 PM"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Location Row -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_location"
+                app:tint="@color/theme_color"/>
+
+            <TextView
+                android:id="@+id/location"
+                android:layout_marginStart="12dp"
+                android:text="University of Alberta"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Organizer Row -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/building"
+                app:tint="@color/theme_color"/>
+
+            <TextView
+                android:id="@+id/organizer_name"
+                android:layout_marginStart="12dp"
+                android:text="301 Grinders Club"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Scrollable Description -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintTop_toBottomOf="@id/details_section"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/event_action_button">
 
         <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            tools:text="Long description"/>
-    </androidx.core.widget.NestedScrollView>
+            android:lineSpacingExtra="4dp"/>
+    </ScrollView>
 
-    <Button
+    <!-- Action Button -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/event_action_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/theme_color"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
         android:text="Enroll"
-        app:layout_constraintBottom_toTopOf="@id/navi_bar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <include
-        android:id="@+id/navi_bar"
-        layout="@layout/navi_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textStyle="bold"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/theme_color"
+        android:layout_margin="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
