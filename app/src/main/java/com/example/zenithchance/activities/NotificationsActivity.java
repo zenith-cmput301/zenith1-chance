@@ -22,6 +22,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.zenithchance.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class NotificationsActivity extends AppCompatActivity {
 
@@ -41,34 +43,39 @@ public class NotificationsActivity extends AppCompatActivity {
             return insets;
         });
 
-
-        // Initializing Buttons:
+        // Initialize buttons
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
 
-        // This sends you to the profileActivity page!
+        // === intent + extras handling ===
         Intent intent = getIntent();
-        notificationList = intent.getExtras().getStringArrayList("notificationList");
-        if (notificationList == null){
-            notificationList = new ArrayList<>();
+        Bundle extras = intent.getExtras();
+
+        if (extras != null) {
+            notificationList = extras.getStringArrayList("notificationList");
         }
-        ListView notificationsListView= findViewById(R.id.notificationListView);
-        ArrayAdapter notificationAdapter = new ArrayAdapter<>(
+
+        if (notificationList == null) {
+            // Provide a backup list
+            notificationList = new ArrayList<>();
+            notificationList.add("No notifications available");
+        }
+
+        // === Setting up ListView ===
+        ListView notificationsListView = findViewById(R.id.notificationListView);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
                 notificationList
         );
-        notificationsListView.setAdapter(notificationAdapter);
+        notificationsListView.setAdapter(adapter);
 
-
-        ArrayList finalNotificationList = notificationList;
-        backArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent resultIntent = new Intent();
-                resultIntent.putStringArrayListExtra("notificationList", finalNotificationList); // Might be able to delete this
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            }});
-
-    }}
+        // === Implementing Back Button ===
+        backArrow.setOnClickListener(v -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putStringArrayListExtra("notificationList", notificationList);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
+    }
+}
