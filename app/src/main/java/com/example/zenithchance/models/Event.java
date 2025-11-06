@@ -23,8 +23,9 @@ public class Event implements Serializable {
     private Boolean geolocation_required;
     private Date registration_date;
     private Integer max_entrants;
-
     private String imageUrl;
+    private String docId;
+    private ArrayList<Entrant> waitingList = new ArrayList<Entrant>();
 
 //    private ArrayList<Entrant> waiting_list;
 
@@ -64,6 +65,12 @@ public class Event implements Serializable {
         this.max_entrants = max_entrants;
     }
 
+    /**
+     * Adds entrant to this event's waiting list
+     */
+    public void addWaiting(Entrant entrant) {
+        // TODO: given entrant, add to local waiting list AND on Firebase's document "events", this event's array field "waitingList"
+    }
 
     /**
      *
@@ -79,8 +86,8 @@ public class Event implements Serializable {
     public Boolean getGeolocationRequired() { return this.geolocation_required; }
     public Date getRegistrationDate() { return this.registration_date; }
     public Integer getMaxEntrants() { return this.max_entrants; }
-
     public String getImageUrl() { return this.imageUrl; }
+    public String getDocId() { return docId; }
 
     /**
      *
@@ -97,6 +104,6 @@ public class Event implements Serializable {
     public void setLocation(String location) { this.location = location; }
     public void setName(String name) { this.name = name; }
     public void setDate(Date date) { this.date = date; }
-
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setDocId(String docId) { this.docId = docId; }
 }
