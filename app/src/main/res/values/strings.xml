@@ -23,4 +23,9 @@
     <string name="togglebuttontext">ToggleButton</string>
     <string name="notifications">Notifications</string>
     <string name="confirmButton">Confirm</string>
+    <string name="browse_events">Browse Events</string>
+    <string name="admin_menu">Admin Menu</string>
+    <string name="profile">Profile</string>
+    <string name="my_events">My Events</string>
+    <string name="all_events">All Events</string>
 </resources>
