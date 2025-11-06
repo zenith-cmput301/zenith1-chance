@@ -8,12 +8,11 @@
     android:background="#FFFFFF"
     tools:context=".PeopleActivity">
 
-    <!-- Header with title and filter button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical|space_between"
+        android:gravity="center_vertical"
         android:padding="16dp">
 
         <TextView
@@ -74,7 +73,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Filter row with icon and status buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -84,38 +82,36 @@
         android:paddingVertical="8dp"
         android:layout_marginTop="4dp">
 
-        <!-- Filter Icon -->
         <ImageView
             android:id="@+id/imgFilter"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_filter_list"
             android:contentDescription="Filter"
             android:layout_marginEnd="12dp"
             app:tint="#000000" />
 
-        <!-- Filter buttons -->
+
         <Button
             android:id="@+id/btnWaiting"
-            android:layout_width="wrap_content"
+            android:layout_width="71dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:text="Waiting"
             android:textColor="#000000"
-            android:textSize="13sp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"/>
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnChosen"
-            android:layout_width="wrap_content"
+            android:layout_width="74dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
             android:text="Chosen"
             android:textColor="#000000"
-            android:textSize="13sp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"/>
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnAccepted"
@@ -139,28 +135,24 @@
             android:paddingVertical="6dp"/>
     </LinearLayout>
 
-
-    <!-- People List -->
     <ListView
         android:id="@+id/listPeople"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <!-- Export Button -->
     <Button
         android:id="@+id/btnExport"
         android:layout_width="wrap_content"
-        android:layout_height="27dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="16dp"
-        android:backgroundTint="#5C6EF8"
         android:paddingHorizontal="32dp"
         android:text="Export"
-        android:textColor="@android:color/black"
+        android:textColor="#000000"
         android:textSize="20dp"/>
 
-    <!-- Bottom bar placeholder -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
