@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The representative class for all Events.
@@ -25,10 +26,10 @@ public class Event implements Serializable {
     private Date finalDeadline;
     private Integer max_entrants;
     private String imageUrl;
-    private ArrayList<Entrant> waitingList;
-    private ArrayList<Entrant> invitedList;
-    private ArrayList<Entrant> acceptedList;
-    private ArrayList<Entrant> declinedList;
+    private ArrayList<String> waitingList = new ArrayList<>();
+    private ArrayList<Entrant> invitedList = new ArrayList<Entrant>();
+    private ArrayList<Entrant> acceptedList = new ArrayList<Entrant>();
+    private ArrayList<Entrant> declinedList = new ArrayList<Entrant>();
 
     private String docId;
 
@@ -70,11 +71,14 @@ public class Event implements Serializable {
         this.registration_date = registration_date;
         this.finalDeadline = finalDeadline;
         this.max_entrants = max_entrants;
+    }
 
-        this.waitingList = new ArrayList<Entrant>();
-        this.invitedList = new ArrayList<Entrant>();
-        this.acceptedList = new ArrayList<Entrant>();
-        this.declinedList = new ArrayList<Entrant>();
+    public void addWaitingList(String uid) {
+        if (!waitingList.contains(uid)) waitingList.add(uid);
+    }
+
+    public void removeFromWaitingList(String uid) {
+        this.waitingList.remove(uid);
     }
 
     /**
@@ -93,7 +97,7 @@ public class Event implements Serializable {
     public Date getFinalDeadline() { return this.finalDeadline; }
     public Integer getMaxEntrants() { return this.max_entrants; }
     public String getImageUrl() { return this.imageUrl; }
-    public ArrayList<Entrant> getWaitingList() { return waitingList; }
+    public ArrayList<String> getWaitingList() { return waitingList; }
     public ArrayList<Entrant> getInvitedList() { return invitedList; }
     public ArrayList<Entrant> getAcceptedList() { return acceptedList; }
     public ArrayList<Entrant> getDeclinedList() { return declinedList; }
@@ -106,19 +110,10 @@ public class Event implements Serializable {
      */
 
     public void setMaxEntrants(Integer max_entrants) { this.max_entrants = max_entrants; }
-    public void setRegistrationDate(Date registration_date) { this.registration_date = registration_date; }
-    public void setFinalDeadline(Date finalDeadline) { this.finalDeadline = finalDeadline; }
-    public void setGeolocationRequired(Boolean geolocation_required) { this.geolocation_required = geolocation_required; }
     public void setDescription(String description) { this.description = description; }
     public void setStatus(String status) { this.status = status; }
     public void setOrganizer(String organizer) { this.organizer = organizer; }
     public void setLocation(String location) { this.location = location; }
     public void setName(String name) { this.name = name; }
-    public void setDate(Date date) { this.date = date; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public void setWaitingList(ArrayList<Entrant> waitingList) { this.waitingList = waitingList; }
-    public void setInvitedList(ArrayList<Entrant> invitedList) { this.invitedList = invitedList; }
-    public void setAcceptedList(ArrayList<Entrant> acceptedList) { this.acceptedList = acceptedList; }
-    public void setDeclinedList(ArrayList<Entrant> declinedList) { this.declinedList = declinedList; }
     public void setDocId(String docId) { this.docId = docId; }
 }

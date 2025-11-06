@@ -76,25 +76,46 @@ public class EntrantEventDetailsFragment extends Fragment {
                     .into(image);
         }
 
-        // Wiring action buttons, first create holder event
+        // wiring action buttons, first create holder event
         Event eventForLocal = new Event();
         eventForLocal.setName(eventName);
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        // Case 1: To enroll
-        if (!currentEntrant.isInAnyListByName(eventName)) {
-            enrollWaiting(eventDocId, actionBtn, eventForLocal);
-        }
-
-        // Case 2: If in waiting list, entrant can drop out of waiting list
-        else if (currentEntrant.isInWaitingList(eventName)) {
-            dropWaitingList(eventDocId, actionBtn, eventForLocal);
-        }
+        bindActionForState(eventDocId, actionBtn, eventForLocal, eventName);
 
         return view;
     }
 
+    private void bindActionForState(String eventDocId,
+                                    com.google.android.material.button.MaterialButton actionBtn,
+                                    Event eventForLocal, String eventName) {
+        actionBtn.setOnClickListener(null); // clear previous listener
+
+        // Case 1: Not enrolled
+        if (!currentEntrant.isInAnyListByName(eventName)) {
+            actionBtn.setText("Enroll");
+            actionBtn.setEnabled(true);
+            enrollWaiting(eventDocId, actionBtn, eventForLocal);
+        }
+
+        // Case 2: Enrolled but want to drop
+        else if (currentEntrant.isInWaitingList(eventName)) {
+            actionBtn.setText("Drop Waiting List");
+            actionBtn.setEnabled(true);
+            dropWaitingList(eventDocId, actionBtn, eventForLocal);
+        }
+
+
+    }
+
+    /**
+     * Allows entrant to enroll an event's waiting list
+     *
+     * @param eventDocId        Firestore id of event
+     * @param actionBtn         Button to wire
+     * @param eventForLocal     Event to enroll
+     */
     public void enrollWaiting(String eventDocId,
                               com.google.android.material.button.MaterialButton actionBtn,
                               Event eventForLocal) {
@@ -111,6 +132,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                         actionBtn.setText("Drop Waiting List");
                         actionBtn.setTextColor(Color.WHITE);
                         actionBtn.setEnabled(true);
+
+                        // bind to dropping list behaviour on next click
+                        dropWaitingList(eventDocId, actionBtn, eventForLocal);
+
                         Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
                     },
                     // fail to enroll due to firebase shenanigans
@@ -123,9 +148,41 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * Allows entrant to drop from event's waiting list
+     *
+     * @param eventDocId        Firestore id of event
+     * @param actionBtn         Button to wire
+     * @param eventForLocal     Event to drop from
+     */
     public void dropWaitingList(String eventDocId,
                               com.google.android.material.button.MaterialButton actionBtn,
                               Event eventForLocal) {
 
+        actionBtn.setOnClickListener(v-> {
+            actionBtn.setEnabled(false); // prevent double taps while transitioning
+            actionBtn.setText("Dropping…");
+
+            currentEntrant.dropWaiting(
+                    eventForLocal,
+                    eventDocId,
+                    // success
+                    () -> {
+                        // Flip UI back to "Enroll" and rebind to enroll flow
+                        actionBtn.setText("Enroll");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Removed from waiting list", Toast.LENGTH_SHORT).show();
+
+                        // rebind to enroll behavior so a subsequent tap enrolls again
+                        enrollWaiting(eventDocId, actionBtn, eventForLocal);
+                    },
+                    // fail to enroll due to firebase shenanigans
+                    e -> {
+                        actionBtn.setText("Drop Waiting List");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
     }
 }

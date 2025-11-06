@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.zenithchance.models.LotterySystem;
 import com.example.zenithchance.navigation.EntrantNavigationHelper;
 
 public class MainActivity extends AppCompatActivity {

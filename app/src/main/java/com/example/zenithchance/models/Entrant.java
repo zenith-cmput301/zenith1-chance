@@ -15,60 +15,11 @@ import java.util.List;
  * This class represents Entrant users.
  */
 public class Entrant extends User {
-    private ArrayList<Event> onWaiting = new ArrayList<Event>();
+    private ArrayList<Event> onWaiting = new ArrayList<>();
     private ArrayList<Event> onInvite = new ArrayList<Event>();
     private ArrayList<Event> onAccepted = new ArrayList<Event>();
 
     public Entrant() { setType("entrant"); }
-
-    /**
-     * This method get this entrant's events
-     */
-    public void fetchUserEvents() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // fetch user's events' names
-        db.collection("users").document(getUserId())
-                .get()
-                .addOnSuccessListener(userDoc -> {
-                    List<String> waitingNames  = (List<String>) userDoc.get("onWaiting");
-                    List<String> inviteNames   = (List<String>) userDoc.get("onInvite");
-                    List<String> acceptedNames = (List<String>) userDoc.get("onAccepted");
-
-                    if (waitingNames  == null) waitingNames  = new ArrayList<>();
-                    if (inviteNames   == null) inviteNames   = new ArrayList<>();
-                    if (acceptedNames == null) acceptedNames = new ArrayList<>();
-
-                    // get all events (to later filter them)
-                    List<String> finalAcceptedNames = acceptedNames;
-                    List<String> finalInviteNames = inviteNames;
-                    List<String> finalWaitingNames = waitingNames;
-                    db.collection("events")
-                            .orderBy("date")
-                            .get()
-                            .addOnSuccessListener(snaps -> {
-                                onWaiting.clear();
-                                onInvite.clear();
-                                onAccepted.clear();
-
-                                // filter them to appropriate lists
-                                for (DocumentSnapshot d : snaps) {
-                                    Event e = d.toObject(Event.class);
-                                    if (e == null) continue;
-                                    String name = e.getName();
-                                    if (name == null) continue;
-
-                                    if (finalAcceptedNames.contains(name)) {
-                                        onAccepted.add(e);
-                                    } else if (finalInviteNames.contains(name)) {
-                                        onInvite.add(e);
-                                    } else if (finalWaitingNames.contains(name)) {
-                                        onWaiting.add(e);
-                                    }
-                                }
-                            });
-                });
-    }
 
     /**
      * Check if event is in given list
@@ -120,9 +71,6 @@ public class Entrant extends User {
 
         String uid = getUserId();
 
-        // Enrolls locally
-        if (!containsByName(onWaiting, event.getName())) onWaiting.add(event);
-
         // Record enrollment on Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = db.collection("users").document(uid);
@@ -132,7 +80,15 @@ public class Entrant extends User {
         batch.update(userRef,  "onWaiting",  FieldValue.arrayUnion(event.getName()));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
-        batch.commit().addOnSuccessListener(v -> { if (onSuccess != null) onSuccess.run(); });
+        batch.commit().addOnSuccessListener(v -> {
+            if (!containsByName(onWaiting, event.getName())) {
+                onWaiting.add(event);
+                event.addWaitingList(uid);
+            }
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> {
+            if (onError != null) onError.accept(e);
+        });
     }
 
     /**
@@ -146,11 +102,24 @@ public class Entrant extends User {
     public void dropWaiting(Event event, String eventDocId, Runnable onSuccess,
                                 java.util.function.Consumer<Exception> onError) {
         String uid = getUserId();
-
-        // Drop locally
         String targetName = event.getName();
-        onWaiting.removeIf(e -> targetName.equals(e.getName()));
 
+        // drop on firebase
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef  = db.collection("users").document(uid);
+        DocumentReference eventRef = db.collection("events").document(eventDocId);
+
+        WriteBatch batch = db.batch();
+        batch.update(userRef,  "onWaiting",  FieldValue.arrayRemove(targetName));
+        batch.update(eventRef, "waitingList", FieldValue.arrayRemove(uid));
+
+        batch.commit().addOnSuccessListener(v -> {
+            onWaiting.removeIf(e -> targetName.equals(e.getName()));
+            event.removeFromWaitingList(uid);
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> {
+            if (onError != null) onError.accept(e);
+        });
     }
 
 
