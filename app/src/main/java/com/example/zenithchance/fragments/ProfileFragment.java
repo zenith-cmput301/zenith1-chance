@@ -26,7 +26,7 @@ import com.example.zenithchance.activities.SignInActivity;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.User;
 
-
+// TODO: Handle Exceptions: Invalid emails while editing
 public class ProfileFragment extends Fragment {
 
     User myUser;
