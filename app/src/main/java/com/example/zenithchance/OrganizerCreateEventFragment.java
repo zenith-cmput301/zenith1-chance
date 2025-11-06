@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,6 +37,7 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // inflates fragment
         View root = inflater.inflate(R.layout.organizer_create_event, container, false);
+        Bundle args = getArguments();
 
         // Initializing views that may require modification
         eventImage = root.findViewById(R.id.event_image);
@@ -47,10 +49,28 @@ public class OrganizerCreateEventFragment extends Fragment {
         eventDescription = root.findViewById(R.id.event_description_box);
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
+        // Initializing buttons
+        Button discardButton = root.findViewById(R.id.event_creation_discard_button);
+        Button submitButton = root.findViewById(R.id.event_creation_save_button);
+
         eventMaxEntrants.setMinValue(0);
         eventMaxEntrants.setMaxValue(100);
 
         updateToExisting();
+
+        discardButton.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
+        submitButton.setOnClickListener(v -> {
+            if (args != null){
+                updateEventFields();
+            } else {
+//                createNewEvent();
+            }
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
+
+
 
         return root;
     }
@@ -76,5 +96,30 @@ public class OrganizerCreateEventFragment extends Fragment {
             if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
         }
     }
+
+    /**
+     * Updates the event values to the field values currently selected
+     */
+    private void updateEventFields() {
+
+        Bundle args = getArguments();
+        if (args != null) {
+            Event event = (Event) getArguments().getSerializable("event");
+
+//            eventImage = PLACEHOLDER;
+
+            event.setName(eventName.toString());
+            eventDate.setText(event.getDate().toString());
+            eventRegistration.setText(event.getRegistrationDate().toString());
+            event.setLocation(eventLocation.toString());
+            event.setMaxEntrants(eventMaxEntrants.getValue());
+            eventDescription.setText(event.getDescription());
+            if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
+        }
+    }
+//    private void createNewEvent() {
+//        Event newEvent = new Event(eventName.toString(),
+//                eventDate.toString(), event):
+//    }
 
 }

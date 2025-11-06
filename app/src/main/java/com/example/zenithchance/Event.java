@@ -1,6 +1,7 @@
 package com.example.zenithchance;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -21,6 +22,8 @@ public class Event implements Serializable {
     private Boolean geolocation_required;
     private Date registration_date;
     private Integer max_entrants;
+
+//    private ArrayList<Entrant> waiting_list;
 
 //    Unique event ID for routing during QR code scanning to be implemented down the line
 //    private Integer event_id;

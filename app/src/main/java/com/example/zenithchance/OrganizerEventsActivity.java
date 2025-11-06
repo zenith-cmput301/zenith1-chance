@@ -1,6 +1,8 @@
 package com.example.zenithchance;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,21 +25,27 @@ public class OrganizerEventsActivity extends AppCompatActivity {
 
         Bundle bundle = new Bundle();
 
-        // For testing purposes
-        Event sampleEvent = createSampleEvent();
+        Button createButton = findViewById(R.id.create_event_button);
 
-        bundle.putSerializable("event", sampleEvent);
+        createButton.setOnClickListener(v->{
+            // For testing purposes
+            Event sampleEvent = createSampleEvent();
 
-        OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
-        createFragment.setArguments(bundle);
+            bundle.putSerializable("event", sampleEvent);
 
+            OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+            createFragment.setArguments(bundle);
 
-        // initialize list fragment into container
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.eventCreateFragmentContainer, createFragment)
-                    .commit();
-        }
+            // initialize list fragment into container
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.eventCreateFragmentContainer, createFragment)
+                        .commit();
+            }
+
+            findViewById(R.id.organizer_events_main_layout).setVisibility(View.INVISIBLE);
+        });
+
     }
 
 
