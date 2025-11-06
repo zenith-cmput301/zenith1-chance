@@ -3,13 +3,15 @@ package com.example.zenithchance.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.OrganizerCreateEventFragment;
+import com.example.zenithchance.fragments.OrganizerEventsFragment;
+import com.example.zenithchance.fragments.ProfileFragment;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -17,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class OrganizerEventDetailsActivity extends AppCompatActivity {
 
     private TextView tvEventName, tvEventDate, tvEventTime, tvLocation, tvOrganizer, tvAboutDescription;
-    private Button btnPeople, btnEdit, btnMap;
+    private Button btnPeople, btnEdit, btnMyEvents, btnProfile;
 
     private FirebaseFirestore db;
     private String eventId;
@@ -43,7 +45,6 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
 
         btnPeople = findViewById(R.id.btnPeople);
         btnEdit = findViewById(R.id.btnEdit);
-        btnMap = findViewById(R.id.btnMap);
 
         loadEventDetails(eventId);
 
@@ -52,6 +53,34 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
             intent.putExtra("eventId", eventId);
             startActivity(intent);
         });
+
+        btnEdit.setOnClickListener(view -> {
+            OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, createFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        btnMyEvents.setOnClickListener(view -> {
+            OrganizerEventsFragment createFragment = new OrganizerEventsFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, createFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        btnProfile.setOnClickListener(view -> {
+            ProfileFragment createFragment = new ProfileFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, createFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
 
     }
 
@@ -78,11 +107,11 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
         String location = documentSnapshot.getString("location");
         String organizer = documentSnapshot.getString("organizer");
 
-        tvEventName.setText(name != null ? name : "Unnamed Event");
+        tvEventName.setText(name != null ? name : "Event name not assigned");
         tvEventDate.setText(date != null ? date : "No Date");
         tvEventTime.setText(time != null ? time : "No Time");
         tvLocation.setText(location != null ? location : "No Location");
-        tvOrganizer.setText(organizer != null ? organizer : "Unknown Organizer");
+        tvOrganizer.setText(organizer != null ? organizer : "Organizer not assigned");
         tvAboutDescription.setText(description != null ? description : "No Description");
     }
 }
