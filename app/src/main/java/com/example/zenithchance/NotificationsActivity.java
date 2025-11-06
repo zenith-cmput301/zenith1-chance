@@ -52,14 +52,17 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // This sends you to the profileActivity page!
         Intent intent = getIntent();
-        ArrayList notificationList = intent.getExtras().getStringArrayList("notificationList");
+        notificationList = intent.getExtras().getStringArrayList("notificationList");
         if (notificationList == null){
             notificationList = new ArrayList<>();
         }
         ListView notificationsListView= findViewById(R.id.notificationListView);
-        Adapter notificationAdapter = new ArrayAdapter<>(this, R.layout.activity_notifications, notificationList);
-
-        notificationsListView.setAdapter((ListAdapter) notificationAdapter);
+        ArrayAdapter notificationAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_list_item_1,
+                notificationList
+        );
+        notificationsListView.setAdapter(notificationAdapter);
 
 
         ArrayList finalNotificationList = notificationList;

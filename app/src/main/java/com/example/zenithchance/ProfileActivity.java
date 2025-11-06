@@ -58,7 +58,8 @@ public class ProfileActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        myUser.setUserId("123");
+        myUser.setDeviceId("456");
         // Initializing Buttons:
         deleteProfile = findViewById(R.id.deleteProfileButton);
         editProfile = findViewById(R.id.editProfileButton);
@@ -127,23 +128,31 @@ public class ProfileActivity extends AppCompatActivity {
 
         // This sends you to the NotificationActivity page!
 
+        // Initialize notification list if null
+        if (notificationList == null) {
+            notificationList = new ArrayList<>();
+        }
+
+// Launcher for result
         ActivityResultLauncher<Intent> notificationActivityLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         ArrayList<String> updatedList = result.getData().getStringArrayListExtra("notificationList");
-
+                        if (updatedList != null) {
+                            notificationList = updatedList;
+                        }
                     }
                 }
         );
-
-        notificationPage.setOnClickListener(new AdapterView.OnClickListener() {
+        // Correct listener type here!
+        notificationPage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, NotificationsActivity.class);
-                intent.putExtra("notificationList", notificationList); // Might be able to delete
+                intent.putStringArrayListExtra("notificationList", notificationList);
                 notificationActivityLauncher.launch(intent);
-
             }
         });
+
     }}

@@ -86,8 +86,8 @@
 
         <ImageButton
             android:id="@+id/notificationButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="159dp"
+            android:layout_height="131dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="10dp"
             android:background="#FFFFFF"

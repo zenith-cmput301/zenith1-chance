@@ -49,7 +49,7 @@
         android:id="@+id/constraintLayout3"
         android:layout_width="match_parent"
         android:layout_height="100sp"
-        app:layout_constraintBottom_toTopOf="@id/scrollView2"
+        app:layout_constraintBottom_toTopOf="@id/notificationListView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
