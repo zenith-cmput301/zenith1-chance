@@ -9,11 +9,21 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
+import com.example.zenithchance.models.Organizer;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Class for the UI used in event creation and modification
@@ -33,11 +43,21 @@ public class OrganizerCreateEventFragment extends Fragment {
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
 
+    Button discardButton, submitButton;
+
+    Organizer organizerId;
+
+    private FirebaseFirestore db;
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // inflates fragment
         View root = inflater.inflate(R.layout.organizer_create_event, container, false);
+
+        // gets input arguments
         Bundle args = getArguments();
+
+        db = FirebaseFirestore.getInstance();
 
         // Initializing views that may require modification
         eventImage = root.findViewById(R.id.organizer_event_image);
@@ -50,39 +70,59 @@ public class OrganizerCreateEventFragment extends Fragment {
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
         // Initializing buttons
-        Button discardButton = root.findViewById(R.id.event_creation_discard_button);
-        Button submitButton = root.findViewById(R.id.event_creation_save_button);
+        discardButton = root.findViewById(R.id.event_creation_discard_button);
+        submitButton = root.findViewById(R.id.event_creation_save_button);
 
+        // Sets bounds for numberpicker
         eventMaxEntrants.setMinValue(0);
         eventMaxEntrants.setMaxValue(100);
 
-        updateToExisting();
+        // Updated fields to display existing values if they exist
+        updateToExisting(args);
 
-        discardButton.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().popBackStack();
-        });
-        submitButton.setOnClickListener(v -> {
-            if (args != null){
-                updateEventFields();
-            } else {
-//                createNewEvent();
-            }
-            requireActivity().getSupportFragmentManager().popBackStack();
-        });
 
+        setupDiscardButton();
+        setupSubmitButton();
 
 
         return root;
     }
 
     /**
+     * This method sets up the submit button to for creation or updating
+     */
+    private void setupSubmitButton(){
+
+        Bundle args = getArguments();
+
+        submitButton.setOnClickListener(v -> {
+            if (args.getSerializable("event") != null){
+                updateEventFields(args);
+            } else {
+                createNewEvent();
+            }
+        });
+
+    }
+
+    /**
+     * This method sets up the discard button to  return the user to the events fragment
+     */
+    private void setupDiscardButton() {
+        discardButton.setOnClickListener(v -> {
+            OrganizerEventsFragment fragment = new OrganizerEventsFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .commit();
+        });
+    }
+    /**
      * Updates the text within the selection boxes to the pre-existing values if they exist
      */
 
-    private void updateToExisting() {
+    private void updateToExisting(Bundle args) {
 
-        Bundle args = getArguments();
-        if (args != null) {
+        if (args.getSerializable("event") != null) {
             Event event = (Event) getArguments().getSerializable("event");
 
 //            eventImage = PLACEHOLDER;
@@ -100,10 +140,9 @@ public class OrganizerCreateEventFragment extends Fragment {
     /**
      * Updates the event values to the field values currently selected
      */
-    private void updateEventFields() {
+    private void updateEventFields(Bundle args) {
 
-        Bundle args = getArguments();
-        if (args != null) {
+        if (args.getSerializable("event") != null) {
             Event event = (Event) getArguments().getSerializable("event");
 
 //            eventImage = PLACEHOLDER;
@@ -117,9 +156,57 @@ public class OrganizerCreateEventFragment extends Fragment {
             if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
         }
     }
-//    private void createNewEvent() {
-//        Event newEvent = new Event(eventName.toString(),
-//                eventDate.toString(), event):
-//    }
+    private void createNewEvent() {
+        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+
+        Date eventdate;
+        Date registrationdate;
+
+        try{
+            eventdate = fmt.parse(eventDate.getText().toString());
+            registrationdate = fmt.parse(eventRegistration.getText().toString());
+        } catch (ParseException e) {
+            Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Constructs event based on inputted data
+
+        Event newEvent = new Event(eventdate,
+                eventDate.getText().toString(),
+                eventLocation.getText().toString(),
+                "waiting",
+                organizerId.getName(),
+                eventDescription.getText().toString(),
+                eventGeolocationRequired.isChecked(),
+                registrationdate,
+                registrationdate,
+                eventMaxEntrants.getValue(),
+                "null");
+
+
+        // Adds event to firebase
+
+        db.collection("events")
+                .add(newEvent)
+
+                .addOnSuccessListener(documentReference -> {
+
+
+                    Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
+
+                    // Returns to Events fragment
+
+                    OrganizerEventsFragment fragment = new OrganizerEventsFragment();
+                    requireActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, fragment)
+                            .commit();
+                })
+
+                .addOnFailureListener(e -> {
+
+                    Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
+                });
+    }
 
 }

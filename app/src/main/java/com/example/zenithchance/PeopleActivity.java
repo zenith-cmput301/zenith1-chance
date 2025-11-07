@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+
+import com.example.zenithchance.fragments.OrganizerEventsFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import java.util.List;
 
 public class PeopleActivity extends AppCompatActivity {
 
-    private Button btnWaiting, btnChosen, btnAccepted, btnDeclined, btnExport;
+    private Button btnWaiting, btnChosen, btnAccepted, btnDeclined, btnMyEvents, btnProfile;
     private ListView listPeople;
 
     private List<Person> peopleList = new ArrayList<>();
@@ -26,6 +28,7 @@ public class PeopleActivity extends AppCompatActivity {
     private String eventId;
     private String currentFilter = "All";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +38,8 @@ public class PeopleActivity extends AppCompatActivity {
         btnChosen = findViewById(R.id.btnChosen);
         btnAccepted = findViewById(R.id.btnAccepted);
         btnDeclined = findViewById(R.id.btnDeclined);
-        btnExport = findViewById(R.id.btnExport);
         listPeople = findViewById(R.id.listPeople);
+        btnMyEvents = findViewById(R.id.btnMyEvents);
 
         db = FirebaseFirestore.getInstance();
 
@@ -54,9 +57,25 @@ public class PeopleActivity extends AppCompatActivity {
         btnAccepted.setOnClickListener(v -> setFilter("Accepted"));
         btnDeclined.setOnClickListener(v -> setFilter("Declined"));
 
-        btnExport.setOnClickListener(v ->
-                Toast.makeText(this, "Export feature coming soon!", Toast.LENGTH_SHORT).show()
-        );
+        btnMyEvents.setOnClickListener(view -> {
+            OrganizerEventsFragment createFragment = new OrganizerEventsFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, createFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        btnProfile.setOnClickListener(view -> {
+            OrganizerEventsFragment createFragment = new OrganizerEventsFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, createFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
     }
 
     private void loadPeopleFromFirestore() {

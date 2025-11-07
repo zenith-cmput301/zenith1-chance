@@ -19,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.zenithchance.AdminMainActivity;
 import com.example.zenithchance.EntrantMainActivity;
+import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.models.Admin;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Organizer;
@@ -240,7 +241,7 @@ public class SignUpActivity extends AppCompatActivity {
         if ("entrant".equalsIgnoreCase(type)) {
             startActivity(new Intent(this, EntrantMainActivity.class));
         } else if ("organizer".equalsIgnoreCase(type)) {
-            startActivity(new Intent(this, OrganizerEventsActivity.class));
+            startActivity(new Intent(this, OrganizerMainActivity.class));
         } else if ("admin".equalsIgnoreCase(type)) {
             startActivity(new Intent(this, AdminMainActivity.class));
         } else {

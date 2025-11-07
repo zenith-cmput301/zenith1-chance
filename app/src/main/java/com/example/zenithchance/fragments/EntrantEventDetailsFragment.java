@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
+        Log.d("Details",
+                "docId=" + eventDocId
+                        + " inAny=" + currentEntrant.isInAnyList(eventDocId)
+                        + " waiting=" + currentEntrant.isInWaitingList(eventDocId)
+                        + " invited=" + currentEntrant.isInInvitedList(eventDocId)
+                        + " accepted=" + currentEntrant.isInAcceptedList(eventDocId)
+                        + " declined=" + currentEntrant.isInDeclinedList(eventDocId)
+                        + " onDeclined=" + currentEntrant.getOnDeclined()
+        );
+
         bindActionForState(eventDocId, eventForLocal, eventName, inviteActions, actionBtn, acceptBtn, declineBtn);
 
         return view;
@@ -117,12 +128,23 @@ public class EntrantEventDetailsFragment extends Fragment {
             // switch default buttons to accept/decline buttons
             actionBtn.setVisibility(View.GONE);
             inviteActions.setVisibility(View.VISIBLE);
+            respondInvitation(eventDocId, inviteActions, actionBtn, acceptBtn, declineBtn, eventForLocal);
+        }
 
-
+        // Case 4: Accepted/Declined
+        else if (currentEntrant.isInAcceptedList(eventDocId)) {
+            actionBtn.setText("Accepted");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
+        }
+        else if (currentEntrant.isInDeclinedList(eventDocId)) {
+            actionBtn.setText("Declined");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
         }
 
         else {
-            actionBtn.setText("To be implemented");
+            actionBtn.setText("Unexpected: Which status is the entrant on?");
             actionBtn.setTextColor(Color.WHITE);
             actionBtn.setEnabled(false);
         }
@@ -143,6 +165,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         actionBtn.setOnClickListener( v -> {
             actionBtn.setEnabled(false);   // prevent double taps during transition
             actionBtn.setText("Enrolling...");
+            actionBtn.setTextColor(Color.WHITE);
 
             currentEntrant.enrollInWaiting(
                     eventForLocal,
@@ -181,6 +204,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         actionBtn.setOnClickListener(v-> {
             actionBtn.setEnabled(false); // prevent double taps while transitioning
             actionBtn.setText("Dropping...");
+            actionBtn.setTextColor(Color.WHITE);
 
             currentEntrant.dropWaiting(
                     eventForLocal,
@@ -205,14 +229,61 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
-    public void respondInvitation(String eventDocId,
-                                  MaterialButton acceptBtn, MaterialButton declineBtn,
+    public void respondInvitation(String eventDocId, ViewGroup inviteActions,
+                                  MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn,
                                   Event eventForLocal) {
-
+        // accept button wiring
         acceptBtn.setOnClickListener(v-> {
             acceptBtn.setEnabled(false);
             declineBtn.setEnabled(false);
             acceptBtn.setText("Accepting...");
+            acceptBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.acceptInvite(
+                    eventForLocal, eventDocId,
+                    () -> { // success
+                        Toast.makeText(requireContext(), "Invite accepted", Toast.LENGTH_SHORT).show();
+                        inviteActions.setVisibility(View.GONE);
+                        actionBtn.setText("Accepted");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                        actionBtn.setVisibility(View.VISIBLE);
+                    }, // fail to make changes to database
+                    e -> {
+                        acceptBtn.setText("Accept");
+                        actionBtn.setTextColor(Color.WHITE);
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
+
+        // decline button wiring
+        declineBtn.setOnClickListener(v -> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            declineBtn.setText("Declining...");
+            declineBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.declineInvite(
+                    eventForLocal, eventDocId,
+                    () -> {
+                        Toast.makeText(requireContext(), "Invite declined", Toast.LENGTH_SHORT).show();
+                        inviteActions.setVisibility(View.GONE);
+                        actionBtn.setText("Declined");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                        actionBtn.setVisibility(View.VISIBLE);
+                    },
+                    e -> {
+                        declineBtn.setText("Decline");
+                        actionBtn.setTextColor(Color.WHITE);
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
         });
     }
 }
