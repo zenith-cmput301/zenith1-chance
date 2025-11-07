@@ -26,8 +26,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Class for the list of events inside Organizer's My Events page.
@@ -133,22 +135,26 @@ public class OrganizerEventListFragment extends Fragment {
     private AllEventsAdapter adapter;
     private List<Event> events = new ArrayList<>();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private Organizer organizer;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_events, container, false);
 
-        Log.d("Event", "This shit is actually running");
-
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        Log.d("Event", "This shit is actually running pt. 2");
 
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
         // Create adapter
         adapter = new AllEventsAdapter(requireContext(), events, event -> {
+
+            /**
+             *
+             * Aayush, this is where the events details can be populated, currently it's using the Entrant details
+             * but you can change it to inflate your fragments instead.
+             *
+             */
 
             EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
 
@@ -170,41 +176,57 @@ public class OrganizerEventListFragment extends Fragment {
                     .commit();
         });
 
-        Log.d("Event", "This shit is actually running pt 3");
-
         recyclerView.setAdapter(adapter);
 
-        loadAllEvents();
+        Bundle args = getArguments();
+        organizer = (Organizer) args.getSerializable("organizer");
 
-        Log.d("Event", "This shit is actually running pt 4");
+        getEvents();
 
         return view;
     }
 
-    private void loadAllEvents() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+private void getEvents() {
 
-        db.collection("events")
-                .orderBy("date")
-                .get()
-                .addOnSuccessListener(snaps -> {
-                    List<Event> eventList = new ArrayList<>();
-                    for (DocumentSnapshot doc : snaps) {
-                        Event event = doc.toObject(Event.class);
-                        if (event != null) {
-                            event.setDocId(doc.getId());
-                            eventList.add(event);
-                            Log.d("adding", "Added an event");
-                        }
-                    }
-                    adapter.updateList(eventList);
-                    for (int i = 0; i < this.events.size(); i++) {
-                        Log.d("Event", "Added to recycler" + events.get(i).getName());
-                    }
+    String uid = organizer.getUserId();
 
+    // Get list of orgEvents from user collection
 
-                })
-                .addOnFailureListener(e -> Log.e("AllEventsFragment", "Error fetching events", e));
+    db.collection("users").document(uid).get()
+            .addOnSuccessListener(userDocument -> {
+
+                ArrayList<String> organizerEventIds = (ArrayList<String>) userDocument.get("orgEvents");
+
+                // If orgEvents is empty, populated an empty list and returns
+
+                if (organizerEventIds == null || organizerEventIds.isEmpty()) {
+                    adapter.updateList(new ArrayList<>());
+                    return;
+                }
+
+                // Finds all events in the database
+
+                db.collection("events")
+                        .orderBy("date")
+                        .get()
+                        .addOnSuccessListener(allEventsSnapshot -> {
+                            ArrayList<Event> filteredList = new ArrayList<>();
+
+                            // Loops through all events and checks if they exist in the orgEvents
+
+                            for (DocumentSnapshot eventDoc : allEventsSnapshot) {
+
+                                if (organizerEventIds.contains(eventDoc.getId())) {
+                                    Event event = eventDoc.toObject(Event.class);
+                                    if (event != null) {
+                                        event.setDocId(eventDoc.getId());
+                                        filteredList.add(event);
+                                    }
+                                }
+                            }
+                            adapter.updateList(filteredList);
+
+                        });
+            });
     }
 }
-
