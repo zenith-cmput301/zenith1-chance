@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents the Admin Browse activity fragment.
+ * Represents the Admin Browse Profiles fragment.
  *
  * @author Sabrina
  */
