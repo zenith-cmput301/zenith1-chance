@@ -30,6 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Tests the Entrant Model methods.
+ */
 public class EntrantModelTests {
 
     @Test
@@ -48,7 +51,7 @@ public class EntrantModelTests {
     }
 
     @Test
-    public void isInInvitedAcceptedDeclinedRespectTheirOwnLists() {
+    public void isInInvitedAcceptedDeclined() {
         Entrant e = new Entrant();
         e.getOnInvite().add("I1");
         e.getOnAccepted().add("A1");
@@ -96,7 +99,7 @@ public class EntrantModelTests {
         ArrayList<String> waiting = e.getOnWaiting();
         waiting.add("X");
 
-        assertTrue(e.isInWaitingList("X")); // proves list is live, not a copy
+        assertTrue(e.isInWaitingList("X"));
     }
 
 }

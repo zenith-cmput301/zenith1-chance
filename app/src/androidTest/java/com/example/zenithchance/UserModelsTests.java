@@ -8,6 +8,10 @@ import com.example.zenithchance.models.Organizer;
 import com.example.zenithchance.models.User;
 
 
+/**
+ * Tests the User Model (superclass of Entrant, Admin, Organizer).
+ * Ensures that each user type works smoothly.
+ */
 public class UserModelsTests {
 
     @Test
