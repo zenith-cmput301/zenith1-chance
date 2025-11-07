@@ -21,4 +21,8 @@ public class Organizer extends User implements Serializable {
     public void setOrgEvents(ArrayList<String> orgEvents) {
         this.orgEvents = orgEvents;
     }
+
+    public void addOrgEvent(String orgEvent) {
+        this.orgEvents.add(orgEvent);
+    }
 }

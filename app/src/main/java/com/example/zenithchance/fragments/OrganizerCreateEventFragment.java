@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -171,10 +172,10 @@ public class OrganizerCreateEventFragment extends Fragment {
         Date eventdate;
         Date registrationdate;
 
-        try{
+        try {
             eventdate = fmt.parse(eventDate.getText().toString());
             registrationdate = fmt.parse(eventRegistration.getText().toString());
-            Log.d("to string",eventDate.getText().toString());
+            Log.d("to string", eventDate.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
@@ -203,10 +204,19 @@ public class OrganizerCreateEventFragment extends Fragment {
 
                 .addOnSuccessListener(documentReference -> {
 
+                    String docId = documentReference.getId();
 
                     Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
 
                     // Returns to Events fragment
+
+                    ArrayList<String> organizerEventList = organizerId.getOrgEvents();
+
+                    organizerEventList.add(docId);
+
+                    db.collection("users")
+                            .document(organizerId.getUserId())
+                            .update("orgEvents", organizerEventList);
 
                     OrganizerEventsFragment fragment = new OrganizerEventsFragment();
                     requireActivity().getSupportFragmentManager().beginTransaction()
@@ -218,5 +228,6 @@ public class OrganizerCreateEventFragment extends Fragment {
                     Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
                 });
     }
+
 
 }
