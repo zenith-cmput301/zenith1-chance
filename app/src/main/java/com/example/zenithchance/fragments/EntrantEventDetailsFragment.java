@@ -97,16 +97,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        Log.d("Details",
-                "docId=" + eventDocId
-                        + " inAny=" + currentEntrant.isInAnyList(eventDocId)
-                        + " waiting=" + currentEntrant.isInWaitingList(eventDocId)
-                        + " invited=" + currentEntrant.isInInvitedList(eventDocId)
-                        + " accepted=" + currentEntrant.isInAcceptedList(eventDocId)
-                        + " declined=" + currentEntrant.isInDeclinedList(eventDocId)
-                        + " onDeclined=" + currentEntrant.getOnDeclined()
-        );
-
         bindActionForState(eventDocId, eventForLocal, eventName, inviteActions, actionBtn, acceptBtn, declineBtn);
 
         return view;

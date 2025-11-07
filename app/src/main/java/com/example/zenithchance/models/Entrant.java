@@ -153,6 +153,11 @@ public class Entrant extends User implements Serializable {
             }
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+
+        // redraw another
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventDocId)
+                .update("needRedraw", true);
     }
 
 

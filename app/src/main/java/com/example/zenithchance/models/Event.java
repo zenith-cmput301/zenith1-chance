@@ -18,7 +18,7 @@ public class Event implements Serializable {
     private Date date;
     private String name;
     private String location;
-    private String organizer;
+    private String organizer; // name of organizer, not document id
     private String status;
     private String description;
     private Boolean geolocation_required;
@@ -27,6 +27,7 @@ public class Event implements Serializable {
     private Integer max_entrants;
     private String imageUrl;
     private boolean lotteryRan = false;
+    private boolean needRedraw = false;
     private ArrayList<String> waitingList = new ArrayList<String>();
     private ArrayList<String> invitedList = new ArrayList<String>();
     private ArrayList<String> acceptedList = new ArrayList<String>();
@@ -149,6 +150,10 @@ public class Event implements Serializable {
         return lotteryRan;
     }
 
+    public boolean isNeedRedraw() {
+        return needRedraw;
+    }
+
     public ArrayList<String> getWaitingList() {
         return waitingList;
     }
@@ -215,6 +220,10 @@ public class Event implements Serializable {
 
     public void setLotteryRan(boolean lotteryRan) {
         this.lotteryRan = lotteryRan;
+    }
+
+    public void setNeedRedraw(boolean needRedraw) {
+        this.needRedraw = needRedraw;
     }
 
     public void setWaitingList(ArrayList<String> waitingList) {
