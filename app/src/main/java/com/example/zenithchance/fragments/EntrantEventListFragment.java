@@ -32,7 +32,7 @@ public class EntrantEventListFragment extends Fragment {
     private boolean upcoming = true;
     private EventsAdapter adapter;
     private RecyclerView rv;
-    private List<Event> list = new ArrayList<>();
+    private ArrayList<Event> list = new ArrayList<>();
 
     /**
      * Method to inflate fragment and attach adapter.
