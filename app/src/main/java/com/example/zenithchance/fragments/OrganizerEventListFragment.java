@@ -133,6 +133,7 @@ private void getEvents() {
                                     }
                                 }
                             }
+
                             adapter.updateList(filteredList);
 
                         });
