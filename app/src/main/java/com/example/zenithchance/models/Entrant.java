@@ -22,7 +22,6 @@ public class Entrant extends User implements Serializable {
     private ArrayList<String> onDeclined = new ArrayList<String>();
 
     public Entrant() { setType("entrant"); }
-
     private boolean containsId(ArrayList<String> list, String id) {
         return list != null && list.contains(id);
     }

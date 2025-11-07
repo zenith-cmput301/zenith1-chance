@@ -3,6 +3,8 @@ package com.example.zenithchance.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,6 +42,8 @@ public class SignUpActivity extends AppCompatActivity {
     private Spinner userRoles;
     private EditText nameField, emailField;
     private Button signUpButton;
+    private View loadingOverlay;
+
 
 
     @Override
@@ -47,19 +51,19 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.sign_up), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        signInWithDeviceId();
 
 
         userRoles = findViewById(R.id.roles);
         nameField = findViewById(R.id.nameTextField);
         emailField = findViewById(R.id.emailTextField);
         signUpButton = findViewById(R.id.signUpButton);
+        loadingOverlay = findViewById(R.id.loadingOverlay);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.sign_up), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         // array of roles (Admin, entrant, organizer)
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -68,6 +72,8 @@ public class SignUpActivity extends AppCompatActivity {
                 new String[]{"Entrant", "Organizer", "Admin"}
         );
         userRoles.setAdapter(adapter);
+
+        signInWithDeviceId();
 
         signUpButton.setOnClickListener(v -> onSignUpButtonTap());
 
@@ -149,7 +155,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         user.setName(name);
         user.setEmail(email);
-        user.setDeviceId(deviceId);
+        user.setUserId(deviceId);
         user.setType(role);
 
         UserManager.getInstance().addUser(user)
@@ -181,48 +187,55 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void signInWithDeviceId() {
         String deviceId = getAndroidDeviceId();
+        Log.d("DeviceCheck", "Local deviceId: " + deviceId);
+
         if (deviceId == null || deviceId.isEmpty()) {
             Toast.makeText(this, "No device ID available.", Toast.LENGTH_SHORT).show();
-            signUpButton.setEnabled(true);
+            loadingOverlay.setVisibility(View.GONE);
+            findViewById(R.id.sign_up).setVisibility(View.VISIBLE);
             return;
         }
 
-        // check for a user with the device id
+        // show loading screen while checking Firestore
+        loadingOverlay.setVisibility(View.VISIBLE);
+        findViewById(R.id.sign_up).setVisibility(View.GONE);
+
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(deviceId)
                 .get()
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Sign-in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                )
+                .addOnFailureListener(e -> {
+                    Log.e("DeviceCheck", "Sign-in failed", e);
+                    Toast.makeText(this, "Sign-in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    loadingOverlay.setVisibility(View.GONE);
+                    findViewById(R.id.sign_up).setVisibility(View.VISIBLE);
+                })
                 .addOnSuccessListener(doc -> {
+                    Log.d("DeviceCheck", "Firestore doc exists? " + doc.exists()
+                            + " (docId=" + doc.getId() + ")");
+
                     if (doc.exists()) {
                         String type = doc.getString("type");
-
                         User user = null;
-                        if ("entrant".equals(type)) user = doc.toObject(Entrant.class);
-                        else if ("organizer".equals(type)) user = doc.toObject(Organizer.class);
-                        else if ("admin".equals(type)) user = doc.toObject(Admin.class);
+                        if ("entrant".equalsIgnoreCase(type)) user = doc.toObject(Entrant.class);
+                        else if ("organizer".equalsIgnoreCase(type)) user = doc.toObject(Organizer.class);
+                        else if ("admin".equalsIgnoreCase(type)) user = doc.toObject(Admin.class);
 
                         if (user != null) {
-
                             user.setUserId(doc.getId());
                             UserManager.getInstance().setCurrentUser(user);
                         }
 
-                        String name = doc.getString("name");
-                        Toast.makeText(this, "Welcome back" + (name != null ? ", " + name : "") + "!", Toast.LENGTH_SHORT).show();
-
                         routeToHomeByType(type);
                         finish();
                     } else {
-                        // No account yet; stay on sign-up screen
-                        Toast.makeText(this, "No account found for this device. Please sign up.", Toast.LENGTH_SHORT).show();
-                        signUpButton.setEnabled(true);
+                        // no user found; hide loading and show sign-up form
+                        loadingOverlay.setVisibility(View.GONE);
+                        findViewById(R.id.sign_up).setVisibility(View.VISIBLE);
                     }
                 });
-
     }
+
 
     private void routeToHomeByType(String type) {
         if ("entrant".equalsIgnoreCase(type)) {
