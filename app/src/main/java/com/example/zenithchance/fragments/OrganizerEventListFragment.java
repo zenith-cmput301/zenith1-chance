@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +41,7 @@ public class OrganizerEventListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_events, container, false);
+        View view = inflater.inflate(R.layout.fragment_organizer_events, container, false);
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -122,6 +123,7 @@ private void getEvents() {
                                     if (event != null) {
                                         event.setDocId(eventDoc.getId());
                                         filteredList.add(event);
+                                        Log.d("Events", String.valueOf(filteredList.size()));
                                     }
                                 }
                             }
