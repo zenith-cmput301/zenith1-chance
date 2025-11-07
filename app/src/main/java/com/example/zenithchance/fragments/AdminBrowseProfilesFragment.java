@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.zenithchance.AdminMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
@@ -81,7 +82,7 @@ public class AdminBrowseProfilesFragment extends Fragment {
                     System.err.println("Failed to fetch profiles: " + e.getMessage());
                 });
 
-
+        ((AdminMainActivity) requireActivity()).showBackButton(true);
         return view;
     }
 

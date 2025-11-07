@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.espresso.core)
     implementation(libs.ext.junit)
+    implementation(libs.fragment.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -53,5 +54,8 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:5.0.5")
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
     implementation("com.google.android.material:material:1.12.0")
+
+//    Fragment testing dependency
+    debugImplementation("androidx.fragment:fragment-testing:1.8.2")
 
 }
