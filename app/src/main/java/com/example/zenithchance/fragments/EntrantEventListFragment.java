@@ -17,6 +17,7 @@ import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +53,6 @@ public class EntrantEventListFragment extends Fragment {
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
-        // inflates fragment
         View frag = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
         // set fragment as vertical scroll list
@@ -104,7 +104,7 @@ public class EntrantEventListFragment extends Fragment {
     /**
      * This method set the correct filter that user have chosen.
      *
-     * @param newFilter The chosen filter.
+     * @param newFilter The chosen filter. true if upcoming.
      */
     public void setFilter(boolean newFilter) {
         upcoming = newFilter;

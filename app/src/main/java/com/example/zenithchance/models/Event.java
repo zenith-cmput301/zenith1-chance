@@ -55,7 +55,7 @@ public class Event implements Serializable {
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants, String imageUrl) {
+    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants) {
         this.date = date;
         this.name = name;
         this.location = location;
@@ -92,35 +92,139 @@ public class Event implements Serializable {
         if (!declinedList.contains(uid)) declinedList.add(uid);
     }
 
-    /**
-     *
-     * Getters
-     *
-     */
-    public Date getDate() { return this.date; }
-    public String getName() { return this.name; }
-    public String getLocation() { return this.location; }
-    public String getStatus() { return this.status; }
-    public String getOrganizer() { return this.organizer; }
-    public String getDescription() { return this.description; }
-    public Boolean getGeolocationRequired() { return this.geolocation_required; }
-    public Date getRegistrationDate() { return this.registration_date; }
-    public Date getFinalDeadline() { return this.finalDeadline; }
-    public Integer getMaxEntrants() { return this.max_entrants; }
-    public String getImageUrl() { return this.imageUrl; }
-    public String getDocId() { return docId; }
+    public boolean isPast(Date now) {
+        return date != null && date.before(now);
+    }
 
-    /**
-     *
-     * Setters
-     *
-     */
+    public boolean isUpcoming(Date now) {
+        return date == null || !date.before(now);
+    }
 
-    public void setMaxEntrants(Integer max_entrants) { this.max_entrants = max_entrants; }
-    public void setDescription(String description) { this.description = description; }
-    public void setStatus(String status) { this.status = status; }
-    public void setOrganizer(String organizer) { this.organizer = organizer; }
-    public void setLocation(String location) { this.location = location; }
-    public void setName(String name) { this.name = name; }
-    public void setDocId(String docId) { this.docId = docId; }
+    public Date getDate() {
+        return date;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Boolean getGeolocationRequired() {
+        return geolocation_required;
+    }
+
+    public Date getRegistrationDate() {
+        return registration_date;
+    }
+
+    public Date getFinalDeadline() {
+        return finalDeadline;
+    }
+
+    public Integer getMaxEntrants() {
+        return max_entrants;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public ArrayList<String> getWaitingList() {
+        return waitingList;
+    }
+
+    public ArrayList<String> getInvitedList() {
+        return invitedList;
+    }
+
+    public ArrayList<String> getAcceptedList() {
+        return acceptedList;
+    }
+
+    public ArrayList<String> getDeclinedList() {
+        return declinedList;
+    }
+
+    public String getDocId() {
+        return docId;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setGeolocationRequired(Boolean geolocation_required) {
+        this.geolocation_required = geolocation_required;
+    }
+
+    public void setRegistrationDate(Date registration_date) {
+        this.registration_date = registration_date;
+    }
+
+    public void setFinalDeadline(Date finalDeadline) {
+        this.finalDeadline = finalDeadline;
+    }
+
+    public void setMaxEntrants(Integer max_entrants) {
+        this.max_entrants = max_entrants;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void setWaitingList(ArrayList<String> waitingList) {
+        this.waitingList = waitingList;
+    }
+
+    public void setInvitedList(ArrayList<String> invitedList) {
+        this.invitedList = invitedList;
+    }
+
+    public void setAcceptedList(ArrayList<String> acceptedList) {
+        this.acceptedList = acceptedList;
+    }
+
+    public void setDeclinedList(ArrayList<String> declinedList) {
+        this.declinedList = declinedList;
+    }
+
+    public void setDocId(String docId) {
+        this.docId = docId;
+    }
 }

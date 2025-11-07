@@ -8,13 +8,14 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This class represents Entrant users.
  */
-public class Entrant extends User {
+public class Entrant extends User implements Serializable {
     private ArrayList<String> onWaiting = new ArrayList<String>();
     private ArrayList<String> onInvite = new ArrayList<String>();
     private ArrayList<String> onAccepted = new ArrayList<String>();
@@ -68,7 +69,7 @@ public class Entrant extends User {
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
         WriteBatch batch = db.batch();
-        batch.update(userRef,  "onWaiting",  FieldValue.arrayUnion(eventDocId));
+        batch.update(userRef, "onWaiting", FieldValue.arrayUnion(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
         batch.commit().addOnSuccessListener(v -> {
