@@ -23,9 +23,13 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.activities.NotificationsActivity;
 import com.example.zenithchance.activities.SignUpActivity;
 import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.User;
 
-// TODO: Handle Exceptions: Invalid emails while editing
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+
+
 public class ProfileFragment extends Fragment {
 
     User myUser;
@@ -85,25 +89,11 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), "Please enter a name or email to update.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Only update name if not blank
-            if (!newName.isEmpty()) {
-                myUser.setName(newName);
-                UserManager.getInstance().updateUserName(myUser);
-            } else {
-                editUsername.setText(myUser.getName());
-            }
+            // Only update name if not blank INSERT FUNCTION HERE
+            changeName(newName);
 
             // Only update email if not blank
-            if (!newEmail.isEmpty()) {
-                myUser.setEmail(newEmail);
-                UserManager.getInstance().updateUserEmail(myUser);
-            } else {
-                editEmail.setText(myUser.getEmail());
-            }
-
-            // Refresh Display
-            usernameDisplay.setText(myUser.getName());
-            emailDisplay.setText(myUser.getEmail());
+            changeEmail(newEmail);
 
             //  Hide the edit panel
             editInformation.setVisibility(View.GONE);
@@ -139,5 +129,34 @@ public class ProfileFragment extends Fragment {
 
 
         return view;
+    }
+    public void changeName(String newName){
+
+        // Only update name if not blank
+        if (!newName.isEmpty()) {
+            myUser.setName(newName);
+            UserManager.getInstance().updateUserName(myUser);
+        } else {
+            editUsername.setText(myUser.getName());
+        }
+        usernameDisplay.setText(myUser.getName());
+    }
+
+    public void changeEmail(String newEmail){
+        if (!newEmail.isEmpty() &&
+                android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
+            // Checks if Email is valid, borrowed from SignUpActivity!
+            myUser.setEmail(newEmail);
+            UserManager.getInstance().updateUserEmail(myUser);
+        } else if (!newEmail.isEmpty()) {
+            editEmail.setError("Enter a valid email or leave blank");
+            editEmail.requestFocus();
+            confirmEdits.setEnabled(true);
+            return;
+
+        } else {
+            editEmail.setText(myUser.getEmail());
+        }
+        emailDisplay.setText(myUser.getEmail());
     }
 }

@@ -28,6 +28,8 @@
     <string name="profile">Profile</string>
     <string name="my_events">My Events</string>
     <string name="all_events">All Events</string>
+    <string name="chosenornotmessage">ChosenOrNotMessage:</string>
+    <string name="eventname">EventName</string>
     <string name="delete">DELETE</string>
     <string name="search_profiles">Search profiles</string>
     <string name="name">Name</string>

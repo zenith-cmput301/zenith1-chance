@@ -1,5 +1,8 @@
 package com.example.zenithchance.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Notification {
     private String eventName;
     private String status;
