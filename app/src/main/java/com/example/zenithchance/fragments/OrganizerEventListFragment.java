@@ -16,6 +16,7 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
+import com.example.zenithchance.models.Organizer;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,14 +26,14 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Class for the list of events inside Entrant's My Events page.
+ * Class for the list of events inside Organizer's My Events page.
  *
- * @author Percy
+ * @author Emerson
  * @version 1.0
  * @see Event
  * @see EventsAdapter
  */
-public class EntrantEventListFragment extends Fragment {
+public class OrganizerEventListFragment extends Fragment {
     private boolean upcoming = true;
     private EventsAdapter adapter;
     private RecyclerView rv;
@@ -74,11 +75,6 @@ public class EntrantEventListFragment extends Fragment {
             bundle.putString("event_image_url", event.getImageUrl());
             bundle.putString("event_doc_id", event.getDocId());
             fragment.setArguments(bundle);
-
-            //pass entrant
-            if (requireActivity() instanceof EntrantProviderInterface) {
-                fragment.setCurrentEntrant(((EntrantProviderInterface) requireActivity()).getCurrentEntrant());
-            }
 
             // boot up fragment
             requireActivity().getSupportFragmentManager()

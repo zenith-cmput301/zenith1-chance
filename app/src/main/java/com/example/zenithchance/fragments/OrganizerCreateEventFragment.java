@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,6 +57,8 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // gets input arguments
         Bundle args = getArguments();
+
+        organizerId = (Organizer) args.getSerializable("organizer");
 
         db = FirebaseFirestore.getInstance();
 
@@ -157,7 +160,13 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
     }
     private void createNewEvent() {
-        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+
+        String expectedFormat = "MMMM d, yyyy 'at' h:mm:ss a z";
+        SimpleDateFormat fmt = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+
+        // Get the text from the EditText fields
+        String eventDateString = eventDate.getText().toString();
+        String registrationDateString = eventRegistration.getText().toString();
 
         Date eventdate;
         Date registrationdate;
@@ -165,12 +174,15 @@ public class OrganizerCreateEventFragment extends Fragment {
         try{
             eventdate = fmt.parse(eventDate.getText().toString());
             registrationdate = fmt.parse(eventRegistration.getText().toString());
+            Log.d("to string",eventDate.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
         }
 
         // Constructs event based on inputted data
+
+        Log.d("organizer name", organizerId.getName());
 
         Event newEvent = new Event(eventdate,
                 eventDate.getText().toString(),
