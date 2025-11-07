@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,20 @@ import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OrganizerEventsFragment extends Fragment {
-    private EntrantEventListFragment eventListFrag;
+    private OrganizerEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
 
     private Organizer organizer;
@@ -39,15 +46,13 @@ public class OrganizerEventsFragment extends Fragment {
 
         // Inflate
         FragmentManager fm = getChildFragmentManager(); // IMPORTANT: child fragment
-        eventListFrag = (EntrantEventListFragment) fm.findFragmentByTag("entrant_event_list");
+        eventListFrag = new OrganizerEventListFragment();
 
-        if (eventListFrag == null) {
-            eventListFrag = new EntrantEventListFragment();
-            fm.beginTransaction()
-                    .replace(R.id.eventsFragmentContainer, eventListFrag, "entrant_event_list")
-                    .commit();
-            fm.executePendingTransactions();
-        }
+        fm.beginTransaction()
+                .replace(R.id.eventsFragmentContainer, eventListFrag)
+                .commit();
+        fm.executePendingTransactions();
+
 
         // Sets the organizer to be the organizer signed in
         if (getActivity() instanceof OrganizerMainActivity) {
@@ -82,6 +87,7 @@ public class OrganizerEventsFragment extends Fragment {
 
         initCreateEventButton();
 
+        getEvents();
 
         return view;
     }
@@ -104,17 +110,61 @@ public class OrganizerEventsFragment extends Fragment {
     }
 
     private void getEvents() {
-        FirebaseFirestore.getInstance()
-                .collection("events")
-                .orderBy("date")
-                .get()
-                .addOnSuccessListener(snaps -> {
-                    eventList.clear();
-                    for (DocumentSnapshot d : snaps) {
-                        Event e = d.toObject(Event.class);
-                        if (e != null) eventList.add(e);
+        String uid = organizer.getUserId();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(userSnap -> {
+                    // Get the orgEvents list from the user document
+                    List<String> orgEvents = (List<String>) userSnap.get("orgEvents");
+
+                    // Handle null or empty case
+                    if (orgEvents == null || orgEvents.isEmpty()) {
+                        eventListFrag.setEvents(new ArrayList<>());
+                        return;
                     }
-                    if (eventListFrag != null) eventListFrag.setEvents(eventList);
-                });
+
+                    // Split orgEvents into chunks of 10 for whereIn queries
+                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                    for (int i = 0; i < orgEvents.size(); i += 10) {
+                        int end = Math.min(i + 10, orgEvents.size());
+                        List<String> chunk = orgEvents.subList(i, end);
+                        Task<QuerySnapshot> t = db.collection("events")
+                                .whereIn(FieldPath.documentId(), chunk)
+                                .get();
+                        tasks.add(t);
+                    }
+
+                    // Wait for all queries to complete and combine results
+                    Tasks.whenAllSuccess(tasks)
+                            .addOnSuccessListener(results -> {
+                                List<Event> merged = new ArrayList<>();
+                                Set<String> seen = new HashSet<>();
+
+                                for (Object obj : results) {
+                                    QuerySnapshot qs = (QuerySnapshot) obj;
+                                    for (DocumentSnapshot d : qs) {
+                                        if (seen.add(d.getId())) {
+                                            Event e = d.toObject(Event.class);
+                                            if (e != null) {
+                                                e.setDocId(d.getId());
+                                                merged.add(e);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Update your fragment with the loaded events
+
+                                Log.d("Org", "Setting the eventListFrag with " + String.valueOf(merged.size()));
+                                eventListFrag.setEvents(merged);
+                            })
+                            .addOnFailureListener(e ->
+                                    Log.e("Firestore", "Error fetching events", e)
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Log.e("Firestore", "Error fetching user document", e)
+                );
     }
 }

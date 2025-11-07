@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -56,6 +58,8 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // gets input arguments
         Bundle args = getArguments();
+
+        organizerId = (Organizer) args.getSerializable("organizer");
 
         db = FirebaseFirestore.getInstance();
 
@@ -157,14 +161,21 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
     }
     private void createNewEvent() {
-        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+
+        String expectedFormat = "MMMM d, yyyy 'at' h:mm:ss a z";
+        SimpleDateFormat fmt = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+
+        // Get the text from the EditText fields
+        String eventDateString = eventDate.getText().toString();
+        String registrationDateString = eventRegistration.getText().toString();
 
         Date eventdate;
         Date registrationdate;
 
-        try{
+        try {
             eventdate = fmt.parse(eventDate.getText().toString());
             registrationdate = fmt.parse(eventRegistration.getText().toString());
+            Log.d("to string", eventDate.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
@@ -172,8 +183,10 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // Constructs event based on inputted data
 
+        Log.d("organizer name", organizerId.getName());
+
         Event newEvent = new Event(eventdate,
-                eventDate.getText().toString(),
+                eventName.getText().toString(),
                 eventLocation.getText().toString(),
                 "waiting",
                 organizerId.getName(),
@@ -181,8 +194,7 @@ public class OrganizerCreateEventFragment extends Fragment {
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 registrationdate,
-                eventMaxEntrants.getValue(),
-                "null");
+                eventMaxEntrants.getValue());
 
 
         // Adds event to firebase
@@ -192,10 +204,21 @@ public class OrganizerCreateEventFragment extends Fragment {
 
                 .addOnSuccessListener(documentReference -> {
 
+                    String docId = documentReference.getId();
 
                     Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
 
                     // Returns to Events fragment
+
+                    ArrayList<String> organizerEventList = organizerId.getOrgEvents();
+
+                    organizerEventList.add(docId);
+
+                    db.collection("users")
+                            .document(organizerId.getUserId())
+                            .update("orgEvents", organizerEventList);
+
+                    organizerId.addOrgEvent(docId);
 
                     OrganizerEventsFragment fragment = new OrganizerEventsFragment();
                     requireActivity().getSupportFragmentManager().beginTransaction()
@@ -204,9 +227,9 @@ public class OrganizerCreateEventFragment extends Fragment {
                 })
 
                 .addOnFailureListener(e -> {
-
                     Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
                 });
     }
+
 
 }
