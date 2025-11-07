@@ -51,6 +51,21 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     private FirebaseFirestore db;
 
+
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // inflates fragment
@@ -122,6 +137,7 @@ public class OrganizerCreateEventFragment extends Fragment {
     }
     /**
      * Updates the text within the selection boxes to the pre-existing values if they exist
+     * @param args the bundle of arguments passed to the fragment
      */
 
     private void updateToExisting(Bundle args) {
@@ -143,6 +159,7 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     /**
      * Updates the event values to the field values currently selected
+     * @param args the bundle of arguments passed to the fragment
      */
     private void updateEventFields(Bundle args) {
 
@@ -160,6 +177,10 @@ public class OrganizerCreateEventFragment extends Fragment {
             if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
         }
     }
+
+    /**
+     * Creates the event using the fields selected by the user and updates the users FireStore document
+     */
     private void createNewEvent() {
 
         String expectedFormat = "MMMM d, yyyy 'at' h:mm:ss a z";
