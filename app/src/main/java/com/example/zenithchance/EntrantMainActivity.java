@@ -23,7 +23,7 @@ public class EntrantMainActivity extends AppCompatActivity implements EntrantPro
         currentEntrant = (Entrant) UserManager.getInstance().getCurrentUser();
 
         // Set up the bottom navigation using the helper
-        EntrantNavigationHelper.setupBottomNav(this);
+        EntrantNavigationHelper.setupBottomNav(this, currentEntrant);
     }
 
     @Override

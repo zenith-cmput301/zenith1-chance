@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,20 @@ import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OrganizerEventsFragment extends Fragment {
-    private EntrantEventListFragment eventListFrag;
+    private OrganizerEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
 
     private Organizer organizer;
@@ -37,51 +44,32 @@ public class OrganizerEventsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_organizer_my_events, container, false);
 
-        // Inflate
-        FragmentManager fm = getChildFragmentManager(); // IMPORTANT: child fragment
-        eventListFrag = (EntrantEventListFragment) fm.findFragmentByTag("entrant_event_list");
-
-        if (eventListFrag == null) {
-            eventListFrag = new EntrantEventListFragment();
-            fm.beginTransaction()
-                    .replace(R.id.eventsFragmentContainer, eventListFrag, "entrant_event_list")
-                    .commit();
-            fm.executePendingTransactions();
-        }
-
         // Sets the organizer to be the organizer signed in
         if (getActivity() instanceof OrganizerMainActivity) {
             organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
         }
 
-        // Fetch all events
-        getEvents();
+        // Inflate
+        FragmentManager fm = getChildFragmentManager(); // IMPORTANT: child fragment
+        eventListFrag = new OrganizerEventListFragment();
 
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("organizer", organizer);
 
-        // buttons
-//        TODO: Handle if no upcoming/past events
-//        TODO: Show event details on clicking an event
-        Button upcomingButton = view.findViewById(R.id.upcoming_events);
-        Button pastButton = view.findViewById(R.id.past_events);
+        eventListFrag.setArguments(bundle);
+
+        fm.beginTransaction()
+                .replace(R.id.eventsFragmentContainer, eventListFrag)
+                .commit();
+        fm.executePendingTransactions();
+
         createEventButton = view.findViewById(R.id.create_event_button);
-        upcomingButton.setEnabled(false);
-
-        upcomingButton.setOnClickListener(v -> {
-//            eventListFrag.setFilter(true);
-            upcomingButton.setEnabled(false);
-            pastButton.setEnabled(true);
-        });
-
-        pastButton.setOnClickListener(v -> {
-//            eventListFrag.setFilter(false);
-            pastButton.setEnabled(false);
-            upcomingButton.setEnabled(true);
-        });
 
         // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
 
         initCreateEventButton();
 
+//        getEvents();
 
         return view;
     }
@@ -103,18 +91,4 @@ public class OrganizerEventsFragment extends Fragment {
 
     }
 
-    private void getEvents() {
-        FirebaseFirestore.getInstance()
-                .collection("events")
-                .orderBy("date")
-                .get()
-                .addOnSuccessListener(snaps -> {
-                    eventList.clear();
-                    for (DocumentSnapshot d : snaps) {
-                        Event e = d.toObject(Event.class);
-                        if (e != null) eventList.add(e);
-                    }
-                    if (eventListFrag != null) eventListFrag.setEvents(eventList);
-                });
-    }
 }
