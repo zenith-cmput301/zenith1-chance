@@ -26,6 +26,7 @@ import java.util.Locale;
 
 /**
  * Class for the list of events inside Organizer's My Events page.
+ * Utilizes logic and recyclerView from AllEvents
  *
  * @author Emerson
  * @version 1.0
@@ -38,6 +39,21 @@ public class OrganizerEventListFragment extends Fragment {
     private List<Event> events = new ArrayList<>();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Organizer organizer;
+
+
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,7 +104,12 @@ public class OrganizerEventListFragment extends Fragment {
         return view;
     }
 
-private void getEvents() {
+
+    /**
+     * This method queries FireBase and adds all events that an Organizer has contained in their orgEvents field
+     * to the MyEvents display.
+     */
+    private void getEvents() {
 
     String uid = organizer.getUserId();
 
@@ -123,7 +144,6 @@ private void getEvents() {
                                     if (event != null) {
                                         event.setDocId(eventDoc.getId());
                                         filteredList.add(event);
-                                        Log.d("Events", String.valueOf(filteredList.size()));
                                     }
                                 }
                             }

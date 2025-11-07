@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
+import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
 import com.google.android.gms.tasks.Task;
@@ -28,6 +29,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class for the Organizer Events page logic
+ *
+ * @author Emerson
+ * @version 1.0
+ * @see Event
+ * @see Organizer
+ * @see OrganizerEventListFragment
+ * @see OrganizerCreateEventFragment
+ */
 public class OrganizerEventsFragment extends Fragment {
     private OrganizerEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
