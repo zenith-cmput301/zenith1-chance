@@ -65,7 +65,8 @@ public class NotificationsActivity extends AppCompatActivity {
         ListView notificationsListView = findViewById(R.id.notificationListView);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_list_item_1,
+                R.layout.notification_items,
+                R.id.notificationText,
                 notificationList
         );
         notificationsListView.setAdapter(adapter);

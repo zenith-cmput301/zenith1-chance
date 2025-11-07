@@ -34,7 +34,7 @@ public class ProfileFragmentTest {
         testUser.setName("testName");
         testUser.setEmail("hi@hi.com");
         Bundle args = new Bundle();
-        args.pu("user", testUser);
+        args.put("user", testUser);
 
         FragmentScenario<ProfileFragment> scenario =
                 FragmentScenario.launchInContainer(ProfileFragment.class, args);
