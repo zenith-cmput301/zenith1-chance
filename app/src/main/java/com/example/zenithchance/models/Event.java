@@ -26,6 +26,7 @@ public class Event implements Serializable {
     private Date finalDeadline;
     private Integer max_entrants;
     private String imageUrl;
+    private boolean lotteryRan = false;
     private ArrayList<String> waitingList = new ArrayList<String>();
     private ArrayList<String> invitedList = new ArrayList<String>();
     private ArrayList<String> acceptedList = new ArrayList<String>();
@@ -144,6 +145,10 @@ public class Event implements Serializable {
         return imageUrl;
     }
 
+    public boolean isLotteryRan() {
+        return lotteryRan;
+    }
+
     public ArrayList<String> getWaitingList() {
         return waitingList;
     }
@@ -206,6 +211,10 @@ public class Event implements Serializable {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setLotteryRan(boolean lotteryRan) {
+        this.lotteryRan = lotteryRan;
     }
 
     public void setWaitingList(ArrayList<String> waitingList) {
