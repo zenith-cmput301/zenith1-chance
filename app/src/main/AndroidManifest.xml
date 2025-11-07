@@ -31,7 +31,7 @@
 
         <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
-        <activity android:name=".activities.AdminBrowseProfilesActivity" />
+
 
     </application>
 

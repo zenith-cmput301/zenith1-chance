@@ -12,13 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.adapters.AllEventsAdapter;
-import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.interfaces.UserProviderInterface;
-import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
-import com.example.zenithchance.R;
 import com.example.zenithchance.models.User;
 import com.example.zenithchance.navigation.EntrantNavigationHelper;
+import com.example.zenithchance.R;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -75,6 +73,7 @@ public class AllEventsFragment extends Fragment {
                 return;
             }
 
+            // Bundle data to send to EventDetailsFragment
             Bundle bundle = new Bundle();
             bundle.putString("event_name", event.getName());
             bundle.putString("event_location", event.getLocation());
@@ -89,8 +88,8 @@ public class AllEventsFragment extends Fragment {
             bundle.putString("event_image_url", event.getImageUrl());
             bundle.putString("event_doc_id", event.getDocId());
 
+            // Decide which EventDetailsFragment to show based on user type
             Fragment targetFragment;
-
             if ("admin".equalsIgnoreCase(currentUser.getType())) {
                 targetFragment = new AdminEventDetailsFragment();
             } else {
@@ -98,12 +97,13 @@ public class AllEventsFragment extends Fragment {
             }
 
             targetFragment.setArguments(bundle);
-            int containerId;
 
+            // Determine which container to replace based on activity layout
+            int containerId;
             if (requireActivity().findViewById(R.id.adminFragmentContainer) != null) {
-                containerId = R.id.adminFragmentContainer; // Admin screen
+                containerId = R.id.adminFragmentContainer;
             } else {
-                containerId = R.id.fragmentContainer; // Entrant/User default screen
+                containerId = R.id.fragmentContainer;
             }
 
             requireActivity().getSupportFragmentManager()
