@@ -1,8 +1,6 @@
 package com.example.zenithchance.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +16,6 @@ import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -35,7 +32,7 @@ public class EntrantEventListFragment extends Fragment {
     private boolean upcoming = true;
     private EventsAdapter adapter;
     private RecyclerView rv;
-    private List<Event> list = new ArrayList<>();
+    private ArrayList<Event> list = new ArrayList<>();
 
     /**
      * Method to inflate fragment and attach adapter.
