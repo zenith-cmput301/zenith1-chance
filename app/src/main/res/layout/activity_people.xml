@@ -73,6 +73,7 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Filter row with icon and status buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -82,36 +83,38 @@
         android:paddingVertical="8dp"
         android:layout_marginTop="4dp">
 
+        <!-- Filter Icon -->
         <ImageView
             android:id="@+id/imgFilter"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:src="@drawable/ic_filter_list"
             android:contentDescription="Filter"
             android:layout_marginEnd="12dp"
             app:tint="#000000" />
 
-
+        <!-- Filter buttons -->
         <Button
             android:id="@+id/btnWaiting"
-            android:layout_width="71dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
             android:text="Waiting"
             android:textColor="#000000"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"/>
 
         <Button
             android:id="@+id/btnChosen"
-            android:layout_width="74dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
             android:text="Chosen"
             android:textColor="#000000"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"/>
 
         <Button
             android:id="@+id/btnAccepted"
@@ -135,61 +138,47 @@
             android:paddingVertical="6dp"/>
     </LinearLayout>
 
+
+    <!-- People List -->
     <ListView
         android:id="@+id/listPeople"
-        android:layout_width="match_parent"
-        android:layout_height="269dp"
-        android:layout_weight="1" />
-
-    <Button
-        android:id="@+id/btnExport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="16dp"
-        android:paddingHorizontal="32dp"
-        android:text="Export"
-        android:textColor="#000000"
-        android:textSize="20dp" />
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
+    <!-- Export Button -->
+    <Button
+        android:id="@+id/btnExport"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:backgroundTint="#5C6EF8"
+        android:paddingHorizontal="32dp"
+        android:text="Export"
+        android:textColor="@android:color/black"
+        android:textSize="20dp"/>
+
+    <!-- Bottom bar placeholder -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="12dp"
-        android:background="#EEEEEE">
+        android:paddingVertical="8dp"
+        android:background="#F8F8F8">
 
-        <Button
-            android:id="@+id/btnMyEvents"
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="My Events"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:layout_marginEnd="8dp"/>
-
-        <Button
-            android:id="@+id/btnProfile"
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Profile"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:layout_marginStart="8dp"/>
+            android:orientation="vertical"
+            android:gravity="center">
 
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp" />
+
+        </LinearLayout>
     </LinearLayout>
-
-
-
 </LinearLayout>
-
-
