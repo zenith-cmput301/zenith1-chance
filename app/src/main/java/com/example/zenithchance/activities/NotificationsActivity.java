@@ -20,7 +20,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.zenithchance.R;
-import com.example.zenithchance.managers.NotificationManager;
+//import com.example.zenithchance.managers.NotificationManager;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Notification;
 import com.google.firebase.firestore.CollectionReference;
@@ -52,24 +52,43 @@ public class NotificationsActivity extends AppCompatActivity {
         // Initialize buttons
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
-        toggledNotifications();
-//        if(!notificationToggle.isChecked()){
-//        // === intent + extras handling ===
-//        Intent intent = getIntent();
-//        Bundle extras = intent.getExtras();
-//
-//        if (extras != null) {
-//            notificationList = extras.getStringArrayList("notificationList");
-//        }
-//
-//        if (notificationList == null) {
-//            // Provide a backup list
-//            notificationList = new ArrayList<>();
-//            notificationList.add("No notifications available");
-//        }}else{
-//            notificationList = new ArrayList<>();
-//            notificationList.add("Notifications Blocked");
-//        }
+//        toggledNotifications();
+        if(!notificationToggle.isChecked()){
+        // === intent + extras handling ===
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+
+        if (extras != null) {
+            notificationList = extras.getStringArrayList("notificationList");
+        }
+
+        if (notificationList == null) {
+            // Provide a backup list
+            notificationList = new ArrayList<>();
+            notificationList.add("No notifications available");
+        }}else{
+            notificationList = new ArrayList<>();
+            notificationList.add("Notifications Blocked");
+        }
+
+        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked)-> {
+                    if(!notificationToggle.isChecked()){
+                        // === intent + extras handling ===
+                        Intent intent = getIntent();
+                        Bundle extras = intent.getExtras();
+
+                        if (extras != null) {
+                            notificationList = extras.getStringArrayList("notificationList");
+                        }
+
+                        if (notificationList == null) {
+                            // Provide a backup list
+                            notificationList = new ArrayList<>();
+                            notificationList.add("No notifications available");
+                        }}else{
+                        notificationList = new ArrayList<>();
+                        notificationList.add("Notifications Blocked");
+                    }});
 
         // === Setting up ListView ===
         ListView notificationsListView = findViewById(R.id.notificationListView);
@@ -87,38 +106,36 @@ public class NotificationsActivity extends AppCompatActivity {
             resultIntent.putStringArrayListExtra("notificationList", notificationList);
             setResult(RESULT_OK, resultIntent);
             finish();
-        });
-        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked)-> {
-            toggledNotifications();
-        });
+        });//Shelved for now
+//        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked)-> {
+//            toggledNotifications();
+//        });
     }
-    public void toggledNotifications(){
-        DocumentReference myNote = NotificationManager.getInstance().getUsersNotifications(UserManager.getInstance().getCurrentUser());
-        
-        if(!notificationToggle.isChecked()) { // Notifications go through
-            if (myNote != null) {
-                notificationList = myNote.
-            }
-
-            ListView notificationsListView = null;
-            ArrayAdapter<String> adapter = null;
-            if (notificationList == null) {
-                // Provide a backup list
-                notificationList = new ArrayList<>();
-                notificationList.add("No notifications available");
-                notificationsListView = findViewById(R.id.notificationListView);
-                adapter = new ArrayAdapter<>(
-                        this,
-                        R.layout.notification_items,
-                        R.id.notificationText,
-                        notificationList
-                );
-                notificationsListView.setAdapter(adapter);
-            } else {
-
-            }
+//    public void toggledNotifications(){
+//        DocumentReference myNote = NotificationManager.getInstance().getUsersNotifications(UserManager.getInstance().getCurrentUser());
+//
+//        if(!notificationToggle.isChecked()) { // Notifications go through
+//            if (myNote != null) {
+//                notificationList = myNote.
+//            }
+//
+//            ListView notificationsListView = null;
+//            ArrayAdapter<String> adapter = null;
+//            if (notificationList == null) {
+//                // Provide a backup list
+//                notificationList = new ArrayList<>();
+//                notificationList.add("No notifications available");
+//                notificationsListView = findViewById(R.id.notificationListView);
+//                adapter = new ArrayAdapter<>(
+//                        this,
+//                        R.layout.notification_items,
+//                        R.id.notificationText,
+//                        notificationList
+//                );
+//                notificationsListView.setAdapter(adapter);
+//            } else {
+//
+//            }
 
                     }
-    }
-}
 
