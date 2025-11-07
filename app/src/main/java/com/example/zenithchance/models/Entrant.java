@@ -29,7 +29,8 @@ public class Entrant extends User {
     public boolean isInAnyList(String eventDocId) {
         return containsId(onWaiting, eventDocId)
                 || containsId(onInvite, eventDocId)
-                || containsId(onAccepted, eventDocId);
+                || containsId(onAccepted, eventDocId)
+                || containsId(onDeclined, eventDocId);
     }
 
     public boolean isInWaitingList(String eventDocId) {
@@ -122,6 +123,10 @@ public class Entrant extends User {
         batch.commit().addOnSuccessListener(v -> {
             onInvite.remove(eventDocId);
             if (!onAccepted.contains(eventDocId)) onAccepted.add(eventDocId);
+            if (event != null) {
+                event.removeFromInvitedList(uid);
+                event.addAcceptedList(uid);
+            }
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
@@ -142,6 +147,10 @@ public class Entrant extends User {
         batch.commit().addOnSuccessListener(v -> {
             onInvite.remove(eventDocId);
             onDeclined.add(eventDocId);
+            if (event != null) {
+                event.removeFromInvitedList(uid);
+                event.addDeclinedList(uid);
+            }
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
@@ -161,6 +170,10 @@ public class Entrant extends User {
 
     public ArrayList<String> getOnAccepted() {
         return onAccepted;
+    }
+
+    public ArrayList<String> getOnDeclined() {
+        return onDeclined;
     }
 
 }
