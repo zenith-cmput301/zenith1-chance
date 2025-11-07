@@ -18,7 +18,7 @@ public class Event implements Serializable {
     private Date date;
     private String name;
     private String location;
-    private String organizer;
+    private String organizer; // name of organizer, not document id
     private String status;
     private String description;
     private Boolean geolocation_required;
@@ -27,6 +27,7 @@ public class Event implements Serializable {
     private Integer max_entrants;
     private String imageUrl;
     private boolean lotteryRan = false;
+    private boolean needRedraw = false;
     private ArrayList<String> waitingList = new ArrayList<String>();
     private ArrayList<String> invitedList = new ArrayList<String>();
     private ArrayList<String> acceptedList = new ArrayList<String>();
@@ -69,20 +70,16 @@ public class Event implements Serializable {
         this.max_entrants = max_entrants;
     }
 
+    /**
+     * Adders
+     * @param uid User id
+     */
     public void addWaitingList(String uid) {
         if (!waitingList.contains(uid)) waitingList.add(uid);
     }
 
-    public void removeFromWaitingList(String uid) {
-        this.waitingList.remove(uid);
-    }
-
     public void addInvitedList(String uid) {
         if (!invitedList.contains(uid)) invitedList.add(uid);
-    }
-
-    public void removeFromInvitedList(String uid) {
-        this.invitedList.remove(uid);
     }
 
     public void addAcceptedList(String uid) {
@@ -93,6 +90,23 @@ public class Event implements Serializable {
         if (!declinedList.contains(uid)) declinedList.add(uid);
     }
 
+    /**
+     * Removers
+     * @param uid User id
+     */
+
+    public void removeFromWaitingList(String uid) {
+        this.waitingList.remove(uid);
+    }
+
+    public void removeFromInvitedList(String uid) {
+        this.invitedList.remove(uid);
+    }
+
+    /**
+     * Time checks
+     */
+
     public boolean isPast(Date now) {
         return date != null && date.before(now);
     }
@@ -100,6 +114,10 @@ public class Event implements Serializable {
     public boolean isUpcoming(Date now) {
         return date == null || !date.before(now);
     }
+
+    /**
+     * Getters
+     */
 
     public Date getDate() {
         return date;
@@ -149,6 +167,10 @@ public class Event implements Serializable {
         return lotteryRan;
     }
 
+    public boolean isNeedRedraw() {
+        return needRedraw;
+    }
+
     public ArrayList<String> getWaitingList() {
         return waitingList;
     }
@@ -168,6 +190,10 @@ public class Event implements Serializable {
     public String getDocId() {
         return docId;
     }
+
+    /**
+     * Setters
+     */
 
     public void setDate(Date date) {
         this.date = date;
@@ -215,6 +241,10 @@ public class Event implements Serializable {
 
     public void setLotteryRan(boolean lotteryRan) {
         this.lotteryRan = lotteryRan;
+    }
+
+    public void setNeedRedraw(boolean needRedraw) {
+        this.needRedraw = needRedraw;
     }
 
     public void setWaitingList(ArrayList<String> waitingList) {

@@ -69,9 +69,21 @@ public class OrganizerEventsFragment extends Fragment {
 
         initCreateEventButton();
 
-//        getEvents();
+        organizer.checkAndRunLotteries();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (organizer == null && getActivity() instanceof OrganizerMainActivity) {
+            organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
+        }
+        if (organizer == null) return;
+
+        organizer.checkAndRedraw();
     }
 
     private void initCreateEventButton() {

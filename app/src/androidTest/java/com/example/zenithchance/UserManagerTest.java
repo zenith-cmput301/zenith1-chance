@@ -33,7 +33,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void AddEntrantAddsToFirestore() throws Exception {
+    public void addEntrantAddsToFirestore() throws Exception {
         Entrant e = new Entrant();
         e.setUserId("TEST_Entrant_Add");
         e.setType("entrant");
@@ -56,7 +56,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void DeleteEntrantRemovesFromFirestore() throws Exception {
+    public void deleteEntrantRemovesFromFirestore() throws Exception {
         Entrant e = new Entrant();
         e.setUserId("TEST_Entrant_Delete");
         e.setType("Entrant");
@@ -83,7 +83,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void AddOrganizerAddsToFirestore() throws Exception {
+    public void addOrganizerAddsToFirestore() throws Exception {
         Organizer o = new Organizer();
         o.setUserId("TEST_Organizer_Add");
         o.setType("organizer");
@@ -107,7 +107,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void DeleteOrganizerRemovesFromFirestore() throws Exception {
+    public void deleteOrganizerRemovesFromFirestore() throws Exception {
         Organizer o = new Organizer();
         o.setUserId("TEST_Organizer_Delete");
         o.setType("Organizer");
@@ -133,7 +133,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void AddAdminAddsToFirestore() throws Exception {
+    public void addAdminAddsToFirestore() throws Exception {
         Admin a = new Admin();
         a.setUserId("TEST_Admin_Add");
         a.setType("admin");
@@ -157,7 +157,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @Test
-    public void DeleteAdminRemovesFromFirestore() throws Exception {
+    public void deleteAdminRemovesFromFirestore() throws Exception {
         Admin a = new Admin();
         a.setUserId("TEST_Admin_Delete");
         a.setType("Admin");
@@ -182,7 +182,7 @@ public class UserManagerTest {
      * @throws Exception if Firestore operations fail
      */
     @After
-    public void CleanUpTestDocuments() throws Exception {
+    public void cleanUpTestDocuments() throws Exception {
         List<String> testIds = Arrays.asList(
                 "TEST_Entrant_Add", "TEST_Entrant_Delete",
                 "TEST_Organizer_Add", "TEST_Organizer_Delete",

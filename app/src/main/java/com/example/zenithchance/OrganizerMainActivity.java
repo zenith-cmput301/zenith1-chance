@@ -6,6 +6,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.zenithchance.fragments.OrganizerCreateEventFragment;
+import com.example.zenithchance.interfaces.UserProviderInterface;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
@@ -37,6 +38,13 @@ public class OrganizerMainActivity extends AppCompatActivity {
 
         // Set up the bottom navigation using the helper
         OrganizerNavigationHelper.setupBottomNav(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (currentOrganizer != null) currentOrganizer.checkAndRunLotteries();
     }
 
     public Organizer getOrganizer() { return currentOrganizer; }

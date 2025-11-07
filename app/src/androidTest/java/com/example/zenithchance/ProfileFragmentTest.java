@@ -31,6 +31,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests the ProfileFragment file.
+ */
 @RunWith(AndroidJUnit4.class)
 public class ProfileFragmentTest {
 

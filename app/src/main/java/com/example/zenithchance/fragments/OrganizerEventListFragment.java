@@ -1,6 +1,5 @@
 package com.example.zenithchance.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,11 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.AllEventsAdapter;
 import com.example.zenithchance.adapters.EventsAdapter;
-import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -24,12 +21,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Class for the list of events inside Organizer's My Events page.
@@ -48,7 +41,7 @@ public class OrganizerEventListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_events, container, false);
+        View view = inflater.inflate(R.layout.fragment_organizer_events, container, false);
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -130,6 +123,7 @@ private void getEvents() {
                                     if (event != null) {
                                         event.setDocId(eventDoc.getId());
                                         filteredList.add(event);
+                                        Log.d("Events", String.valueOf(filteredList.size()));
                                     }
                                 }
                             }
