@@ -1,19 +1,19 @@
 package com.example.zenithchance.models;
 
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents Entrant users.
+ *
+ * @author Percy
+ * @version 1.0
  */
 public class Entrant extends User implements Serializable {
     private ArrayList<String> onWaiting = new ArrayList<String>();
@@ -22,10 +22,25 @@ public class Entrant extends User implements Serializable {
     private ArrayList<String> onDeclined = new ArrayList<String>();
 
     public Entrant() { setType("entrant"); }
+
+    /**
+     * Check if id is contained in given list
+     *
+     * @param list  List to check from
+     * @param id    Id to compare with
+     *
+     * @return      true is yes, false otherwise
+     */
     private boolean containsId(ArrayList<String> list, String id) {
         return list != null && list.contains(id);
     }
 
+    /**
+     * Check if event is in any of entrant's list
+     *
+     * @param eventDocId Firebase document id of event
+     * @return           true if yes, false if no
+     */
     public boolean isInAnyList(String eventDocId) {
         return containsId(onWaiting, eventDocId)
                 || containsId(onInvite, eventDocId)
@@ -33,18 +48,42 @@ public class Entrant extends User implements Serializable {
                 || containsId(onDeclined, eventDocId);
     }
 
+    /**
+     * Check if event is in entrant's waiting list
+     *
+     * @param eventDocId Firebase document id of event
+     * @return           true if yes, false if no
+     */
     public boolean isInWaitingList(String eventDocId) {
         return containsId(onWaiting, eventDocId);
     }
 
+    /**
+     * Check if event is in entrant's invited list
+     *
+     * @param eventDocId Firebase document id of event
+     * @return           true if yes, false if no
+     */
     public boolean isInInvitedList(String eventDocId) {
         return containsId(onInvite, eventDocId);
     }
 
+    /**
+     * Check if event is in entrant's accepted list
+     *
+     * @param eventDocId Firebase document id of event
+     * @return           true if yes, false if no
+     */
     public boolean isInAcceptedList(String eventDocId) {
         return containsId(onAccepted, eventDocId);
     }
 
+    /**
+     * Check if event is in entrant's declined list
+     *
+     * @param eventDocId Firebase document id of event
+     * @return           true if yes, false if no
+     */
     public boolean isInDeclinedList(String eventDocId) {
         return containsId(onDeclined, eventDocId);
     }
@@ -107,6 +146,14 @@ public class Entrant extends User implements Serializable {
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
+    /**
+     * Allows entrant to accept invitation
+     *
+     * @param event         Event to respond to
+     * @param eventDocId    Firebase document id of event
+     * @param onSuccess     A callback to run if the Firestore update succeeds
+     * @param onError       Signal that contains error if update fail
+     */
     public void acceptInvite(Event event, String eventDocId, Runnable onSuccess,
                              java.util.function.Consumer<Exception> onError) {
         String uid = getUserId();
@@ -131,6 +178,14 @@ public class Entrant extends User implements Serializable {
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
+    /**
+     * Allows entrant to decline invitation
+     *
+     * @param event         Event to respond to
+     * @param eventDocId    Firebase document id of event
+     * @param onSuccess     A callback to run if the Firestore update succeeds
+     * @param onError       Signal that contains error if update fail
+     */
     public void declineInvite(Event event, String eventDocId, Runnable onSuccess,
                               java.util.function.Consumer<Exception> onError) {
         String uid = getUserId();
@@ -153,6 +208,11 @@ public class Entrant extends User implements Serializable {
             }
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+
+        // redraw another
+        FirebaseFirestore.getInstance()
+                .collection("events").document(eventDocId)
+                .update("needRedraw", true);
     }
 
 

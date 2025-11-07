@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
+import com.example.zenithchance.navigation.EntrantNavigationHelper;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,13 +29,35 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * This fragment displays the interactive My Events page for Entrants
+ *
+ * @author Percy
+ * @version 1.0
+ * @see EntrantNavigationHelper
+ * @see EntrantEventListFragment
+ */
 public class EntrantEventsFragment extends Fragment {
 
     private EntrantEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
     private Entrant currentEntrant;
 
+    /**
+     * Method to inflate fragment
+     *
+     * @param inflater              The LayoutInflater object that can be used to inflate
+     *                              any views in the fragment,
+     * @param container             If non-null, this is the parent view that the fragment's
+     *                              UI should be attached to.
+     *                              The fragment should not add the view itself,
+     *                              but this can be used to generate the
+     *                              LayoutParams of the view.
+     * @param savedInstanceState    If non-null, this fragment is being re-constructed
+     *                              from a previous saved state as given here.
+     *
+     * @return                      Inflated view.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -141,6 +164,13 @@ public class EntrantEventsFragment extends Fragment {
                 });
     }
 
+    /**
+     * This method converts array of string from Firebase into list of string in Java
+     *
+     * @param snap      Firebase document
+     * @param field     Name of array field in that document
+     * @param out       We put the array items from Firestore in here for Java to use
+     */
     private void addArrayToSet(DocumentSnapshot snap, String field, Set<String> out) {
         List<String> arr = (List<String>) snap.get(field);
         if (arr != null) out.addAll(arr);
