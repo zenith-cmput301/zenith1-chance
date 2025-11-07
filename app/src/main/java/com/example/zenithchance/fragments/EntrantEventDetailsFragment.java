@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
+import com.google.android.material.button.MaterialButton;
 
 public class EntrantEventDetailsFragment extends Fragment {
     private Entrant currentEntrant;
@@ -44,7 +46,10 @@ public class EntrantEventDetailsFragment extends Fragment {
         TextView time = view.findViewById(R.id.time);
         TextView desc = view.findViewById(R.id.description);
         ImageView image = view.findViewById(R.id.header_image);
-        com.google.android.material.button.MaterialButton actionBtn = view.findViewById(R.id.event_action_button);
+        MaterialButton actionBtn = view.findViewById(R.id.event_action_button);
+        ViewGroup inviteActions = view.findViewById(R.id.invite_actions);
+        MaterialButton acceptBtn  = view.findViewById(R.id.btn_accept);
+        MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
 
         String eventName = null;
         String eventDocId = null;
@@ -82,14 +87,26 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        bindActionForState(eventDocId, actionBtn, eventForLocal, eventName);
+        Log.d("Details",
+                "docId=" + eventDocId
+                        + " inAny=" + currentEntrant.isInAnyList(eventDocId)
+                        + " waiting=" + currentEntrant.isInWaitingList(eventDocId)
+                        + " invited=" + currentEntrant.isInInvitedList(eventDocId)
+                        + " accepted=" + currentEntrant.isInAcceptedList(eventDocId)
+                        + " declined=" + currentEntrant.isInDeclinedList(eventDocId)
+                        + " onDeclined=" + currentEntrant.getOnDeclined()
+        );
+
+        bindActionForState(eventDocId, eventForLocal, eventName, inviteActions, actionBtn, acceptBtn, declineBtn);
 
         return view;
     }
 
-    private void bindActionForState(String eventDocId,
-                                    com.google.android.material.button.MaterialButton actionBtn,
-                                    Event eventForLocal, String eventName) {
+    private void bindActionForState(String eventDocId, Event eventForLocal, String eventName,
+                                    ViewGroup inviteActions,
+                                    MaterialButton actionBtn,
+                                    MaterialButton acceptBtn,
+                                    MaterialButton declineBtn) {
         actionBtn.setOnClickListener(null); // clear previous listener
 
         // Case 1: Enroll
@@ -100,10 +117,36 @@ public class EntrantEventDetailsFragment extends Fragment {
         }
 
         // Case 2: Enrolled but wants to drop
-        else if (currentEntrant.isInWaitingListById(eventDocId)) {
+        else if (currentEntrant.isInWaitingList(eventDocId)) {
             actionBtn.setText("Drop Waiting List");
             actionBtn.setEnabled(true);
             dropWaitingList(eventDocId, actionBtn, eventForLocal);
+        }
+
+        // Case 3: Invited, waiting to accept or decline
+        else if (currentEntrant.isInInvitedList(eventDocId)) {
+            // switch default buttons to accept/decline buttons
+            actionBtn.setVisibility(View.GONE);
+            inviteActions.setVisibility(View.VISIBLE);
+            respondInvitation(eventDocId, inviteActions, actionBtn, acceptBtn, declineBtn, eventForLocal);
+        }
+
+        // Case 4: Accepted/Declined
+        else if (currentEntrant.isInAcceptedList(eventDocId)) {
+            actionBtn.setText("Accepted");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
+        }
+        else if (currentEntrant.isInDeclinedList(eventDocId)) {
+            actionBtn.setText("Declined");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
+        }
+
+        else {
+            actionBtn.setText("Unexpected: Which status is the entrant on?");
+            actionBtn.setTextColor(Color.WHITE);
+            actionBtn.setEnabled(false);
         }
 
 
@@ -116,13 +159,13 @@ public class EntrantEventDetailsFragment extends Fragment {
      * @param actionBtn         Button to wire
      * @param eventForLocal     Event to enroll
      */
-    public void enrollWaiting(String eventDocId,
-                              com.google.android.material.button.MaterialButton actionBtn,
+    public void enrollWaiting(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
 
         actionBtn.setOnClickListener( v -> {
             actionBtn.setEnabled(false);   // prevent double taps during transition
-            actionBtn.setText("Enrolling…");
+            actionBtn.setText("Enrolling...");
+            actionBtn.setTextColor(Color.WHITE);
 
             currentEntrant.enrollInWaiting(
                     eventForLocal,
@@ -155,13 +198,13 @@ public class EntrantEventDetailsFragment extends Fragment {
      * @param actionBtn         Button to wire
      * @param eventForLocal     Event to drop from
      */
-    public void dropWaitingList(String eventDocId,
-                              com.google.android.material.button.MaterialButton actionBtn,
+    public void dropWaitingList(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
 
         actionBtn.setOnClickListener(v-> {
             actionBtn.setEnabled(false); // prevent double taps while transitioning
-            actionBtn.setText("Dropping…");
+            actionBtn.setText("Dropping...");
+            actionBtn.setTextColor(Color.WHITE);
 
             currentEntrant.dropWaiting(
                     eventForLocal,
@@ -180,6 +223,64 @@ public class EntrantEventDetailsFragment extends Fragment {
                     e -> {
                         actionBtn.setText("Drop Waiting List");
                         actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
+    }
+
+    public void respondInvitation(String eventDocId, ViewGroup inviteActions,
+                                  MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn,
+                                  Event eventForLocal) {
+        // accept button wiring
+        acceptBtn.setOnClickListener(v-> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            acceptBtn.setText("Accepting...");
+            acceptBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.acceptInvite(
+                    eventForLocal, eventDocId,
+                    () -> { // success
+                        Toast.makeText(requireContext(), "Invite accepted", Toast.LENGTH_SHORT).show();
+                        inviteActions.setVisibility(View.GONE);
+                        actionBtn.setText("Accepted");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                        actionBtn.setVisibility(View.VISIBLE);
+                    }, // fail to make changes to database
+                    e -> {
+                        acceptBtn.setText("Accept");
+                        actionBtn.setTextColor(Color.WHITE);
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
+
+        // decline button wiring
+        declineBtn.setOnClickListener(v -> {
+            acceptBtn.setEnabled(false);
+            declineBtn.setEnabled(false);
+            declineBtn.setText("Declining...");
+            declineBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.declineInvite(
+                    eventForLocal, eventDocId,
+                    () -> {
+                        Toast.makeText(requireContext(), "Invite declined", Toast.LENGTH_SHORT).show();
+                        inviteActions.setVisibility(View.GONE);
+                        actionBtn.setText("Declined");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                        actionBtn.setVisibility(View.VISIBLE);
+                    },
+                    e -> {
+                        declineBtn.setText("Decline");
+                        actionBtn.setTextColor(Color.WHITE);
+                        acceptBtn.setEnabled(true);
+                        declineBtn.setEnabled(true);
                         Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
             );
