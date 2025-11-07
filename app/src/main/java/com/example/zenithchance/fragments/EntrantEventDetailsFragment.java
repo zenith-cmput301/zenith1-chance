@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,6 +86,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setName(eventName);
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
+
+        Log.d("Details",
+                "docId=" + eventDocId
+                        + " inAny=" + currentEntrant.isInAnyList(eventDocId)
+                        + " waiting=" + currentEntrant.isInWaitingList(eventDocId)
+                        + " invited=" + currentEntrant.isInInvitedList(eventDocId)
+                        + " accepted=" + currentEntrant.isInAcceptedList(eventDocId)
+                        + " declined=" + currentEntrant.isInDeclinedList(eventDocId)
+                        + " onDeclined=" + currentEntrant.getOnDeclined()
+        );
 
         bindActionForState(eventDocId, eventForLocal, eventName, inviteActions, actionBtn, acceptBtn, declineBtn);
 

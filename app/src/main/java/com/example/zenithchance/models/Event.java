@@ -76,6 +76,22 @@ public class Event implements Serializable {
         this.waitingList.remove(uid);
     }
 
+    public void addInvitedList(String uid) {
+        if (!invitedList.contains(uid)) invitedList.add(uid);
+    }
+
+    public void removeFromInvitedList(String uid) {
+        this.invitedList.remove(uid);
+    }
+
+    public void addAcceptedList(String uid) {
+        if (!acceptedList.contains(uid)) acceptedList.add(uid);
+    }
+
+    public void addDeclinedList(String uid) {
+        if (!declinedList.contains(uid)) declinedList.add(uid);
+    }
+
     /**
      *
      * Getters
@@ -92,10 +108,6 @@ public class Event implements Serializable {
     public Date getFinalDeadline() { return this.finalDeadline; }
     public Integer getMaxEntrants() { return this.max_entrants; }
     public String getImageUrl() { return this.imageUrl; }
-    public ArrayList<String> getWaitingList() { return waitingList; }
-    public ArrayList<String> getInvitedList() { return invitedList; }
-    public ArrayList<String> getAcceptedList() { return acceptedList; }
-    public ArrayList<String> getDeclinedList() { return declinedList; }
     public String getDocId() { return docId; }
 
     /**
