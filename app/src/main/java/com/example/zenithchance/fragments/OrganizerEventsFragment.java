@@ -60,7 +60,7 @@ public class OrganizerEventsFragment extends Fragment {
         }
 
         // Fetch all events
-        getEvents();
+//        getEvents();
 
 
         // buttons
@@ -87,7 +87,7 @@ public class OrganizerEventsFragment extends Fragment {
 
         initCreateEventButton();
 
-        getEvents();
+//        getEvents();
 
         return view;
     }
@@ -109,62 +109,62 @@ public class OrganizerEventsFragment extends Fragment {
 
     }
 
-    private void getEvents() {
-        String uid = organizer.getUserId();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("users").document(uid).get()
-                .addOnSuccessListener(userSnap -> {
-                    // Get the orgEvents list from the user document
-                    List<String> orgEvents = (List<String>) userSnap.get("orgEvents");
-
-                    // Handle null or empty case
-                    if (orgEvents == null || orgEvents.isEmpty()) {
-                        eventListFrag.setEvents(new ArrayList<>());
-                        return;
-                    }
-
-                    // Split orgEvents into chunks of 10 for whereIn queries
-                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-                    for (int i = 0; i < orgEvents.size(); i += 10) {
-                        int end = Math.min(i + 10, orgEvents.size());
-                        List<String> chunk = orgEvents.subList(i, end);
-                        Task<QuerySnapshot> t = db.collection("events")
-                                .whereIn(FieldPath.documentId(), chunk)
-                                .get();
-                        tasks.add(t);
-                    }
-
-                    // Wait for all queries to complete and combine results
-                    Tasks.whenAllSuccess(tasks)
-                            .addOnSuccessListener(results -> {
-                                List<Event> merged = new ArrayList<>();
-                                Set<String> seen = new HashSet<>();
-
-                                for (Object obj : results) {
-                                    QuerySnapshot qs = (QuerySnapshot) obj;
-                                    for (DocumentSnapshot d : qs) {
-                                        if (seen.add(d.getId())) {
-                                            Event e = d.toObject(Event.class);
-                                            if (e != null) {
-                                                e.setDocId(d.getId());
-                                                merged.add(e);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // Update your fragment with the loaded events
-
-                                Log.d("Org", "Setting the eventListFrag with " + String.valueOf(merged.size()));
-                                eventListFrag.setEvents(merged);
-                            })
-                            .addOnFailureListener(e ->
-                                    Log.e("Firestore", "Error fetching events", e)
-                            );
-                })
-                .addOnFailureListener(e ->
-                        Log.e("Firestore", "Error fetching user document", e)
-                );
-    }
+//    private void getEvents() {
+//        String uid = organizer.getUserId();
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        db.collection("users").document(uid).get()
+//                .addOnSuccessListener(userSnap -> {
+//                    // Get the orgEvents list from the user document
+//                    List<String> orgEvents = (List<String>) userSnap.get("orgEvents");
+//
+//                    // Handle null or empty case
+//                    if (orgEvents == null || orgEvents.isEmpty()) {
+//                        eventListFrag.setEvents(new ArrayList<>());
+//                        return;
+//                    }
+//
+//                    // Split orgEvents into chunks of 10 for whereIn queries
+//                    List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+//                    for (int i = 0; i < orgEvents.size(); i += 10) {
+//                        int end = Math.min(i + 10, orgEvents.size());
+//                        List<String> chunk = orgEvents.subList(i, end);
+//                        Task<QuerySnapshot> t = db.collection("events")
+//                                .whereIn(FieldPath.documentId(), chunk)
+//                                .get();
+//                        tasks.add(t);
+//                    }
+//
+//                    // Wait for all queries to complete and combine results
+//                    Tasks.whenAllSuccess(tasks)
+//                            .addOnSuccessListener(results -> {
+//                                List<Event> merged = new ArrayList<>();
+//                                Set<String> seen = new HashSet<>();
+//
+//                                for (Object obj : results) {
+//                                    QuerySnapshot qs = (QuerySnapshot) obj;
+//                                    for (DocumentSnapshot d : qs) {
+//                                        if (seen.add(d.getId())) {
+//                                            Event e = d.toObject(Event.class);
+//                                            if (e != null) {
+//                                                e.setDocId(d.getId());
+//                                                merged.add(e);
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//
+//                                // Update your fragment with the loaded events
+//
+//                                Log.d("Org", "Setting the eventListFrag with " + String.valueOf(merged.size()));
+//                                eventListFrag.setEvents(merged);
+//                            })
+//                            .addOnFailureListener(e ->
+//                                    Log.e("Firestore", "Error fetching events", e)
+//                            );
+//                })
+//                .addOnFailureListener(e ->
+//                        Log.e("Firestore", "Error fetching user document", e)
+//                );
+//    }
 }

@@ -37,8 +37,8 @@
 
     <FrameLayout
         android:id="@+id/eventsFragmentContainer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/upcoming_events"
         app:layout_constraintBottom_toTopOf="@id/navi_bar"
         app:layout_constraintStart_toStartOf="parent"
