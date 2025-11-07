@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,9 +41,7 @@ public class EntrantEventsFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         // get current entrant
-        if (getArguments() != null && currentEntrant == null) {
-            currentEntrant = (Entrant) getArguments().getSerializable("entrant");
-        }
+        currentEntrant = (Entrant) getArguments().getSerializable("entrant");
 
         View view = inflater.inflate(R.layout.fragment_entrant_my_events, container, false);
 
