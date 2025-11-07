@@ -29,6 +29,10 @@ import java.util.Locale;
  * Organizers can delete the event using the delete button, which shows
  * a confirmation dialog before removing the event from Firestore.
  *
+ * FUTURE UPDATES (To be implemented):
+ * Here, We will also include:
+ * Edit Event, View Waitlist, Draw Random Users (from waitlist),
+ * Send Notifications to selected and rejected entrants
  *
  * @author Kiran Kaur
  * @version 1.0
