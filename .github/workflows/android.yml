@@ -41,7 +41,31 @@ jobs:
       - name: Add dummy google-services.json
         run: |
           mkdir -p app
-          echo '{}' > app/google-services.json
+          cat <<EOF > app/google-services.json
+          {
+            "project_info": {
+              "project_id": "dummy-project",
+              "project_number": "000000000000",
+              "name": "Dummy Project"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:abcdef123456",
+                  "android_client_info": {
+                    "package_name": "com.example.zenithchance"
+                  }
+                },
+                "api_key": [
+                  {
+                    "current_key": "dummy_key"
+                  }
+                ]
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
 
       # Build Debug APK
       - name: Build Debug APK
