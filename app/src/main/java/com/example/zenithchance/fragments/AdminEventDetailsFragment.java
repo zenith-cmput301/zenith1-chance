@@ -1,5 +1,6 @@
 package com.example.zenithchance.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -54,19 +56,30 @@ public class AdminEventDetailsFragment extends Fragment {
                     .into(image);
 
 
+            MaterialToolbar toolbar = view.findViewById(R.id.admin_toolbar);
+            toolbar.setNavigationOnClickListener(v1 -> requireActivity().getSupportFragmentManager().popBackStack());
+
             deleteBtn.setOnClickListener(v -> {
-                FirebaseFirestore.getInstance()
-                        .collection("events")
-                        .document(docId)
-                        .delete()
-                        .addOnSuccessListener(unused -> {
-                            Toast.makeText(requireContext(), "Event deleted", Toast.LENGTH_SHORT).show();
-                            requireActivity().getSupportFragmentManager().popBackStack();
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Delete Event?")
+                        .setMessage("This action cannot be undone.")
+                        .setPositiveButton("Delete", (dialog, which) -> {
+                            FirebaseFirestore.getInstance()
+                                    .collection("events")
+                                    .document(docId)
+                                    .delete()
+                                    .addOnSuccessListener(unused -> {
+                                        Toast.makeText(requireContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                                        requireActivity().getSupportFragmentManager().popBackStack();
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                                    );
                         })
-                        .addOnFailureListener(e ->
-                                Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                        );
+                        .setNegativeButton("Cancel", null)
+                        .show();
             });
+
         }
 
         return view;

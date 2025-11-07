@@ -48,44 +48,50 @@ public class AllEventsFragment extends Fragment {
             if (requireActivity() instanceof UserProviderInterface) {
                 currentUser = ((UserProviderInterface) requireActivity()).getCurrentUser();
             }
-            if (currentUser == null) return;
 
-            String type = currentUser.getType();
+            if (currentUser == null) {
+                return;
+            }
 
-            // Bundle to pass into fragments
             Bundle bundle = new Bundle();
-            bundle.putString("event_doc_id", event.getDocId());
             bundle.putString("event_name", event.getName());
             bundle.putString("event_location", event.getLocation());
             bundle.putString("event_organizer", event.getOrganizer());
-            bundle.putString("event_time", fmt.format(event.getDate()));
+
+            String formattedDate = (event.getDate() != null)
+                    ? fmt.format(event.getDate())
+                    : "Date not available";
+            bundle.putString("event_time", formattedDate);
+
             bundle.putString("event_description", event.getDescription());
             bundle.putString("event_image_url", event.getImageUrl());
+            bundle.putString("event_doc_id", event.getDocId());
 
-            Fragment nextFragment;
+            Fragment targetFragment;
 
-            if ("admin".equalsIgnoreCase(type)) {
-                nextFragment = new AdminEventDetailsFragment();
-                nextFragment.setArguments(bundle);
+            if ("admin".equalsIgnoreCase(currentUser.getType())) {
+                targetFragment = new AdminEventDetailsFragment();
+            } else {
+                targetFragment = new EntrantEventDetailsFragment();
+            }
 
-            } else { // Entrant
-                EntrantEventDetailsFragment entrantFragment = new EntrantEventDetailsFragment();
-                entrantFragment.setArguments(bundle);
+            targetFragment.setArguments(bundle);
+            int containerId;
 
-                if (requireActivity() instanceof EntrantProviderInterface) {
-                    EntrantProviderInterface provider = (EntrantProviderInterface) requireActivity();
-                    entrantFragment.setCurrentEntrant(provider.getCurrentEntrant());
-                }
-
-                nextFragment = entrantFragment;
+            if (requireActivity().findViewById(R.id.adminFragmentContainer) != null) {
+                containerId = R.id.adminFragmentContainer; // Admin screen
+            } else {
+                containerId = R.id.fragmentContainer; // Entrant/User default screen
             }
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragmentContainer, nextFragment)
+                    .replace(containerId, targetFragment)
                     .addToBackStack(null)
                     .commit();
         });
+
+
 
 
         recyclerView.setAdapter(adapter);
