@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;

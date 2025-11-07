@@ -55,4 +55,7 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
     implementation("com.google.android.material:material:1.12.0")
 
+//    Fragment testing dependency
+    debugImplementation("androidx.fragment:fragment-testing:1.8.2")
+
 }
