@@ -3,9 +3,7 @@ package com.example.zenithchance.models;
 
 import android.util.Log;
 
-import com.example.zenithchance.interfaces.LotteryService;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;

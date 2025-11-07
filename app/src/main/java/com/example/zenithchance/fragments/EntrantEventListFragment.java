@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Class for the list of events inside Entrant's My Events page.
+ * Fragment that displays list of event in Entrant's My Events page
  *
  * @author Percy
  * @version 1.0
  * @see Event
- * @see EventsAdapter
+ * @see EntrantEventsFragment
  */
 public class EntrantEventListFragment extends Fragment {
     private boolean upcoming = true;

@@ -21,6 +21,15 @@ import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
 
+/**
+ * This fragment displays details of the selected event.
+ *
+ * @author Percy
+ * @version 1.0
+ * @see AllEventsFragment
+ * @see EntrantEventListFragment
+ * @see OrganizerEventListFragment
+ */
 public class EntrantEventDetailsFragment extends Fragment {
     private Entrant currentEntrant;
 
@@ -34,6 +43,10 @@ public class EntrantEventDetailsFragment extends Fragment {
         this.currentEntrant = entrant;
     }
 
+    /**
+     * Defines behavior when fragment is attached to activity
+     * @param context Activity that hosts this fragment
+     */
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -42,6 +55,19 @@ public class EntrantEventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -101,6 +127,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Binds action button behaviour to specific state (enroll, invited, etc.)
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param inviteActions     Special group of buttons in case entrant is invited
+     * @param actionBtn         Button to enroll/drop out of waiting list
+     * @param acceptBtn         Button to accept invitation
+     * @param declineBtn        Button to decline invitation
+     */
     private void bindActionForState(String eventDocId, Event eventForLocal,
                                     ViewGroup inviteActions,
                                     MaterialButton actionBtn,
@@ -228,6 +264,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * Allows entrant to respond to invitation (accept/decline)
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param inviteActions     Special group of buttons in case entrant is invited
+     * @param actionBtn         Button to enroll/drop out of waiting list
+     * @param acceptBtn         Button to accept invitation
+     * @param declineBtn        Button to decline invitation
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     */
     public void respondInvitation(String eventDocId, ViewGroup inviteActions,
                                   MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn,
                                   Event eventForLocal) {

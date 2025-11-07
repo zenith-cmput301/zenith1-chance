@@ -18,6 +18,7 @@ import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.User;
+import com.example.zenithchance.navigation.EntrantNavigationHelper;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -26,13 +27,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * This fragment displays all available events to Entrants
+ *
+ * @author Kira, Percy
+ * @version 1.0
+ * @see AllEventsAdapter
+ * @see EntrantNavigationHelper
+ * @see AdminMenuFragment
+ */
 public class AllEventsFragment extends Fragment {
-
     private RecyclerView recyclerView;
     private AllEventsAdapter adapter;
     private List<Event> events = new ArrayList<>();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_events, container, false);
@@ -91,15 +113,15 @@ public class AllEventsFragment extends Fragment {
                     .commit();
         });
 
-
-
-
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
         return view;
     }
 
+    /**
+     * This method fetches all events from Firestore to local list of events
+     */
     private void loadAllEvents() {
         db.collection("events")
                 .orderBy("date")
