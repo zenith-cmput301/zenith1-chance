@@ -21,6 +21,7 @@
         android:id="@+id/upcoming_events"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:text="Upcoming"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/past_events"
@@ -30,6 +31,7 @@
         android:id="@+id/past_events"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="invisible"
         android:text="Past"
         app:layout_constraintStart_toEndOf="@id/upcoming_events"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,9 +39,9 @@
 
     <FrameLayout
         android:id="@+id/eventsFragmentContainer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/upcoming_events"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/my_events_heading"
         app:layout_constraintBottom_toTopOf="@id/navi_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,10 +56,10 @@
         android:textSize="20dp"
         app:layout_constraintBottom_toTopOf="@+id/past_events"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.98"
+        app:layout_constraintHorizontal_bias="0.956"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19999999" />
+        app:layout_constraintVertical_bias="0.509" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
