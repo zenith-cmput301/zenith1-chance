@@ -18,6 +18,7 @@ public class Entrant extends User {
     private ArrayList<String> onWaiting = new ArrayList<String>();
     private ArrayList<String> onInvite = new ArrayList<String>();
     private ArrayList<String> onAccepted = new ArrayList<String>();
+    private ArrayList<String> onDeclined = new ArrayList<String>();
 
     public Entrant() { setType("entrant"); }
 
@@ -37,6 +38,14 @@ public class Entrant extends User {
 
     public boolean isInInvitedList(String eventDocId) {
         return containsId(onInvite, eventDocId);
+    }
+
+    public boolean isInAcceptedList(String eventDocId) {
+        return containsId(onAccepted, eventDocId);
+    }
+
+    public boolean isInDeclinedList(String eventDocId) {
+        return containsId(onDeclined, eventDocId);
     }
 
     /**
@@ -112,7 +121,7 @@ public class Entrant extends User {
 
         batch.commit().addOnSuccessListener(v -> {
             onInvite.remove(eventDocId);
-            if (!getOnAccepted().contains(eventDocId)) onAccepted.add(eventDocId);
+            if (!onAccepted.contains(eventDocId)) onAccepted.add(eventDocId);
             if (onSuccess != null) onSuccess.run();
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
@@ -124,7 +133,17 @@ public class Entrant extends User {
         DocumentReference userRef  = db.collection("users").document(uid);
         DocumentReference eventRef = db.collection("events").document(eventDocId);
 
+        WriteBatch batch = db.batch();
+        batch.update(userRef,  "onInvite",  FieldValue.arrayRemove(eventDocId));
+        batch.update(userRef, "onDeclined", FieldValue.arrayUnion(eventDocId));
+        batch.update(eventRef, "invitedList", FieldValue.arrayRemove(uid));
+        batch.update(eventRef, "declinedList", FieldValue.arrayUnion(uid));
 
+        batch.commit().addOnSuccessListener(v -> {
+            onInvite.remove(eventDocId);
+            onDeclined.add(eventDocId);
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
 

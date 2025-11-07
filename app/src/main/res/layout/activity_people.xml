@@ -138,8 +138,8 @@
     <ListView
         android:id="@+id/listPeople"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="269dp"
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/btnExport"
@@ -150,28 +150,46 @@
         android:paddingHorizontal="32dp"
         android:text="Export"
         android:textColor="#000000"
-        android:textSize="20dp"/>
+        android:textSize="20dp" />
 
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:paddingVertical="8dp"
-        android:background="#F8F8F8">
+        android:padding="12dp"
+        android:background="#EEEEEE">
 
-        <LinearLayout
+        <Button
+            android:id="@+id/btnMyEvents"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:layout_weight="1"
+            android:text="My Events"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp"/>
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp" />
+        <Button
+            android:id="@+id/btnProfile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Profile"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"/>
 
-        </LinearLayout>
     </LinearLayout>
+
+
+
 </LinearLayout>
+
+
