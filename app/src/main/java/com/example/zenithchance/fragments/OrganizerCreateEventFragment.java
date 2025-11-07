@@ -186,7 +186,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         Log.d("organizer name", organizerId.getName());
 
         Event newEvent = new Event(eventdate,
-                eventDate.getText().toString(),
+                eventName.getText().toString(),
                 eventLocation.getText().toString(),
                 "waiting",
                 organizerId.getName(),
@@ -217,6 +217,8 @@ public class OrganizerCreateEventFragment extends Fragment {
                     db.collection("users")
                             .document(organizerId.getUserId())
                             .update("orgEvents", organizerEventList);
+
+                    organizerId.addOrgEvent(docId);
 
                     OrganizerEventsFragment fragment = new OrganizerEventsFragment();
                     requireActivity().getSupportFragmentManager().beginTransaction()
