@@ -14,10 +14,6 @@ import com.example.zenithchance.navigation.AdminNavigationHelper;
 
 /**
  * Main activity for admin users.
- * <p>
- * Handles the admin toolbar, fragment navigation, and back button behavior.
- * Implements {@link UserProviderInterface} to provide the currently logged-in user.
- * </p>
  *
  * Features:
  * <ul>
@@ -47,10 +43,6 @@ public class AdminMainActivity extends AppCompatActivity implements UserProvider
 
     /**
      * Called when the activity is starting.
-     * <p>
-     * Initializes the toolbar, sets up bottom navigation, retrieves the current user,
-     * and adds a custom back press callback to handle fragment back stack.
-     * </p>
      *
      * @param savedInstanceState If the activity is being re-initialized after previously
      *                           being shut down then this Bundle contains the data it most

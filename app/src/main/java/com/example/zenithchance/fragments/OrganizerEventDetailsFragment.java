@@ -24,6 +24,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+/**
+ * Fragment used by organizers to view detailed information about a single event.
+ * Organizers can delete the event using the delete button, which shows
+ * a confirmation dialog before removing the event from Firestore.
+ *
+ *
+ * @author Kiran Kaur
+ * @version 1.0
+ */
+
 public class OrganizerEventDetailsFragment extends Fragment {
 
     private Event event;
@@ -37,7 +47,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_organizer_event_details, container, false);
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
-        // Get passed arguments
+
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
             organizer = (Organizer) getArguments().getSerializable("organizer");
@@ -47,7 +57,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
             return view;
         }
 
-        // Toolbar with back arrow
+        // BACK ARROW
         MaterialToolbar toolbar = view.findViewById(R.id.organizer_event_toolbar);
         toolbar.setNavigationOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
 
@@ -59,20 +69,19 @@ public class OrganizerEventDetailsFragment extends Fragment {
         TextView description = view.findViewById(R.id.description);
         MaterialButton deleteButton = view.findViewById(R.id.delete_button);
 
-        // Populate UI
+        // UI
         eventName.setText(event.getName());
         location.setText(event.getLocation());
         time.setText(fmt.format(event.getDate()));
         description.setText(event.getDescription());
 
-        // ✅ Image load with placeholder
         Glide.with(requireContext())
                 .load(event.getImageUrl())
-                .placeholder(R.drawable.ic_my_events)
-                .error(R.drawable.ic_my_events)
+                .placeholder(R.drawable.celebration_placeholder)
+                .error(R.drawable.celebration_placeholder)
                 .into(headerImage);
 
-        // ✅ DELETE EVENT OPTION
+        // DELETE BUTTON
         deleteButton.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Delete Event?")

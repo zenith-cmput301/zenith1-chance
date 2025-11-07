@@ -112,7 +112,7 @@ public class EntrantEventDetailsFragment extends Fragment {
 
             Glide.with(this)
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_my_events)
+                    .placeholder(R.drawable.celebration_placeholder)
                     .into(image);
         }
 

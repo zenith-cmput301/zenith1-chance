@@ -75,8 +75,8 @@ public class AdminEventDetailsFragment extends Fragment {
             String imageUrl = args.getString("event_image_url");
             Glide.with(requireContext())
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_my_events)
-                    .error(R.drawable.ic_my_events)
+                    .placeholder(R.drawable.celebration_placeholder)
+                    .error(R.drawable.celebration_placeholder)
                     .into(image);
 
             // Configure toolbar back navigation
