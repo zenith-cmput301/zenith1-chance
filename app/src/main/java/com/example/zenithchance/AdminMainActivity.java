@@ -4,10 +4,17 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.zenithchance.R;
+import com.example.zenithchance.interfaces.UserProviderInterface;
+import com.example.zenithchance.models.User;
 import com.example.zenithchance.navigation.AdminNavigationHelper;
 
-public class AdminMainActivity extends AppCompatActivity {
+public class AdminMainActivity extends AppCompatActivity implements UserProviderInterface {
 
+    private User currentUser;
+    @Override
+    public User getCurrentUser() {
+        return currentUser;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
