@@ -227,7 +227,6 @@ public class OrganizerCreateEventFragment extends Fragment {
                 })
 
                 .addOnFailureListener(e -> {
-
                     Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
                 });
     }
