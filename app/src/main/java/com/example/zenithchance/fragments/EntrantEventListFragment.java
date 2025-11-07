@@ -2,6 +2,7 @@ package com.example.zenithchance.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.EventsAdapter;
+import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +55,6 @@ public class EntrantEventListFragment extends Fragment {
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
-        // inflates fragment
         View frag = inflater.inflate(R.layout.entrant_event_list_fragment, container, false);
 
         // set fragment as vertical scroll list
@@ -61,14 +63,29 @@ public class EntrantEventListFragment extends Fragment {
 
         // attach adapter to fragment
         adapter = new EventsAdapter(new ArrayList<>(), event -> {
-            Intent i = new Intent(requireContext(), EntrantEventDetailsActivity.class);
-            i.putExtra("event_name", event.getName());
-            i.putExtra("event_location", event.getLocation());
-            i.putExtra("event_status", event.getStatus());
-            i.putExtra("event_organizer", event.getOrganizer());
-            i.putExtra("event_time", fmt.format(event.getDate()));
-            i.putExtra("event_description", event.getDescription());
-            startActivity(i);
+            EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+            // get info to fill
+            Bundle bundle = new Bundle();
+            bundle.putString("event_name", event.getName());
+            bundle.putString("event_location", event.getLocation());
+            bundle.putString("event_organizer", event.getOrganizer());
+            bundle.putString("event_time", fmt.format(event.getDate()));
+            bundle.putString("event_description", event.getDescription());
+            bundle.putString("event_image_url", event.getImageUrl());
+            bundle.putString("event_doc_id", event.getDocId());
+            fragment.setArguments(bundle);
+
+            //pass entrant
+            if (requireActivity() instanceof EntrantProviderInterface) {
+                fragment.setCurrentEntrant(((EntrantProviderInterface) requireActivity()).getCurrentEntrant());
+            }
+
+            // boot up fragment
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit();
         });
         rv.setAdapter(adapter);
 
@@ -104,7 +121,7 @@ public class EntrantEventListFragment extends Fragment {
     /**
      * This method set the correct filter that user have chosen.
      *
-     * @param newFilter The chosen filter.
+     * @param newFilter The chosen filter. true if upcoming.
      */
     public void setFilter(boolean newFilter) {
         upcoming = newFilter;
