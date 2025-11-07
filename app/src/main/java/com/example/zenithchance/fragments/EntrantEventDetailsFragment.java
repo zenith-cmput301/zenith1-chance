@@ -1,5 +1,6 @@
 package com.example.zenithchance.fragments;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
+import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
@@ -31,6 +33,14 @@ public class EntrantEventDetailsFragment extends Fragment {
      */
     public void setCurrentEntrant(Entrant entrant) {
         this.currentEntrant = entrant;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (currentEntrant == null && context instanceof EntrantProviderInterface) {
+            currentEntrant = ((EntrantProviderInterface) context).getCurrentEntrant();
+        }
     }
 
     @Nullable

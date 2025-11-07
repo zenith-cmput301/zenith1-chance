@@ -1,5 +1,7 @@
 package com.example.zenithchance.navigation;
 
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -7,6 +9,7 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.fragments.AllEventsFragment;
 import com.example.zenithchance.fragments.EntrantEventsFragment;
 import com.example.zenithchance.fragments.ProfileFragment;
+import com.example.zenithchance.models.Entrant;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
@@ -20,7 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
  */
 public class EntrantNavigationHelper {
 
-    public static void setupBottomNav(AppCompatActivity activity) {
+    public static void setupBottomNav(AppCompatActivity activity, Entrant currentEntrant) {
 
         BottomNavigationView bottomNav = activity.findViewById(R.id.bottomNavigationView);
 
@@ -34,6 +37,10 @@ public class EntrantNavigationHelper {
             }
             else if (id == R.id.nav_my_events) {
                 selected = new EntrantEventsFragment();
+                // pass in current entrant
+                Bundle args = new Bundle();
+                args.putSerializable("entrant", currentEntrant);
+                selected.setArguments(args);
             }
             else if (id == R.id.nav_profile) {
                 selected = new ProfileFragment();

@@ -181,8 +181,7 @@ public class OrganizerCreateEventFragment extends Fragment {
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 registrationdate,
-                eventMaxEntrants.getValue(),
-                "null");
+                eventMaxEntrants.getValue());
 
 
         // Adds event to firebase
