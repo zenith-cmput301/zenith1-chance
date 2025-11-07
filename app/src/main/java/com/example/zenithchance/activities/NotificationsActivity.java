@@ -20,6 +20,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.zenithchance.R;
+import com.example.zenithchance.managers.NotificationManager;
+import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.Notification;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,13 +93,11 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
     public void toggledNotifications(){
+        DocumentReference myNote = NotificationManager.getInstance().getUsersNotifications(UserManager.getInstance().getCurrentUser());
+        
         if(!notificationToggle.isChecked()) { // Notifications go through
-            // === intent + extras handling ===
-            Intent intent = getIntent();
-            Bundle extras = intent.getExtras();
-
-            if (extras != null) {
-                notificationList = extras.getStringArrayList("notificationList");
+            if (myNote != null) {
+                notificationList = myNote.
             }
 
             ListView notificationsListView = null;
