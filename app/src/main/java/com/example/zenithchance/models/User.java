@@ -7,7 +7,8 @@ import com.google.firebase.firestore.Exclude;
 /**
  * This class represents a User object.
  * This class is the superclass for entrants, organizers, and admins.
- * Firestore document ID == deviceId == userId.
+ *
+ * @author Sabrina
  */
 public abstract class User {
 

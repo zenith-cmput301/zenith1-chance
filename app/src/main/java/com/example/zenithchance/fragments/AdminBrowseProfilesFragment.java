@@ -25,7 +25,11 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Represents the Admin Browse activity fragment.
+ *
+ * @author Sabrina
+ */
 public class AdminBrowseProfilesFragment extends Fragment {
 
     @Nullable @Override
