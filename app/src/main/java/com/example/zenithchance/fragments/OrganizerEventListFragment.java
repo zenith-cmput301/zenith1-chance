@@ -66,26 +66,12 @@ public class OrganizerEventListFragment extends Fragment {
 
         // Create adapter
         adapter = new AllEventsAdapter(requireContext(), events, event -> {
-
-            /**
-             *
-             * Aayush, this is where the events details can be populated, currently it's using the Entrant details
-             * but you can change it to inflate your fragments instead.
-             *
-             */
-
-            EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+            OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("event_name", event.getName());
-            bundle.putString("event_location", event.getLocation());
-            bundle.putString("event_organizer", event.getOrganizer());
-            bundle.putString("event_time", fmt.format(event.getDate()));
-            bundle.putString("event_description", event.getDescription());
-            bundle.putString("event_image_url", event.getImageUrl());
-            bundle.putString("event_doc_id", event.getDocId());
+            bundle.putSerializable("event", event);
+            bundle.putSerializable("organizer", organizer);
             fragment.setArguments(bundle);
-
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -93,6 +79,7 @@ public class OrganizerEventListFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
 
         recyclerView.setAdapter(adapter);
 

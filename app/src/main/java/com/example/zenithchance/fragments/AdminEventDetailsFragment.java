@@ -24,18 +24,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
  * Admins can delete the event using the delete button, which shows
  * a confirmation dialog before removing the event from Firestore.
  *
- * <p>
- * Expected bundle arguments to exist (in event model class):
- * <ul>
- *     <li>event_doc_id (String) – Firestore document ID of the event</li>
- *     <li>event_name (String) – Event name</li>
- *     <li>event_location (String) – Event location</li>
- *     <li>event_organizer (String) – Event organizer name</li>
- *     <li>event_time (String) – Formatted event date/time</li>
- *     <li>event_description (String) – Event description</li>
- *     <li>event_image_url (String) – URL of the event image</li>
- * </ul>
- * </p>
  *
  * @author Kiran Kaur
  * @version 1.0
