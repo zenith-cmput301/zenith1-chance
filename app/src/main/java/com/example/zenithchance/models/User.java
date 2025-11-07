@@ -11,21 +11,21 @@ import com.google.firebase.firestore.Exclude;
  */
 public abstract class User {
 
-    protected String email;
-    protected String name;
-    protected String type;
-
     @DocumentId
+    private String id; // Firestore document ID == deviceId
+
+    private String email;
+    private String name;
+    private String type;
+
+    public User() {}
+
+    // Optional convenience getter so other code can still call getUserId()
     @Exclude
-    protected String userId;  // same as deviceId (Firestore doc ID)
+    public String getUserId() { return id; }
 
-    public User() { }
-
-    public String getUserId() { return userId; }
-    public void setUserId(String firestoreDocId) { this.userId = firestoreDocId; }
-
-    public String getDeviceId() { return userId; }
-    public void setDeviceId(String deviceId) { this.userId = deviceId; }
+    @Exclude
+    public void setUserId(String userId) { this.id = userId; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
