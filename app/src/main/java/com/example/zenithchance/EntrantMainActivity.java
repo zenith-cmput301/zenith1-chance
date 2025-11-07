@@ -24,6 +24,9 @@ public class EntrantMainActivity extends AppCompatActivity implements EntrantPro
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entrant_main);
 
+//        get user info
+        currentUser = UserManager.getInstance().getCurrentUser();
+
         // get entrant info
         currentEntrant = (Entrant) UserManager.getInstance().getCurrentUser();
 
