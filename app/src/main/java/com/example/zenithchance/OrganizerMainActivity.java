@@ -6,6 +6,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.zenithchance.fragments.OrganizerCreateEventFragment;
+import com.example.zenithchance.interfaces.UserProviderInterface;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;

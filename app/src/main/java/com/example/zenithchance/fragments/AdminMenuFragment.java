@@ -9,6 +9,7 @@ import android.widget.Switch;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.zenithchance.AdminMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.fragments.AdminBrowseProfilesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -34,10 +35,14 @@ public class AdminMenuFragment extends Fragment {
 
 //        BROWSE EVENTS -> Switch tab to All Events
         browseEventsBtn.setOnClickListener(v -> {
-            BottomNavigationView nav = requireActivity().findViewById(R.id.adminBottomNavigationView);
-            nav.setSelectedItemId(R.id.nav_admin_all_events);
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.adminFragmentContainer, new AllEventsFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
 
+        ((AdminMainActivity) requireActivity()).showBackButton(false);
         return view;
     }
 }

@@ -17,9 +17,7 @@ public class AdminNavigationHelper {
             Fragment selected = null;
 
             int id = item.getItemId();
-            if (id == R.id.nav_admin_all_events) {
-                selected = new AllEventsFragment();
-            } else if (id == R.id.nav_admin_menu) {
+            if (id == R.id.nav_admin_menu) {
                 selected = new AdminMenuFragment();
             } else if (id == R.id.nav_admin_profile) {
                 selected = new ProfileFragment();
