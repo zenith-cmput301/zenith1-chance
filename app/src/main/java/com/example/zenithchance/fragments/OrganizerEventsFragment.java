@@ -11,8 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Event;
+import com.example.zenithchance.models.Organizer;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -22,6 +24,10 @@ import java.util.List;
 public class OrganizerEventsFragment extends Fragment {
     private EntrantEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
+
+    private Organizer organizer;
+
+    Button createEventButton;
 
     @Nullable
     @Override
@@ -43,41 +49,58 @@ public class OrganizerEventsFragment extends Fragment {
             fm.executePendingTransactions();
         }
 
+        // Sets the organizer to be the organizer signed in
+        if (getActivity() instanceof OrganizerMainActivity) {
+            organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
+        }
+
         // Fetch all events
         getEvents();
+
 
         // buttons
 //        TODO: Handle if no upcoming/past events
 //        TODO: Show event details on clicking an event
         Button upcomingButton = view.findViewById(R.id.upcoming_events);
         Button pastButton = view.findViewById(R.id.past_events);
-        Button createEventButton = view.findViewById(R.id.create_event_button);
+        createEventButton = view.findViewById(R.id.create_event_button);
         upcomingButton.setEnabled(false);
 
         upcomingButton.setOnClickListener(v -> {
-            eventListFrag.setFilter(true);
+//            eventListFrag.setFilter(true);
             upcomingButton.setEnabled(false);
             pastButton.setEnabled(true);
         });
 
         pastButton.setOnClickListener(v -> {
-            eventListFrag.setFilter(false);
+//            eventListFrag.setFilter(false);
             pastButton.setEnabled(false);
             upcomingButton.setEnabled(true);
         });
 
         // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
 
+        initCreateEventButton();
+
+
+        return view;
+    }
+
+    private void initCreateEventButton() {
         createEventButton.setOnClickListener(v -> {
+
+            // Initializing a bundle to pass the organizer user
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("organizer", organizer);
+
             OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+            createFragment.setArguments(bundle);
+
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, createFragment)
                     .commit();
         });
 
-
-
-        return view;
     }
 
     private void getEvents() {
