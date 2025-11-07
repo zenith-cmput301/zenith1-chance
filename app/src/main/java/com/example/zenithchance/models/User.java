@@ -21,7 +21,6 @@ public abstract class User {
 
     public User() {}
 
-    // Optional convenience getter so other code can still call getUserId()
     @Exclude
     public String getUserId() { return id; }
 
