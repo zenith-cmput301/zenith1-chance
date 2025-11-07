@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,20 @@ import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OrganizerEventsFragment extends Fragment {
-    private EntrantEventListFragment eventListFrag;
+    private OrganizerEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
 
     private Organizer organizer;
@@ -39,15 +46,13 @@ public class OrganizerEventsFragment extends Fragment {
 
         // Inflate
         FragmentManager fm = getChildFragmentManager(); // IMPORTANT: child fragment
-        eventListFrag = (EntrantEventListFragment) fm.findFragmentByTag("entrant_event_list");
+        eventListFrag = new OrganizerEventListFragment();
 
-        if (eventListFrag == null) {
-            eventListFrag = new EntrantEventListFragment();
-            fm.beginTransaction()
-                    .replace(R.id.eventsFragmentContainer, eventListFrag, "entrant_event_list")
-                    .commit();
-            fm.executePendingTransactions();
-        }
+        fm.beginTransaction()
+                .replace(R.id.eventsFragmentContainer, eventListFrag)
+                .commit();
+        fm.executePendingTransactions();
+
 
         // Sets the organizer to be the organizer signed in
         if (getActivity() instanceof OrganizerMainActivity) {
@@ -82,6 +87,7 @@ public class OrganizerEventsFragment extends Fragment {
 
         initCreateEventButton();
 
+        getEvents();
 
         return view;
     }
@@ -104,17 +110,43 @@ public class OrganizerEventsFragment extends Fragment {
     }
 
     private void getEvents() {
-        FirebaseFirestore.getInstance()
-                .collection("events")
-                .orderBy("date")
+        // 1. Ensure the organizer object and its UID are valid before querying.
+        if (organizer == null || organizer.getUserId() == null || organizer.getUserId().isEmpty()) {
+            Log.e("OrganizerEventsFragment", "Cannot fetch events: Organizer or Organizer UID is null.");
+            // If the organizer is invalid, show an empty list.
+            if (eventListFrag != null) {
+                // Assuming the method is named setItems based on our previous discussion
+                eventListFrag.setEvents(new ArrayList<>());
+            }
+            return;
+        }
+
+        String organizerId = organizer.getUserId();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Log.d("OrganizerEventsFragment", "Fetching events from Firestore for organizerId: " + organizerId);
+
+        // 2. Query the "events" collection directly.
+        db.collection("events")
+
+                .whereEqualTo("organizer", organizer.getName())
                 .get()
-                .addOnSuccessListener(snaps -> {
-                    eventList.clear();
-                    for (DocumentSnapshot d : snaps) {
-                        Event e = d.toObject(Event.class);
-                        if (e != null) eventList.add(e);
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                    List<Event> events = new ArrayList<>();
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null) {
+                            event.setDocId(document.getId());
+                            events.add(event);
+                            Log.d("eventname", String.valueOf(events.size()));
+                        } else {
+                            Log.w("OrganizerEventsFragment", "Document " + document.getId() + " could not be converted to an Event object.");
+                        }
                     }
-                    if (eventListFrag != null) eventListFrag.setEvents(eventList);
+
+                    eventListFrag.setEvents(events);
                 });
+
     }
 }
