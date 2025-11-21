@@ -236,4 +236,24 @@ public class Entrant extends User implements Serializable {
         return onDeclined;
     }
 
+    /**
+     * Queue setters
+     * @param onWaiting list of events (Firebase ids)
+     */
+    public void setOnWaiting(ArrayList<String> onWaiting) {
+        this.onWaiting = (onWaiting != null) ? onWaiting : new ArrayList<>();
+    }
+
+    public void setOnInvite(ArrayList<String> onInvite) {
+        this.onInvite = (onInvite != null) ? onInvite : new ArrayList<>();
+    }
+
+    public void setOnAccepted(ArrayList<String> onAccepted) {
+        this.onAccepted = (onAccepted != null) ? onAccepted : new ArrayList<>();
+    }
+
+    public void setOnDeclined(ArrayList<String> onDeclined) {
+        this.onDeclined = (onDeclined != null) ? onDeclined : new ArrayList<>();
+    }
+
 }

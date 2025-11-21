@@ -21,6 +21,7 @@ import java.util.Objects;
 
 /**
  * This class reads and writes Users to the Firestore database.
+ * @author Sabrina
  */
 public final class UserManager {
     // Singleton

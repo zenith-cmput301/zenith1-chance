@@ -112,7 +112,7 @@ public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.Even
 
         Glide.with(context)
                 .load(event.getImageUrl())
-                .placeholder(R.drawable.ic_my_events)
+                .placeholder(R.drawable.celebration_placeholder)
                 .into(holder.imageView);
 
         holder.itemView.setOnClickListener(v -> {
