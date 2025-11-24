@@ -90,15 +90,14 @@ public class ProfileFragment extends Fragment {
             String newEmail = editEmail.getText().toString().trim();
 
             // Checks if user left both fields empty
-            if (newName.isEmpty() && newEmail.isEmpty()) {
+            if ((newName.isEmpty() && newEmail.isEmpty())) {
                 Toast.makeText(getContext(), "Please enter a name or email to update.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            }else{
             // Calls changeName and changeEmail to do the work!
             changeName(newName);
             changeEmail(newEmail);
-            editInformation.setVisibility(View.GONE);
-        });
+
+        }});
 
         // Delete profile button, will give an "are you sure message" first before deleting
         deleteProfile.setOnClickListener(v -> {
@@ -135,17 +134,20 @@ public class ProfileFragment extends Fragment {
      * Function for the User to change their name. Created to assist in testing.
      *
      * @author Lauren
-     * @version 1.0
      * @param newName Is the string that will be the new name
      */
     public void changeName(String newName){
 
         // Only update name if not blank
-        if (!newName.isEmpty()) {
+        if (!newName.isEmpty() && newName.matches("[a-zA-Z\\s-]+")) { // Borrowed from https://stackoverflow.com/questions/63577777/correct-usage-of-string-matches-and-regex
             myUser.setName(newName);
             UserManager.getInstance().updateUserName(myUser);
-        } else {
+            editInformation.setVisibility(View.GONE);
+        }else {
             editUsername.setText(myUser.getName());
+            Toast.makeText(getContext(), "Please enter a valid name to update.", Toast.LENGTH_SHORT).show();
+            editUsername.requestFocus();
+
         }
         usernameDisplay.setText(myUser.getName());
     }
@@ -153,7 +155,6 @@ public class ProfileFragment extends Fragment {
      * Function for the User to change their email. Created to assist in testing.
      *
      * @author Lauren
-     * @version 1.0
      * @param newEmail Is the string that will be the new email
      */
     public void changeEmail(String newEmail){
@@ -163,13 +164,13 @@ public class ProfileFragment extends Fragment {
             myUser.setEmail(newEmail);
             UserManager.getInstance().updateUserEmail(myUser);
         } else if (!newEmail.isEmpty()) {
-            editEmail.setError("Enter a valid email or leave blank");
+            Toast.makeText(getContext(), "Please enter a valid email to update, or leave blank.", Toast.LENGTH_SHORT).show();
             editEmail.requestFocus();
-            confirmEdits.setEnabled(true);
-            return;
+
 
         } else {
             editEmail.setText(myUser.getEmail());
+            editInformation.setVisibility(View.GONE);
         }
         emailDisplay.setText(myUser.getEmail());
     }
