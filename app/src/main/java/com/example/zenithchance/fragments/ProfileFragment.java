@@ -139,7 +139,7 @@ public class ProfileFragment extends Fragment {
     public void changeName(String newName){
 
         // Only update name if not blank
-        if (!newName.isEmpty() && newName.matches("[a-zA-Z\\s-]+")) {
+        if (!newName.isEmpty() && newName.matches("[a-zA-Z\\s-]+")) { // Borrowed from https://stackoverflow.com/questions/63577777/correct-usage-of-string-matches-and-regex
             myUser.setName(newName);
             UserManager.getInstance().updateUserName(myUser);
             editInformation.setVisibility(View.GONE);
