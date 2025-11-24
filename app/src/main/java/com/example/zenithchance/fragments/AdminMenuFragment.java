@@ -14,12 +14,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
  * Fragment representing the main menu for admin users.
- * Provides buttons for navigating to other admin features such as:
- * <ul>
- *     <li>Browsing user profiles</li>
- *     <li>Browsing all events</li>
- * </ul>
+ * Provides buttons for navigating to other admin features such as: Browse Profiles, Browse Events
+ *
  * Handles navigation by replacing fragments in the {@link AdminMainActivity}'s container.
+ *
+ * Future Updates:
+ * We will add Browse Notification logs and Browse Images in this Menu
  */
 public class AdminMenuFragment extends Fragment {
 

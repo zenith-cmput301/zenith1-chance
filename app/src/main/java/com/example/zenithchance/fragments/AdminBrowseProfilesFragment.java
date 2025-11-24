@@ -25,7 +25,11 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Represents the Admin Browse Profiles fragment.
+ *
+ * @author Sabrina
+ */
 public class AdminBrowseProfilesFragment extends Fragment {
 
     @Nullable @Override
@@ -35,8 +39,6 @@ public class AdminBrowseProfilesFragment extends Fragment {
 
 
         View view = inflater.inflate(R.layout.admin_browse_profiles, container, false);
-
-        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
 
         LinearLayout listContainer = view.findViewById(R.id.listContainer);
         LayoutInflater li = LayoutInflater.from(requireContext());

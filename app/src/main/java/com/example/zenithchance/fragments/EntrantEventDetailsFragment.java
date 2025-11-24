@@ -21,6 +21,12 @@ import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This fragment displays details of the selected event.
  *
@@ -112,7 +118,7 @@ public class EntrantEventDetailsFragment extends Fragment {
 
             Glide.with(this)
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_my_events)
+                    .placeholder(R.drawable.celebration_placeholder)
                     .into(image);
         }
 
@@ -122,10 +128,61 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
 
-        bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        // this code is so event detail is refreshed every time it's accessed
+        if (eventDocId != null) {
+            refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        } else {
+            // backup plan -> local states (copy got from when app first boot)
+            bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        }
 
         return view;
     }
+
+    /**
+     * This function fetches newest event details data to accurately shows buttons
+     * (in case queue status changes)
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param inviteActions     Special group of buttons in case entrant is invited
+     * @param actionBtn         Button to enroll/drop out of waiting list
+     * @param acceptBtn         Button to accept invitation
+     * @param declineBtn        Button to decline invitation
+     */
+    private void refreshEntrantListsAndBind(String eventDocId, Event eventForLocal, ViewGroup inviteActions, MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn) {
+
+        // show loading state while fetching for fancy purposes
+        actionBtn.setEnabled(false);
+        actionBtn.setText("Loading...");
+        actionBtn.setTextColor(Color.WHITE);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users")
+                .document(currentEntrant.getUserId())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot != null && snapshot.exists()) {
+                        List<String> waiting  = (List<String>) snapshot.get("onWaiting");
+                        List<String> invited  = (List<String>) snapshot.get("onInvite");
+                        List<String> accepted = (List<String>) snapshot.get("onAccepted");
+                        List<String> declined = (List<String>) snapshot.get("onDeclined");
+
+                        // update currentEntrant with latest data
+                        currentEntrant.setOnWaiting(waiting != null ? new ArrayList<>(waiting) : new ArrayList<>());
+                        currentEntrant.setOnInvite(invited != null ? new ArrayList<>(invited) : new ArrayList<>());
+                        currentEntrant.setOnAccepted(accepted != null ? new ArrayList<>(accepted) : new ArrayList<>());
+                        currentEntrant.setOnDeclined(declined != null ? new ArrayList<>(declined) : new ArrayList<>());
+                    }
+
+                    bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to refresh status: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+                });
+    }
+
 
     /**
      * Binds action button behaviour to specific state (enroll, invited, etc.)

@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * Tests the UserManager class to ensure that Entrant, Organizer, and Admin
  * users can be added to and deleted from Firestore successfully.
+ * @author Sabrina
  */
 public class UserManagerTest {
 

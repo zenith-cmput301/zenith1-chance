@@ -12,26 +12,11 @@ import com.example.zenithchance.models.User;
 import com.example.zenithchance.navigation.EntrantNavigationHelper;
 
 /**
- * Main activity for entrant users.
- * <p>
- * Handles setting up the bottom navigation for the three main tabs:
- * <ul>
- *     <li>All Events</li>
- *     <li>My Events</li>
- *     <li>Profile</li>
- * </ul>
- * Implements {@link EntrantProviderInterface} and {@link UserProviderInterface}
- * to provide the currently logged-in entrant and user.
- * </p>
- *
- * Features:
- * <ul>
- *     <li>Fetches the current entrant and user from {@link UserManager}</li>
- *     <li>Uses {@link EntrantNavigationHelper} to initialize bottom navigation</li>
- * </ul>
+ * Main activity for entrant users. Sets up bottom navigation.
  *
  * @author Kiran
  * @version 1.0
+ * @see EntrantNavigationHelper
  */
 public class EntrantMainActivity extends AppCompatActivity implements EntrantProviderInterface, UserProviderInterface {
 
@@ -42,11 +27,7 @@ public class EntrantMainActivity extends AppCompatActivity implements EntrantPro
     private User currentUser;
 
     /**
-     * Called when the activity is starting.
-     * <p>
-     * Retrieves the current entrant and user from {@link UserManager} and sets up
-     * the bottom navigation using {@link EntrantNavigationHelper}.
-     * </p>
+     * Called when the activity is starting
      *
      * @param savedInstanceState If the activity is being re-initialized after previously
      *                           being shut down then this Bundle contains the data it most
@@ -68,7 +49,6 @@ public class EntrantMainActivity extends AppCompatActivity implements EntrantPro
     /**
      * Returns the currently logged-in entrant.
      *
-     * @return The Entrant object representing the logged-in entrant.
      */
     @Override
     public Entrant getCurrentEntrant() {
@@ -78,7 +58,6 @@ public class EntrantMainActivity extends AppCompatActivity implements EntrantPro
     /**
      * Returns the currently logged-in user.
      *
-     * @return The User object representing the logged-in user.
      */
     @Override
     public User getCurrentUser() {

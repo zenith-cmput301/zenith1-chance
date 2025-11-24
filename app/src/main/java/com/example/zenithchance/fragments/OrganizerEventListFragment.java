@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.Locale;
 
 /**
  * Class for the list of events inside Organizer's My Events page.
+ * Utilizes logic and recyclerView from AllEvents
  *
  * @author Emerson
  * @version 1.0
@@ -38,9 +40,24 @@ public class OrganizerEventListFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Organizer organizer;
 
+
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_events, container, false);
+        View view = inflater.inflate(R.layout.fragment_organizer_events, container, false);
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -49,26 +66,12 @@ public class OrganizerEventListFragment extends Fragment {
 
         // Create adapter
         adapter = new AllEventsAdapter(requireContext(), events, event -> {
-
-            /**
-             *
-             * Aayush, this is where the events details can be populated, currently it's using the Entrant details
-             * but you can change it to inflate your fragments instead.
-             *
-             */
-
-            EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+            OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("event_name", event.getName());
-            bundle.putString("event_location", event.getLocation());
-            bundle.putString("event_organizer", event.getOrganizer());
-            bundle.putString("event_time", fmt.format(event.getDate()));
-            bundle.putString("event_description", event.getDescription());
-            bundle.putString("event_image_url", event.getImageUrl());
-            bundle.putString("event_doc_id", event.getDocId());
+            bundle.putSerializable("event", event);
+            bundle.putSerializable("organizer", organizer);
             fragment.setArguments(bundle);
-
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -76,6 +79,7 @@ public class OrganizerEventListFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
 
         recyclerView.setAdapter(adapter);
 
@@ -87,7 +91,12 @@ public class OrganizerEventListFragment extends Fragment {
         return view;
     }
 
-private void getEvents() {
+
+    /**
+     * This method queries FireBase and adds all events that an Organizer has contained in their orgEvents field
+     * to the MyEvents display.
+     */
+    private void getEvents() {
 
     String uid = organizer.getUserId();
 

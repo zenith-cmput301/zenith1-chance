@@ -29,7 +29,12 @@ import com.example.zenithchance.models.User;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+/**
+ * Class for the UI used in Profile Page For ALl Users
+ *
+ * @author Lauren
+ * @version 3.0
+ */
 public class ProfileFragment extends Fragment {
 
     User myUser;
@@ -63,7 +68,7 @@ public class ProfileFragment extends Fragment {
         editUsername = view.findViewById(R.id.editTextUsername);
         editEmail = view.findViewById(R.id.editTextEmail);
 
-        // Load profile info
+        // Gets User Data
         if (myUser != null) {
             usernameDisplay.setText(myUser.getName());
             emailDisplay.setText(myUser.getEmail());
@@ -72,47 +77,42 @@ public class ProfileFragment extends Fragment {
         // Edit profile
         editProfile.setOnClickListener(v -> {
             if (myUser != null) {
-                editUsername.setText(myUser.getName());   // prefill with current name
-                editEmail.setText(myUser.getEmail());     // prefill with current email
+                editUsername.setText(myUser.getName());   // current name
+                editEmail.setText(myUser.getEmail());     // current email
             }
-            editInformation.setVisibility(VISIBLE);       // show the edit panel
+            editInformation.setVisibility(VISIBLE);       // Shows the edit panel
         });
 
 
-        // Confirm Edits
+        // Confirm Edits button, which will get the data the user typed in and pass it to the 2 functions
         confirmEdits.setOnClickListener(v -> {
             String newName = editUsername.getText().toString().trim();
             String newEmail = editEmail.getText().toString().trim();
 
-            // Check if user left both fields empty
-            if (newName.isEmpty() && newEmail.isEmpty()) {
+            // Checks if user left both fields empty
+            if ((newName.isEmpty() && newEmail.isEmpty())) {
                 Toast.makeText(getContext(), "Please enter a name or email to update.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            // Only update name if not blank INSERT FUNCTION HERE
+            }else{
+            // Calls changeName and changeEmail to do the work!
             changeName(newName);
-
-            // Only update email if not blank
             changeEmail(newEmail);
 
-            //  Hide the edit panel
-            editInformation.setVisibility(View.GONE);
-        });
+        }});
 
-        // Delete profile
+        // Delete profile button, will give an "are you sure message" first before deleting
         deleteProfile.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Delete Profile Warning!")
                     .setMessage("Are you sure you want to delete your profile?")
                     .setPositiveButton("Yes", (dialog, which) -> {
-                        // Delete user and redirect to SignIn
+                        // Deletes user and redirects to SignIn
                         UserManager.getInstance().deleteUserById(myUser.getUserId());
                         Intent intent = new Intent(getActivity(), SignUpActivity.class);
                         startActivity(intent);
                         requireActivity().finish();
                     })
                     .setNegativeButton("No", (dialog, which) -> {
-                        // Dismiss dialog
+                        // Dismisses dialog
                         dialog.dismiss();
                     })
                     .setCancelable(true)
@@ -130,18 +130,33 @@ public class ProfileFragment extends Fragment {
 
         return view;
     }
+    /**
+     * Function for the User to change their name. Created to assist in testing.
+     *
+     * @author Lauren
+     * @param newName Is the string that will be the new name
+     */
     public void changeName(String newName){
 
         // Only update name if not blank
-        if (!newName.isEmpty()) {
+        if (!newName.isEmpty() && newName.matches("[a-zA-Z\\s-]+")) { // Borrowed from https://stackoverflow.com/questions/63577777/correct-usage-of-string-matches-and-regex
             myUser.setName(newName);
             UserManager.getInstance().updateUserName(myUser);
-        } else {
+            editInformation.setVisibility(View.GONE);
+        }else {
             editUsername.setText(myUser.getName());
+            Toast.makeText(getContext(), "Please enter a valid name to update.", Toast.LENGTH_SHORT).show();
+            editUsername.requestFocus();
+
         }
         usernameDisplay.setText(myUser.getName());
     }
-
+    /**
+     * Function for the User to change their email. Created to assist in testing.
+     *
+     * @author Lauren
+     * @param newEmail Is the string that will be the new email
+     */
     public void changeEmail(String newEmail){
         if (!newEmail.isEmpty() &&
                 android.util.Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()) {
@@ -149,13 +164,13 @@ public class ProfileFragment extends Fragment {
             myUser.setEmail(newEmail);
             UserManager.getInstance().updateUserEmail(myUser);
         } else if (!newEmail.isEmpty()) {
-            editEmail.setError("Enter a valid email or leave blank");
+            Toast.makeText(getContext(), "Please enter a valid email to update, or leave blank.", Toast.LENGTH_SHORT).show();
             editEmail.requestFocus();
-            confirmEdits.setEnabled(true);
-            return;
+
 
         } else {
             editEmail.setText(myUser.getEmail());
+            editInformation.setVisibility(View.GONE);
         }
         emailDisplay.setText(myUser.getEmail());
     }

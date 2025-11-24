@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.espresso.core)
     implementation(libs.ext.junit)
     implementation(libs.fragment.testing)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
