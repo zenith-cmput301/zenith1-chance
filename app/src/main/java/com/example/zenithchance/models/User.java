@@ -3,6 +3,9 @@ package com.example.zenithchance.models;
 import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.Exclude;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * This class represents a User object.
@@ -18,6 +21,8 @@ public abstract class User {
     private String email;
     private String name;
     private String type;
+    private List<Notification> notifications = new ArrayList<>();
+    private Boolean notificationStatus = true;
 
     public User() {}
 
@@ -35,4 +40,18 @@ public abstract class User {
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+
+    // ADDED FOR NOTIFICATION THINGS:
+    public void setNotifications(List<Notification> notifications){ this.notifications = notifications; } // May need to change and is useful for testing purposes
+
+    public void addNotification(Notification newNotification){
+        notifications.add(newNotification);
+    }
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public Boolean getNotificationStatus() {
+        return notificationStatus;
+    }
 }
