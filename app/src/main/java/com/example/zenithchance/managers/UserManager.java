@@ -42,6 +42,7 @@ public final class UserManager {
 
     private final CollectionReference userCollection =
             FirebaseFirestore.getInstance().collection("users");
+
     private ListenerRegistration listener;
 
     public User getCurrentUser() {
@@ -212,7 +213,23 @@ public final class UserManager {
                     return out;
                 });
     }
+// NEW ADDITIONS FOR NOTIFICATIONS HERE:
 
+    public void updateNotificationStatus(User user) {
+        String id = user.getUserId();
+        if (id == null || id.isEmpty()) return;
+        userCollection.document(id).update("notificationStatus", user.getNotificationStatus())
+                .addOnSuccessListener(aVoid -> System.out.println("notificationStatus updated"))
+                .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
+    }
+
+    public void updateUserNotifications(User user) {
+        String id = user.getUserId();
+        if (id == null || id.isEmpty()) return;
+        userCollection.document(id).update("notifications", user.getNotifications())
+                .addOnSuccessListener(aVoid -> System.out.println("notificationStatus updated"))
+                .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
+    }
 
 
 

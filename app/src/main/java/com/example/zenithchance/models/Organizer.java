@@ -136,4 +136,11 @@ public class Organizer extends User implements Serializable {
     public void addOrgEvent(String orgEvent) {
         this.orgEvents.add(orgEvent);
     }
+
+    // NEW NOTIFICATION THINGS:
+    public void sendNotification(String eventName, String status, Entrant recipient){
+        if(recipient.getNotificationStatus()==true){
+            recipient.addNotification(new Notification(eventName, status, recipient.getUserId() ));
+        }
+    }
 }
