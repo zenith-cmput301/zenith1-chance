@@ -2,6 +2,7 @@ package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
@@ -23,6 +24,7 @@ import com.example.zenithchance.R;
 //import com.example.zenithchance.managers.NotificationManager;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Notification;
+import com.example.zenithchance.models.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 
@@ -42,7 +44,6 @@ public class NotificationsActivity extends AppCompatActivity {
     ImageButton backArrow;
     ToggleButton notificationToggle;
 
-    ArrayList notificationList;
 
     /**
      * OnCreate
@@ -61,48 +62,18 @@ public class NotificationsActivity extends AppCompatActivity {
                 return insets;
             });
         }
-
+        User myUser = UserManager.getInstance().getCurrentUser();
 
 
         // Initialize buttons
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
-        if(!notificationToggle.isChecked()){
-        // This is temporary, as it will be replaced later on
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
+        notificationToggle.setChecked(myUser.getNotificationStatus());
 
-        if (extras != null) {
-            notificationList = extras.getStringArrayList("notificationList");
-        }
-
-        if (notificationList == null) {
-            // Provide a backup list if there isn't one already
-            notificationList = new ArrayList<>();
-            notificationList.add("No notifications available");
-        }}else{
-            notificationList = new ArrayList<>();
-            notificationList.add("Notifications Blocked");
-        }
-
-        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked)-> {
-                    if(!notificationToggle.isChecked()){
-                        // Same as above, will turn into a function once NotificationManager is fixed
-                        Intent intent = getIntent();
-                        Bundle extras = intent.getExtras();
-
-                        if (extras != null) {
-                            notificationList = extras.getStringArrayList("notificationList");
-                        }
-
-                        if (notificationList == null) {
-                            // Provide a backup list
-                            notificationList = new ArrayList<>();
-                            notificationList.add("No notifications available");
-                        }}else{
-                        notificationList = new ArrayList<>();
-                        notificationList.add("Notifications Blocked");
-                    }});
+        notificationToggle.setOnClickListener(v -> {
+                    myUser.updateNotificationStatus(myUser.getNotificationStatus());
+                    UserManager.getInstance().updateNotificationStatus(myUser);
+                });
 
         // Setting up ListView
         ListView notificationsListView = findViewById(R.id.notificationListView);
@@ -110,14 +81,13 @@ public class NotificationsActivity extends AppCompatActivity {
                 this,
                 R.layout.notification_items,
                 R.id.notificationText,
-                notificationList
+                myUser.getNotifications()
         );
         notificationsListView.setAdapter(adapter);
 
         // Implementing Back Button OnClickListener
         backArrow.setOnClickListener(v -> {
             Intent resultIntent = new Intent();
-            resultIntent.putStringArrayListExtra("notificationList", notificationList);
             setResult(RESULT_OK, resultIntent);
             finish();
         });

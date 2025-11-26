@@ -1,7 +1,10 @@
 package com.example.zenithchance.managers;
 
+import android.util.Log; // Add this import
+
 import com.example.zenithchance.models.Admin;
 import com.example.zenithchance.models.Entrant;
+import com.example.zenithchance.models.Notification;
 import com.example.zenithchance.models.Organizer;
 import com.example.zenithchance.models.User;
 import com.google.android.gms.tasks.Task;
@@ -9,6 +12,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -42,6 +46,7 @@ public final class UserManager {
 
     private final CollectionReference userCollection =
             FirebaseFirestore.getInstance().collection("users");
+
     private ListenerRegistration listener;
 
     public User getCurrentUser() {
@@ -212,8 +217,69 @@ public final class UserManager {
                     return out;
                 });
     }
+// NEW ADDITIONS FOR NOTIFICATIONS HERE:
+    /**
+     * Updates a user's Notification Status in the Firestore "users" collection using their document id.
+     *
+     * @param user This is the user to have their NotificationStatus updated.
+     */
+    public void updateNotificationStatus(User user) {
+        String id = user.getUserId();
+        if (id == null || id.isEmpty()) return;
+        userCollection.document(id).update("notificationStatus", user.getNotificationStatus())
+                .addOnSuccessListener(aVoid -> System.out.println("notificationStatus updated"))
+                .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
+    }
+    /**
+     * Updates a user's Notifications in the Firestore "users" collection using their document id.
+     * Credit: Gemini AI for debugging purposes
+     * @author Lauren
+     *
+     * @param user This is the user to have their Notifications updated.
+     */
+    public void updateUserNotifications(User user) {
+        String id = user.getUserId();
 
+        // Checks the ID
+        if (id == null || id.isEmpty()) {
+            Log.e("UserManager", "CRITICAL ERROR: User ID is NULL or Empty. Cannot update.");
+            return;
+        }
 
+        // Checks the List Content
+        List<String> currentList = user.getNotifications();
+        if (currentList == null) {
+            Log.e("UserManager", "CRITICAL ERROR: getNotifications() returned null.");
+            return;
+        }
 
+        // Create the fresh copy
+        List<String> listForFirestore = new ArrayList<>(currentList);
 
-}
+        userCollection.document(id)
+                .update("notifications", listForFirestore)
+                .addOnSuccessListener(aVoid -> Log.d("UserManager", "SUCCESS: Firestore confirms update for Doc: " + id))
+                .addOnFailureListener(e -> Log.e("UserManager", "FAILURE: Firestore rejected update.", e));
+    }
+
+    /**
+     * Sends a notification (if recipient doesn't have them blocked) and updates a user's Notifications in the Firestore "users" collection using their document id.
+     * @author Lauren
+     *
+     * @param eventName This is the event name for the notification.
+     * @param status This is the status for the notification: Waiting, Chosen, etc.
+     * @param recipient This is the user to have their Notifications updated.
+     */
+    public void sendNotification(String eventName, String status, User recipient){
+        if(recipient.getNotificationStatus() == true){
+            Notification newNotification = new Notification(eventName, status, recipient.getUserId());
+            String newNotiString = newNotification.getToDisplay();
+
+            // Update local object
+            recipient.addNotification(newNotiString);
+
+            // Update Firestore
+            updateUserNotifications(recipient);
+        }
+        }
+        }
