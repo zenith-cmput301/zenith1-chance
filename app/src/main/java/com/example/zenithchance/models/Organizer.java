@@ -1,8 +1,10 @@
 package com.example.zenithchance.models;
 
-
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.OrganizerEventsFragment;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
@@ -137,10 +139,4 @@ public class Organizer extends User implements Serializable {
         this.orgEvents.add(orgEvent);
     }
 
-    // NEW NOTIFICATION THINGS:
-    public void sendNotification(String eventName, String status, Entrant recipient){
-        if(recipient.getNotificationStatus()==true){
-            recipient.addNotification(new Notification(eventName, status, recipient.getUserId() ));
-        }
     }
-}

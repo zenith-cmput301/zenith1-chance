@@ -21,7 +21,7 @@ public abstract class User {
     private String email;
     private String name;
     private String type;
-    private List<Notification> notifications = new ArrayList<>();
+    private List<String> notifications = new ArrayList<>();
     private Boolean notificationStatus = true;
 
     public User() {}
@@ -42,12 +42,11 @@ public abstract class User {
     public void setType(String type) { this.type = type; }
 
     // ADDED FOR NOTIFICATION THINGS:
-    public void setNotifications(List<Notification> notifications){ this.notifications = notifications; } // May need to change and is useful for testing purposes
 
-    public void addNotification(Notification newNotification){
+    public void addNotification(String newNotification){
         notifications.add(newNotification);
     }
-    public List<Notification> getNotifications() {
+    public List<String> getNotifications() {
         return notifications;
     }
 

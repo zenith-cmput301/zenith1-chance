@@ -8,6 +8,7 @@ import com.google.firebase.firestore.WriteBatch;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents Entrant users.
@@ -20,6 +21,8 @@ public class Entrant extends User implements Serializable {
     private ArrayList<String> onInvite = new ArrayList<String>();
     private ArrayList<String> onAccepted = new ArrayList<String>();
     private ArrayList<String> onDeclined = new ArrayList<String>();
+
+    private List<String> notifications = new ArrayList<>(); // Do Not Delete, used for notifications
 
     public Entrant() { setType("entrant"); }
 
