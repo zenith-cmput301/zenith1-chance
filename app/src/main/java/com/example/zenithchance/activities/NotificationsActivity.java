@@ -77,7 +77,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // Setting up ListView
         ListView notificationsListView = findViewById(R.id.notificationListView);
-        ArrayAdapter<Notification> adapter = new ArrayAdapter<>(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.notification_items,
                 R.id.notificationText,
