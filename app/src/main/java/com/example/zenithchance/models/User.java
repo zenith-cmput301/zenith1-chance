@@ -54,4 +54,8 @@ public abstract class User {
     public Boolean getNotificationStatus() {
         return notificationStatus;
     }
+
+    public void updateNotificationStatus(Boolean notificationStatus) {
+        this.notificationStatus = !notificationStatus;
+    }
 }
