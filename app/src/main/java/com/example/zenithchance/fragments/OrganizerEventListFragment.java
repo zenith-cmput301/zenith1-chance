@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -40,6 +41,8 @@ public class OrganizerEventListFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Organizer organizer;
 
+    private ProgressBar progressBar;
+
 
     /**
      * This method defines what happens when this fragment is created
@@ -61,6 +64,8 @@ public class OrganizerEventListFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        progressBar = view.findViewById(R.id.progress_loading_events);
 
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
@@ -85,6 +90,10 @@ public class OrganizerEventListFragment extends Fragment {
 
         Bundle args = getArguments();
         organizer = (Organizer) args.getSerializable("organizer");
+
+        // show loading screen if events are loading
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
 
         getEvents();
 
@@ -135,6 +144,10 @@ public class OrganizerEventListFragment extends Fragment {
                                 }
                             }
                             adapter.updateList(filteredList);
+
+                            // done loading
+                            progressBar.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
 
                         });
             });
