@@ -131,9 +131,60 @@ public class Organizer extends User implements Serializable {
                 UserManager.getInstance().sendNotification(eventName, "Chosen", user);
             }
 
+            for (String entrantId : newWaiting) {
+                // Get User for Send Notification
+                DocumentReference userRef = db.collection("users").document(entrantId);
+                DocumentSnapshot userSnap = trans.get(userRef);
+                User user = userSnap.toObject(User.class);
+                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+                UserManager.getInstance().sendNotification(eventName, "Waiting", user);
+            }
+
             return null;
         });
     }
+    public Task<Void> sendCancellationNotification(String eventId, List<String> waiting) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference evRef = db.collection("events").document(eventId);
+
+        return db.runTransaction(trans -> {
+            DocumentSnapshot ev = trans.get(evRef);
+            String eventName = ev.getString("name");
+
+        for (String entrantId : waiting) {
+            // Get User for Send Notification
+            DocumentReference userRef = db.collection("users").document(entrantId);
+            DocumentSnapshot userSnap = trans.get(userRef);
+            User user = userSnap.toObject(User.class);
+            user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+            UserManager.getInstance().sendNotification(eventName, "Cancelled", user);
+    }
+            return null;
+        });}
+
+    public Task<Void> sendLoseNotification(String eventId, List<String> waiting) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference evRef = db.collection("events").document(eventId);
+
+        return db.runTransaction(trans -> {
+            DocumentSnapshot ev = trans.get(evRef);
+            String eventName = ev.getString("name");
+
+            for (String entrantId : waiting) {
+                // Get User for Send Notification
+                DocumentReference userRef = db.collection("users").document(entrantId);
+                DocumentSnapshot userSnap = trans.get(userRef);
+                User user = userSnap.toObject(User.class);
+                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+                UserManager.getInstance().sendNotification(eventName, "Not Chosen", user);
+            }
+            return null;
+        });}
 
     public List<String> randomSample(List<String> waiting, int slots) {
         List<String> pool = new ArrayList<>(waiting); // copy to not affect original waiting list
