@@ -32,6 +32,7 @@ import java.util.List;
 
 /**
  * Tests the Entrant Model methods.
+ * @author Sabrina
  */
 public class EntrantModelTests {
 

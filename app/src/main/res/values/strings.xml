@@ -38,4 +38,5 @@
     <string name="browse_profiles">Browse Profiles</string>
     <string name="event_name">Event Name</string>
     <string name="zenithchance">ZenithChance</string>
+    <string name="date_and_time">Date and time:</string>
 </resources>

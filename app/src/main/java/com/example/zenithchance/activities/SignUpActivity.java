@@ -36,6 +36,7 @@ import java.util.Locale;
  * It checks if the device id is available for any users in the Firebase "users" collection.
  * If yes, it gets the type of user (admin, entrant, organizer) and directs them to the correct screen.
  * Otherwise, ask to create an account with the sign up button.
+ * @author Sabrina
  */
 public class SignUpActivity extends AppCompatActivity {
 

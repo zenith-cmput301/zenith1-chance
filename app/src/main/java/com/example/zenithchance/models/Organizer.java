@@ -1,8 +1,11 @@
 package com.example.zenithchance.models;
 
-
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.OrganizerEventsFragment;
+import com.example.zenithchance.managers.UserManager;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
@@ -108,20 +111,80 @@ public class Organizer extends User implements Serializable {
             updates.put("lotteryRan", true);
 
             trans.update(evRef, updates);
+            // Get Event Name for Notifications:
+            String eventName = ev.getString("name");
 
             // move event from user's onWaiting to onInvite
             for (String entrantId : winners) {
+                // Get User for Send Notification
                 DocumentReference userRef = db.collection("users").document(entrantId);
+                DocumentSnapshot userSnap = trans.get(userRef);
+                User user = userSnap.toObject(User.class);
+                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
                 // no need to read user doc: use atomic array transforms
                 trans.update(userRef,
                         "onWaiting", FieldValue.arrayRemove(eventId),
                         "onInvite",  FieldValue.arrayUnion(eventId)
                 );
+
+                UserManager.getInstance().sendNotification(eventName, "Chosen", user);
+            }
+
+            for (String entrantId : newWaiting) {
+                // Get User for Send Notification
+                DocumentReference userRef = db.collection("users").document(entrantId);
+                DocumentSnapshot userSnap = trans.get(userRef);
+                User user = userSnap.toObject(User.class);
+                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+                UserManager.getInstance().sendNotification(eventName, "Waiting", user);
             }
 
             return null;
         });
     }
+    public Task<Void> sendCancellationNotification(String eventId, List<String> waiting) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference evRef = db.collection("events").document(eventId);
+
+        return db.runTransaction(trans -> {
+            DocumentSnapshot ev = trans.get(evRef);
+            String eventName = ev.getString("name");
+
+        for (String entrantId : waiting) {
+            // Get User for Send Notification
+            DocumentReference userRef = db.collection("users").document(entrantId);
+            DocumentSnapshot userSnap = trans.get(userRef);
+            User user = userSnap.toObject(User.class);
+            user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+            UserManager.getInstance().sendNotification(eventName, "Cancelled", user);
+    }
+            return null;
+        });}
+
+    public Task<Void> sendLoseNotification(String eventId, List<String> waiting) {
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference evRef = db.collection("events").document(eventId);
+
+        return db.runTransaction(trans -> {
+            DocumentSnapshot ev = trans.get(evRef);
+            String eventName = ev.getString("name");
+
+            for (String entrantId : waiting) {
+                // Get User for Send Notification
+                DocumentReference userRef = db.collection("users").document(entrantId);
+                DocumentSnapshot userSnap = trans.get(userRef);
+                User user = userSnap.toObject(User.class);
+                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+
+                UserManager.getInstance().sendNotification(eventName, "Not Chosen", user);
+            }
+            return null;
+        });}
 
     public List<String> randomSample(List<String> waiting, int slots) {
         List<String> pool = new ArrayList<>(waiting); // copy to not affect original waiting list
@@ -136,4 +199,5 @@ public class Organizer extends User implements Serializable {
     public void addOrgEvent(String orgEvent) {
         this.orgEvents.add(orgEvent);
     }
-}
+
+    }

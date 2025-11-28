@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +21,14 @@ import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * This fragment displays details of the selected event.
@@ -32,6 +41,8 @@ import com.google.android.material.button.MaterialButton;
  */
 public class EntrantEventDetailsFragment extends Fragment {
     private Entrant currentEntrant;
+    private TextView waitingCountView;
+    private int waitingCount = -1;
 
     public EntrantEventDetailsFragment() { }
 
@@ -85,6 +96,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         ViewGroup inviteActions = view.findViewById(R.id.invite_actions);
         MaterialButton acceptBtn  = view.findViewById(R.id.btn_accept);
         MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
+        waitingCountView = view.findViewById(R.id.waiting_list_count);
+        ImageButton infoBtn = view.findViewById(R.id.info_button);
 
         String eventName = null;
         String eventDocId = null;
@@ -92,6 +105,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         String eventLocation = null;
         String eventOrganizer = null;
         String eventTime = null;
+        Long eventDateMillis = null;
         String eventDesc = null;
 
         Bundle args = getArguments();
@@ -100,6 +114,7 @@ public class EntrantEventDetailsFragment extends Fragment {
             eventLocation = args.getString("event_location");
             eventOrganizer = args.getString("event_organizer");
             eventTime = args.getString("event_time");
+            eventDateMillis = args.getLong("event_date_millis");
             eventDesc = args.getString("event_description");
             imageUrl = args.getString("event_image_url");
             eventDocId = args.getString("event_doc_id");
@@ -112,7 +127,7 @@ public class EntrantEventDetailsFragment extends Fragment {
 
             Glide.with(this)
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_my_events)
+                    .placeholder(R.drawable.celebration_placeholder)
                     .into(image);
         }
 
@@ -121,11 +136,68 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setName(eventName);
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
+        eventForLocal.setDate(new Date(eventDateMillis));
 
-        bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        // this code is so event detail is refreshed every time it's accessed
+        if (eventDocId != null) {
+            loadWaitingListCount(eventDocId, eventForLocal);
+            refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        } else {
+            waitingCountView.setText("Waiting list: --");
+            // backup plan -> local states (copy got from when app first boot)
+            bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+        }
+
+        // clicks on info button to show how lottery is drawn
+        infoBtn.setOnClickListener(v -> showDrawInfoDialog());
 
         return view;
     }
+
+    /**
+     * This function fetches newest event details data to accurately shows buttons
+     * (in case queue status changes)
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param inviteActions     Special group of buttons in case entrant is invited
+     * @param actionBtn         Button to enroll/drop out of waiting list
+     * @param acceptBtn         Button to accept invitation
+     * @param declineBtn        Button to decline invitation
+     */
+    private void refreshEntrantListsAndBind(String eventDocId, Event eventForLocal, ViewGroup inviteActions, MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn) {
+
+        // show loading state while fetching for fancy purposes
+        actionBtn.setEnabled(false);
+        actionBtn.setText("Loading...");
+        actionBtn.setTextColor(Color.WHITE);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users")
+                .document(currentEntrant.getUserId())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot != null && snapshot.exists()) {
+                        List<String> waiting  = (List<String>) snapshot.get("onWaiting");
+                        List<String> invited  = (List<String>) snapshot.get("onInvite");
+                        List<String> accepted = (List<String>) snapshot.get("onAccepted");
+                        List<String> declined = (List<String>) snapshot.get("onDeclined");
+
+                        // update currentEntrant with latest data
+                        currentEntrant.setOnWaiting(waiting != null ? new ArrayList<>(waiting) : new ArrayList<>());
+                        currentEntrant.setOnInvite(invited != null ? new ArrayList<>(invited) : new ArrayList<>());
+                        currentEntrant.setOnAccepted(accepted != null ? new ArrayList<>(accepted) : new ArrayList<>());
+                        currentEntrant.setOnDeclined(declined != null ? new ArrayList<>(declined) : new ArrayList<>());
+                    }
+
+                    bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(), "Failed to refresh status: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+                });
+    }
+
 
     /**
      * Binds action button behaviour to specific state (enroll, invited, etc.)
@@ -143,6 +215,17 @@ public class EntrantEventDetailsFragment extends Fragment {
                                     MaterialButton acceptBtn,
                                     MaterialButton declineBtn) {
         actionBtn.setOnClickListener(null); // clear previous listener
+
+        // Check if event has passed
+        Date now = new Date();
+        if (eventForLocal != null && eventForLocal.isPast(now)) {
+            actionBtn.setVisibility(View.VISIBLE);
+            inviteActions.setVisibility(View.GONE);   // hide accept/decline buttons
+            actionBtn.setText("Event passed");
+            actionBtn.setEnabled(false);
+            actionBtn.setTextColor(Color.WHITE);      // or a softer gray if you prefer
+            return;
+        }
 
         // Case 1: Enroll
         if (!currentEntrant.isInAnyList(eventDocId)) {
@@ -168,9 +251,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         // Case 4: Accepted/Declined
         else if (currentEntrant.isInAcceptedList(eventDocId)) {
-            actionBtn.setText("Accepted");
+            actionBtn.setText("Cancel Spot");
             actionBtn.setTextColor(Color.WHITE);
-            actionBtn.setEnabled(false);
+            actionBtn.setEnabled(true);
+            cancelAccepted(eventDocId, actionBtn, eventForLocal);
         }
         else if (currentEntrant.isInDeclinedList(eventDocId)) {
             actionBtn.setText("Declined");
@@ -214,6 +298,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // bind to dropping list behaviour on next click
                         dropWaitingList(eventDocId, actionBtn, eventForLocal);
 
+                        // increment #entrants
+                        waitingCount++;
+                        updateWaitingCountLabel();
+
                         Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
                     },
                     // fail to enroll due to firebase shenanigans
@@ -253,6 +341,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
                         // rebind to enroll behavior so a subsequent tap enrolls again
                         enrollWaiting(eventDocId, actionBtn, eventForLocal);
+
+                        // decrement #entrants
+                        waitingCount--;
+                        updateWaitingCountLabel();
                     },
                     // fail to enroll due to firebase shenanigans
                     e -> {
@@ -330,5 +422,87 @@ public class EntrantEventDetailsFragment extends Fragment {
                     }
             );
         });
+    }
+
+    /**
+     * Allow entrant to decline accepted spot
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param actionBtn         Button to drop out of accepted list
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     */
+    public void cancelAccepted(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+
+        actionBtn.setOnClickListener(v -> {
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Cancelling...");
+            actionBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.cancelAccepted(
+                    eventForLocal,
+                    eventDocId,
+                    () -> {
+                        Toast.makeText(requireContext(), "You cancelled your spot", Toast.LENGTH_SHORT).show();
+                        actionBtn.setText("Declined");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                    },
+                    e -> {
+                        actionBtn.setText("Cancel Spot");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(),
+                                "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
+    }
+
+    /**
+     * Fetch and display number of entrants on waiting list
+     *
+     * @param eventDocId    Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     */
+    private void loadWaitingListCount(String eventDocId, Event eventForLocal) {
+
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventDocId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<String> waiting = (List<String>) snapshot.get("waitingList");
+                    waitingCount = (waiting != null) ? waiting.size() : 0;
+                    if (eventForLocal != null) { // get newest event details to local
+                        eventForLocal.setWaitingList(waiting != null ? new ArrayList<>(waiting) : new ArrayList<>());
+                    }
+                    updateWaitingCountLabel();
+                })
+                .addOnFailureListener(e -> {
+                    waitingCountView.setText("Waiting list: --");
+                });
+    }
+
+    /**
+     * Update the number of entrants on waiting list displayed on screen
+     */
+    private void updateWaitingCountLabel() {
+        String label = "Waiting list: " + waitingCount + (waitingCount == 1 ? " entrant" : " entrants");
+        waitingCountView.setText(label);
+    }
+
+    /**
+     * To show lottery info popup
+     */
+    private void showDrawInfoDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("How the draw works")
+                .setMessage("Entrants join the waiting list.\n\n" +
+                        "When registration closes, a random draw selects up to the max number allowed " +
+                        "of entrants.\n\n" +
+                        "Selected entrants receive an invitation and must accept by the " +
+                        "deadline.\n\n" +
+                        "If someone declines or cancels, another entrant may be drawn.")
+                .setPositiveButton("Got it", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }

@@ -10,7 +10,7 @@ public class Notification {
     private String toDisplay;
 
     public Notification (String eventName, String status, String uid) {
-        this.uid = uid;
+        this.uid = uid; 
         this.eventName = eventName;
         this.status = status;
         this.toDisplay = "You have been " + status + " for " + eventName;

@@ -1,10 +1,8 @@
 package com.example.zenithchance.models;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * The representative class for all Events.
@@ -52,7 +50,7 @@ public class Event implements Serializable {
      * @param organizer             organizer of the event
      * @param description           event description
      * @param geolocation_required  boolean representing if geolocation is toggled
-     * @param registration_date     date in which to close registration
+     * @param registration_date     date in which to close registration (lottery is drawn)
      * @param finalDeadline         date of finalizing attendees
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
@@ -98,9 +96,11 @@ public class Event implements Serializable {
     public void removeFromWaitingList(String uid) {
         this.waitingList.remove(uid);
     }
-
     public void removeFromInvitedList(String uid) {
         this.invitedList.remove(uid);
+    }
+    public void removeFromAcceptedList(String uid) {
+        this.acceptedList.remove(uid);
     }
 
     /**

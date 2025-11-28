@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
 
@@ -62,7 +63,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
      */
     @NonNull
     public EventVH onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.entrant_event_list_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_events_list_item, parent, false);
         return new EventVH(v);
     }
 
@@ -76,8 +77,12 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
         Event e = eventList.get(position);
         h.name.setText(e.getName());
         h.location.setText(e.getLocation());
-        h.status.setText(e.getStatus());
         h.date.setText(fmt.format(e.getDate())); // formatting date
+
+        Glide.with(h.itemView.getContext())
+                .load(e.getImageUrl())
+                .placeholder(R.drawable.celebration_placeholder)
+                .into(h.image);
 
         h.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onEventClick(e);
@@ -104,10 +109,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventVH> {
          */
         EventVH(View v) {
             super(v);
+            image    = v.findViewById(R.id.event_image);
             date     = v.findViewById(R.id.event_date);
             name     = v.findViewById(R.id.event_name);
             location = v.findViewById(R.id.event_location);
-            status   = v.findViewById(R.id.event_status);
         }
     }
 }
