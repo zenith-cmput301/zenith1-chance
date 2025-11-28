@@ -246,6 +246,8 @@ public class AllEventsFragment extends Fragment {
         for (Event event : events) {
             // Date filter
             Date d = event.getDate();
+            Date now = new Date();
+            if (d.before(now)) continue;
             if (startDateFilter != null && d.before(startDateFilter)) continue;
             if (endDateFilter != null && d.after(endDateFilter)) continue;
 
