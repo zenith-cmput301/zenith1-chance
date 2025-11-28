@@ -20,8 +20,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import java.util.UUID;
 
-
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -37,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Class for the UI used in event creation and modification
@@ -143,19 +140,17 @@ public class OrganizerCreateEventFragment extends Fragment {
     /**
      * This method sets up the submit button to for creation or updating
      */
-    private void setupSubmitButton(){
-
-        Bundle args = getArguments();
-
+    private void setupSubmitButton() {
         submitButton.setOnClickListener(v -> {
-            if (args.getSerializable("event") != null){
+            Bundle args = getArguments();
+            if (args != null && args.getSerializable("event") != null) {
                 updateEventFields(args);
             } else {
                 createNewEvent();
             }
         });
-
     }
+
 
     /**
      * This method sets up the discard button to  return the user to the events fragment
@@ -277,8 +272,8 @@ public class OrganizerCreateEventFragment extends Fragment {
      */
     private void createNewEvent() {
 
-
-        SimpleDateFormat fmt = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+        SimpleDateFormat fmt =
+                new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
 
         Date eventdate;
         Date registrationdate;
@@ -299,14 +294,15 @@ public class OrganizerCreateEventFragment extends Fragment {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-
+                // you might want a Toast here
             }
         }
 
         // Constructs event based on inputted data
         Log.d("organizer name", organizerId.getName());
 
-        Event newEvent = new Event(eventdate,
+        Event newEvent = new Event(
+                eventdate,
                 eventName.getText().toString(),
                 eventLocation.getText().toString(),
                 "waiting",
@@ -315,7 +311,8 @@ public class OrganizerCreateEventFragment extends Fragment {
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 registrationdate,
-                maxEntrants);
+                maxEntrants
+        );
 
         // handle image + save
         if (selectedImageUri != null) {
@@ -325,39 +322,8 @@ public class OrganizerCreateEventFragment extends Fragment {
             // no image; just save event
             saveNewEventToFirestore(newEvent);
         }
-
-        // Adds event to firebase
-        db.collection("events")
-                .add(newEvent)
-
-                .addOnSuccessListener(documentReference -> {
-
-                    String docId = documentReference.getId();
-
-                    Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
-
-                    // Returns to Events fragment
-
-                    ArrayList<String> organizerEventList = organizerId.getOrgEvents();
-
-                    organizerEventList.add(docId);
-
-                    db.collection("users")
-                            .document(organizerId.getUserId())
-                            .update("orgEvents", organizerEventList);
-
-                    organizerId.addOrgEvent(docId);
-
-                    OrganizerEventsFragment fragment = new OrganizerEventsFragment();
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragmentContainer, fragment)
-                            .commit();
-                })
-
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
-                });
     }
+
     private void attachDateTimePicker(Button targetButton) {
 
         targetButton.setOnClickListener(v -> {
@@ -432,10 +398,12 @@ public class OrganizerCreateEventFragment extends Fragment {
                         })
                 )
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Image upload failed", Toast.LENGTH_LONG).show();
-                    // still save event without image
+                    Log.e("FirebaseStorage", "Image upload failed", e);
+                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     saveNewEventToFirestore(newEvent);
                 });
+
+
     }
 
     private void saveNewEventToFirestore(Event newEvent) {
@@ -500,7 +468,4 @@ public class OrganizerCreateEventFragment extends Fragment {
                             Toast.LENGTH_LONG).show();
                 });
     }
-
-
-
 }
