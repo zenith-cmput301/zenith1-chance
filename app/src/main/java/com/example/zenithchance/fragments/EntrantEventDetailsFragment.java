@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -94,6 +96,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         MaterialButton acceptBtn  = view.findViewById(R.id.btn_accept);
         MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
         waitingCountView = view.findViewById(R.id.waiting_list_count);
+        ImageButton infoBtn = view.findViewById(R.id.info_button);
 
         String eventName = null;
         String eventDocId = null;
@@ -140,6 +143,9 @@ public class EntrantEventDetailsFragment extends Fragment {
             // backup plan -> local states (copy got from when app first boot)
             bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
         }
+
+        // clicks on info button to show how lottery is drawn
+        infoBtn.setOnClickListener(v -> showDrawInfoDialog());
 
         return view;
     }
@@ -467,5 +473,21 @@ public class EntrantEventDetailsFragment extends Fragment {
     private void updateWaitingCountLabel() {
         String label = "Waiting list: " + waitingCount + (waitingCount == 1 ? " entrant" : " entrants");
         waitingCountView.setText(label);
+    }
+
+    /**
+     * To show lottery info popup
+     */
+    private void showDrawInfoDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("How the draw works")
+                .setMessage("Entrants join the waiting list.\n\n" +
+                        "When registration closes, a random draw selects up to the max number allowed " +
+                        "of entrants.\n\n" +
+                        "Selected entrants receive an invitation and must accept by the " +
+                        "deadline.\n\n" +
+                        "If someone declines or cancels, another entrant may be drawn.")
+                .setPositiveButton("Got it", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }
