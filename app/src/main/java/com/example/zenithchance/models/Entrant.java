@@ -210,12 +210,53 @@ public class Entrant extends User implements Serializable {
                 event.addDeclinedList(uid);
             }
             if (onSuccess != null) onSuccess.run();
-        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
 
-        // redraw another
-        FirebaseFirestore.getInstance()
-                .collection("events").document(eventDocId)
-                .update("needRedraw", true);
+            // redraw another
+            FirebaseFirestore.getInstance()
+                    .collection("events").document(eventDocId)
+                    .update("needRedraw", true);
+
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+    }
+
+    /**
+     * Allows entrant to decline accepted spot
+     *
+     * @param event         Event to respond to
+     * @param eventDocId    Firebase document id of event
+     * @param onSuccess     A callback to run if the Firestore update succeeds
+     * @param onError       Signal that contains error if update fail
+     */
+    public void cancelAccepted(Event event, String eventDocId, Runnable onSuccess,
+                               java.util.function.Consumer<Exception> onError) {
+
+        String uid = getUserId();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef  = db.collection("users").document(uid);
+        DocumentReference eventRef = db.collection("events").document(eventDocId);
+
+        WriteBatch batch = db.batch();
+        batch.update(userRef,  "onAccepted", FieldValue.arrayRemove(eventDocId));
+        batch.update(userRef, "onDeclined", FieldValue.arrayUnion(eventDocId));
+        batch.update(eventRef, "acceptedList", FieldValue.arrayRemove(uid));
+        batch.update(eventRef, "declinedList", FieldValue.arrayUnion(uid));
+
+        batch.commit().addOnSuccessListener(v -> {
+            onAccepted.remove(eventDocId);
+            onDeclined.add(eventDocId);
+            if (event != null) {
+                event.removeFromAcceptedList(uid);
+                event.addDeclinedList(uid);
+            }
+
+            if (onSuccess != null) onSuccess.run();
+
+            // redraw
+            FirebaseFirestore.getInstance()
+                    .collection("events").document(eventDocId)
+                    .update("needRedraw", true);
+
+        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });;
     }
 
 

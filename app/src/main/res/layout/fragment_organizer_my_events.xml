@@ -18,6 +18,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/run_lotteries_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="Run Lottery"
+        app:layout_constraintBottom_toBottomOf="@+id/my_events_heading"
+        app:layout_constraintEnd_toStartOf="@+id/create_event_button"
+        app:layout_constraintStart_toEndOf="@+id/my_events_heading"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:id="@+id/upcoming_events"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -51,15 +62,15 @@
         android:id="@+id/create_event_button"
         android:layout_width="41dp"
         android:layout_height="46dp"
+        android:layout_marginEnd="16dp"
         android:padding="1dp"
+        android:paddingRight="20dp"
         android:text="+"
         android:textSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/past_events"
+        app:layout_constraintBottom_toBottomOf="@+id/my_events_heading"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.956"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.509" />
+        app:layout_constraintHorizontal_bias="1.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
