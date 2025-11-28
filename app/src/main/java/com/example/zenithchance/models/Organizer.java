@@ -34,73 +34,24 @@ public class Organizer extends User implements Serializable {
         return orgEvents;
     }
 
-//    public void checkAndRunLotteries() {
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        Timestamp now = Timestamp.now();
-//
-//        db.collection("events")
-//                .whereEqualTo("organizer", this.getName())
-//                .whereLessThanOrEqualTo("registrationDate", now)
-//                .whereEqualTo("lotteryRan", false) // only events not drawn yet
-//                .orderBy("registrationDate")
-//                .get()
-//                .addOnSuccessListener(snap -> {
-//                    for (var doc : snap.getDocuments()) {
-//                        Log.d("Organizer", "Qualifying event detected");
-//                        runLottery(doc.getId(), false);
-//                    }
-//                })
-//                .addOnFailureListener(snap -> {
-//                    Log.d("Organizer", "No event qualified.");
-//                });
-//    }
     public void checkAndRunLotteries() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Timestamp now = Timestamp.now();
 
-        String orgName = this.getName();
-        Log.d("Organizer", "checkAndRunLotteries for organizer: " + orgName
-                + " at " + now.toDate());
-
         db.collection("events")
-                .whereEqualTo("organizer", orgName)
+                .whereEqualTo("organizer", this.getName())
+                .whereLessThanOrEqualTo("registrationDate", now)
+                .whereEqualTo("lotteryRan", false) // only events not drawn yet
+                .orderBy("registrationDate")
                 .get()
                 .addOnSuccessListener(snap -> {
-                    Log.d("Organizer", "Found " + snap.size() + " events for organizer " + orgName);
-
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        String eventId = doc.getId();
-                        String eventName = doc.getString("name");
-                        Timestamp regDate = doc.getTimestamp("registrationDate");
-                        Boolean lotteryRan = doc.getBoolean("lotteryRan");
-
-                        Log.d("Organizer", "Event " + eventId + " (" + eventName + ")" +
-                                " regDate=" + (regDate != null ? regDate.toDate() : "null") +
-                                " lotteryRan=" + lotteryRan);
-
-                        if (regDate == null) {
-                            Log.w("Organizer", "Event " + eventId + " has null registrationDate, skipping");
-                            continue;
-                        }
-
-                        boolean alreadyRan = (lotteryRan != null && lotteryRan);
-                        if (alreadyRan) {
-                            Log.d("Organizer", "Event " + eventId + " already had lottery run, skipping");
-                            continue;
-                        }
-
-                        if (regDate.compareTo(now) <= 0) {
-                            Log.d("Organizer", "Running lottery for event " + eventId);
-                            runLottery(eventId, false)
-                                    .addOnFailureListener(e ->
-                                            Log.e("Organizer", "runLottery failed for event " + eventId, e));
-                        } else {
-                            Log.d("Organizer", "Event " + eventId + " not ready yet (regDate in future)");
-                        }
+                    for (var doc : snap.getDocuments()) {
+                        Log.d("Organizer", "Qualifying event detected");
+                        runLottery(doc.getId(), false);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("Organizer", "Error checking lotteries", e);
+                .addOnFailureListener(snap -> {
+                    Log.d("Organizer", "No event qualified.");
                 });
     }
 
