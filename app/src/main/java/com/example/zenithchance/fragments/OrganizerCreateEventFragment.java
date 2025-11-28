@@ -18,6 +18,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import androidx.annotation.Nullable;
@@ -205,6 +209,7 @@ public class OrganizerCreateEventFragment extends Fragment {
      * Updates the event values to the field values currently selected
      * @param args the bundle of arguments passed to the fragment
      */
+
     private void updateEventFields(Bundle args) {
         if (args == null || args.getSerializable("event") == null) {
             return;
@@ -232,11 +237,6 @@ public class OrganizerCreateEventFragment extends Fragment {
             return;
         }
 
-        // if new image chosen this session
-        if (selectedImageUri != null) {
-            event.setImageUrl(selectedImageUri.toString());
-        }
-
         // update rest of fields from UI
         event.setName(eventName.getText().toString());
         event.setLocation(eventLocation.getText().toString());
@@ -250,7 +250,7 @@ public class OrganizerCreateEventFragment extends Fragment {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-
+                // invalid number format
             }
         }
 
@@ -262,8 +262,6 @@ public class OrganizerCreateEventFragment extends Fragment {
         } else {
             saveUpdatedEventToFirestore(event);
         }
-
-
     }
 
 
@@ -383,27 +381,59 @@ public class OrganizerCreateEventFragment extends Fragment {
     }
 
     private void uploadImageAndCreateEvent(Event newEvent) {
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+        if (selectedImageUri == null) {
+            Log.w("ImageUpload", "selectedImageUri is null");
+            saveNewEventToFirestore(newEvent);
+            return;
+        }
 
-        imgRef.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot ->
+        try {
+            Log.d("ImageUpload", "Starting image upload with URI: " + selectedImageUri.toString());
+
+            // Convert URI to bytes
+            InputStream inputStream = getContext().getContentResolver().openInputStream(selectedImageUri);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+
+            byte[] imageBytes = byteArrayOutputStream.toByteArray();
+            inputStream.close();
+
+            Log.d("ImageUpload", "Image converted to bytes, size: " + imageBytes.length);
+
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+            imgRef.putBytes(imageBytes)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d("ImageUpload", "Upload successful, getting download URL");
                         imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String downloadUrl = uri.toString();
+                                    Log.d("ImageUpload", "Download URL: " + downloadUrl);
+                                    newEvent.setImageUrl(downloadUrl);
+                                    saveNewEventToFirestore(newEvent);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("ImageUpload", "Failed to get download URL", e);
+                                    Toast.makeText(getContext(), "Failed to get download URL", Toast.LENGTH_LONG).show();
+                                    saveNewEventToFirestore(newEvent);
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("ImageUpload", "Image upload failed: " + e.getMessage(), e);
+                        Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        saveNewEventToFirestore(newEvent);
+                    });
 
-                            String downloadUrl = uri.toString();
-                            newEvent.setImageUrl(downloadUrl);
-
-                            // now save event with proper imageUrl
-                            saveNewEventToFirestore(newEvent);
-                        })
-                )
-                .addOnFailureListener(e -> {
-                    Log.e("FirebaseStorage", "Image upload failed", e);
-                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    saveNewEventToFirestore(newEvent);
-                });
-
-
+        } catch (IOException e) {
+            Log.e("ImageUpload", "Failed to read image file", e);
+            Toast.makeText(getContext(), "Failed to read image file", Toast.LENGTH_LONG).show();
+            saveNewEventToFirestore(newEvent);
+        }
     }
 
     private void saveNewEventToFirestore(Event newEvent) {
@@ -435,23 +465,65 @@ public class OrganizerCreateEventFragment extends Fragment {
     }
 
     private void uploadImageAndUpdateEvent(Event event) {
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+        // Store the original image URL in case upload fails
+        String originalImageUrl = event.getImageUrl();
 
-        imgRef.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot ->
+        if (selectedImageUri == null) {
+            Log.w("ImageUpload", "selectedImageUri is null");
+            saveUpdatedEventToFirestore(event);
+            return;
+        }
+
+        try {
+            Log.d("ImageUpload", "Starting image upload with URI: " + selectedImageUri.toString());
+
+            // Convert URI to bytes
+            InputStream inputStream = getContext().getContentResolver().openInputStream(selectedImageUri);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+
+            byte[] imageBytes = byteArrayOutputStream.toByteArray();
+            inputStream.close();
+
+            Log.d("ImageUpload", "Image converted to bytes, size: " + imageBytes.length);
+
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+            imgRef.putBytes(imageBytes)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d("ImageUpload", "Upload successful, getting download URL");
                         imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String downloadUrl = uri.toString();
+                                    Log.d("ImageUpload", "Download URL: " + downloadUrl);
+                                    event.setImageUrl(downloadUrl);
+                                    saveUpdatedEventToFirestore(event);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("ImageUpload", "Failed to get download URL", e);
+                                    Toast.makeText(getContext(), "Failed to get download URL", Toast.LENGTH_LONG).show();
+                                    event.setImageUrl(originalImageUrl);
+                                    saveUpdatedEventToFirestore(event);
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("ImageUpload", "Image upload failed: " + e.getMessage(), e);
+                        Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        event.setImageUrl(originalImageUrl);
+                        saveUpdatedEventToFirestore(event);
+                    });
 
-                            String downloadUrl = uri.toString();
-                            event.setImageUrl(downloadUrl);
-
-                            saveUpdatedEventToFirestore(event);
-                        })
-                )
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Image upload failed", Toast.LENGTH_LONG).show();
-                    saveUpdatedEventToFirestore(event);
-                });
+        } catch (IOException e) {
+            Log.e("ImageUpload", "Failed to read image file", e);
+            Toast.makeText(getContext(), "Failed to read image file", Toast.LENGTH_LONG).show();
+            event.setImageUrl(originalImageUrl);
+            saveUpdatedEventToFirestore(event);
+        }
     }
 
     private void saveUpdatedEventToFirestore(Event event) {
@@ -460,6 +532,7 @@ public class OrganizerCreateEventFragment extends Fragment {
                 .set(event)
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Event updated", Toast.LENGTH_SHORT).show();
+                    selectedImageUri = null;  // Reset after successful save
                     requireActivity().getSupportFragmentManager().popBackStack();
                 })
                 .addOnFailureListener(e -> {
