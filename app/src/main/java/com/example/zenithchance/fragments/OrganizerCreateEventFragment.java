@@ -43,7 +43,7 @@ import java.util.Locale;
 /**
  * Class for the UI used in event creation and modification
  *
- * @author Emerson
+ * @author Emerson, Sabrina
  * @version 1.0
  * @see Event
  */
@@ -382,59 +382,26 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     private void uploadImageAndCreateEvent(Event newEvent) {
         if (selectedImageUri == null) {
-            Log.w("ImageUpload", "selectedImageUri is null");
             saveNewEventToFirestore(newEvent);
             return;
         }
 
-        try {
-            Log.d("ImageUpload", "Starting image upload with URI: " + selectedImageUri.toString());
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
 
-            // Convert URI to bytes
-            InputStream inputStream = getContext().getContentResolver().openInputStream(selectedImageUri);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, length);
-            }
-
-            byte[] imageBytes = byteArrayOutputStream.toByteArray();
-            inputStream.close();
-
-            Log.d("ImageUpload", "Image converted to bytes, size: " + imageBytes.length);
-
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
-
-            imgRef.putBytes(imageBytes)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        Log.d("ImageUpload", "Upload successful, getting download URL");
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
                         imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                                    String downloadUrl = uri.toString();
-                                    Log.d("ImageUpload", "Download URL: " + downloadUrl);
-                                    newEvent.setImageUrl(downloadUrl);
-                                    saveNewEventToFirestore(newEvent);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("ImageUpload", "Failed to get download URL", e);
-                                    Toast.makeText(getContext(), "Failed to get download URL", Toast.LENGTH_LONG).show();
-                                    saveNewEventToFirestore(newEvent);
-                                });
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("ImageUpload", "Image upload failed: " + e.getMessage(), e);
-                        Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        saveNewEventToFirestore(newEvent);
-                    });
-
-        } catch (IOException e) {
-            Log.e("ImageUpload", "Failed to read image file", e);
-            Toast.makeText(getContext(), "Failed to read image file", Toast.LENGTH_LONG).show();
-            saveNewEventToFirestore(newEvent);
-        }
+                            newEvent.setImageUrl(uri.toString());
+                            saveNewEventToFirestore(newEvent);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    saveNewEventToFirestore(newEvent);
+                });
     }
+
 
     private void saveNewEventToFirestore(Event newEvent) {
         db.collection("events")
@@ -465,65 +432,25 @@ public class OrganizerCreateEventFragment extends Fragment {
     }
 
     private void uploadImageAndUpdateEvent(Event event) {
-        // Store the original image URL in case upload fails
-        String originalImageUrl = event.getImageUrl();
-
         if (selectedImageUri == null) {
-            Log.w("ImageUpload", "selectedImageUri is null");
             saveUpdatedEventToFirestore(event);
             return;
         }
 
-        try {
-            Log.d("ImageUpload", "Starting image upload with URI: " + selectedImageUri.toString());
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
 
-            // Convert URI to bytes
-            InputStream inputStream = getContext().getContentResolver().openInputStream(selectedImageUri);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, length);
-            }
-
-            byte[] imageBytes = byteArrayOutputStream.toByteArray();
-            inputStream.close();
-
-            Log.d("ImageUpload", "Image converted to bytes, size: " + imageBytes.length);
-
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
-
-            imgRef.putBytes(imageBytes)
-                    .addOnSuccessListener(taskSnapshot -> {
-                        Log.d("ImageUpload", "Upload successful, getting download URL");
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
                         imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                                    String downloadUrl = uri.toString();
-                                    Log.d("ImageUpload", "Download URL: " + downloadUrl);
-                                    event.setImageUrl(downloadUrl);
-                                    saveUpdatedEventToFirestore(event);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("ImageUpload", "Failed to get download URL", e);
-                                    Toast.makeText(getContext(), "Failed to get download URL", Toast.LENGTH_LONG).show();
-                                    event.setImageUrl(originalImageUrl);
-                                    saveUpdatedEventToFirestore(event);
-                                });
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("ImageUpload", "Image upload failed: " + e.getMessage(), e);
-                        Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        event.setImageUrl(originalImageUrl);
-                        saveUpdatedEventToFirestore(event);
-                    });
-
-        } catch (IOException e) {
-            Log.e("ImageUpload", "Failed to read image file", e);
-            Toast.makeText(getContext(), "Failed to read image file", Toast.LENGTH_LONG).show();
-            event.setImageUrl(originalImageUrl);
-            saveUpdatedEventToFirestore(event);
-        }
+                            event.setImageUrl(uri.toString());
+                            saveUpdatedEventToFirestore(event);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    saveUpdatedEventToFirestore(event);
+                });
     }
 
     private void saveUpdatedEventToFirestore(Event event) {
