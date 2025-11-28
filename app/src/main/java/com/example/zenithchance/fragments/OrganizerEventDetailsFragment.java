@@ -1,6 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
+import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -84,6 +86,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
         MaterialButton deleteButton = view.findViewById(R.id.delete_button);
         MaterialButton editButton = view.findViewById(R.id.edit_button);
+        ImageView qr = view.findViewById(R.id.qr_placeholder);
 
         // Title & image
         tvEventName.setText(event.getName()); // required, so no "None" here
@@ -93,6 +96,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 .placeholder(R.drawable.celebration_placeholder)
                 .error(R.drawable.celebration_placeholder)
                 .into(headerImage);
+
+        // QR
+        QRManager manager = new QRManager();
+        manager.updateImageView(qr, event);
+
 
         // Date (required)
         if (event.getDate() != null) {

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -55,6 +56,8 @@ public class AllEventsFragment extends Fragment {
     private Date startDateFilter = null;
     private Date endDateFilter = null;
 
+    private ImageView scannerButton;
+
     // date formats
     private SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
     private SimpleDateFormat displayDateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
@@ -89,10 +92,19 @@ public class AllEventsFragment extends Fragment {
         startDateButton = view.findViewById(R.id.btn_start_date);
         endDateButton = view.findViewById(R.id.btn_end_date);
         clearDatesButton = view.findViewById(R.id.btn_clear_dates);
+        scannerButton = view.findViewById(R.id.qr_scanner_button);
+
 
         startDateButton.setOnClickListener(v -> showDatePicker(true));
         endDateButton.setOnClickListener(v -> showDatePicker(false));
         clearDatesButton.setOnClickListener(v -> clearDateFilters());
+
+        scannerButton.setOnClickListener(v -> {
+            QRScannerFragment createFragment = new QRScannerFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, createFragment)
+                    .commit();
+                });
 
         // Search bar + set listener
         searchEditText = view.findViewById(R.id.search_edit_text);
@@ -116,6 +128,7 @@ public class AllEventsFragment extends Fragment {
 
             // Bundle data to send to EventDetailsFragment
             Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);
             bundle.putString("event_name", event.getName());
             bundle.putString("event_location", event.getLocation());
             bundle.putString("event_organizer", event.getOrganizer());

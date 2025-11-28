@@ -62,6 +62,7 @@ public class EntrantEventListFragment extends Fragment {
             EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
             // get info to fill
             Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);
             bundle.putString("event_name", event.getName());
             bundle.putString("event_location", event.getLocation());
             bundle.putString("event_organizer", event.getOrganizer());

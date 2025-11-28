@@ -413,6 +413,10 @@ public class OrganizerCreateEventFragment extends Fragment {
 
                     String docId = documentReference.getId();
 
+                    // Updates docId field to include the unique docId
+
+                    documentReference.update("docId", docId);
+
                     Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
 
                     ArrayList<String> organizerEventList = organizerId.getOrgEvents();

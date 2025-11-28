@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
+import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
@@ -98,7 +99,9 @@ public class EntrantEventDetailsFragment extends Fragment {
         MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
         waitingCountView = view.findViewById(R.id.waiting_list_count);
         ImageButton infoBtn = view.findViewById(R.id.info_button);
+        ImageView qr = view.findViewById(R.id.qr);
 
+        Event event;
         String eventName = null;
         String eventDocId = null;
         String imageUrl = null;
@@ -110,6 +113,7 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null) {
+            event = (Event) args.getSerializable("event");
             eventName = args.getString("event_name");
             eventLocation = args.getString("event_location");
             eventOrganizer = args.getString("event_organizer");
@@ -124,6 +128,10 @@ public class EntrantEventDetailsFragment extends Fragment {
             organizer.setText(eventOrganizer);
             time.setText(eventTime);
             desc.setText(eventDesc);
+
+            // QR
+            QRManager manager = new QRManager();
+            manager.updateImageView(qr, event);
 
             Glide.with(this)
                     .load(imageUrl)

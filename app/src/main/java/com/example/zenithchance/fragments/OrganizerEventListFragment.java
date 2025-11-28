@@ -143,6 +143,7 @@ public class OrganizerEventListFragment extends Fragment {
                                     }
                                 }
                             }
+
                             adapter.updateList(filteredList);
 
                             // done loading
