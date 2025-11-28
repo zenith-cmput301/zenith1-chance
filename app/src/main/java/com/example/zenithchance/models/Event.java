@@ -100,6 +100,9 @@ public class Event implements Serializable {
     public void removeFromInvitedList(String uid) {
         this.invitedList.remove(uid);
     }
+    public void removeFromAcceptedList(String uid) {
+        this.acceptedList.remove(uid);
+    }
 
     /**
      * Time checks

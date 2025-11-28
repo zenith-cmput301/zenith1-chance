@@ -225,9 +225,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         // Case 4: Accepted/Declined
         else if (currentEntrant.isInAcceptedList(eventDocId)) {
-            actionBtn.setText("Accepted");
+            actionBtn.setText("Cancel Spot");
             actionBtn.setTextColor(Color.WHITE);
-            actionBtn.setEnabled(false);
+            actionBtn.setEnabled(true);
+            cancelAccepted(eventDocId, actionBtn, eventForLocal);
         }
         else if (currentEntrant.isInDeclinedList(eventDocId)) {
             actionBtn.setText("Declined");
@@ -384,6 +385,37 @@ public class EntrantEventDetailsFragment extends Fragment {
                         acceptBtn.setEnabled(true);
                         declineBtn.setEnabled(true);
                         Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
+        });
+    }
+
+    public void cancelAccepted(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+
+        actionBtn.setOnClickListener(v -> {
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Cancelling...");
+            actionBtn.setTextColor(Color.WHITE);
+
+            currentEntrant.cancelAccepted(
+                    eventForLocal,
+                    eventDocId,
+                    // success
+                    () -> {
+                        Toast.makeText(requireContext(),
+                                "You cancelled your spot", Toast.LENGTH_SHORT).show();
+
+                        // After cancelling, reflect that they have declined
+                        actionBtn.setText("Declined");
+                        actionBtn.setTextColor(Color.WHITE);
+                        actionBtn.setEnabled(false);
+                    },
+                    // failure
+                    e -> {
+                        actionBtn.setText("Cancel Spot");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(),
+                                "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
             );
         });
