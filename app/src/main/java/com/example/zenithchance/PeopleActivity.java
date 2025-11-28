@@ -39,7 +39,7 @@ public class PeopleActivity extends AppCompatActivity {
         btnAccepted = findViewById(R.id.btnAccepted);
         btnDeclined = findViewById(R.id.btnDeclined);
         listPeople = findViewById(R.id.listPeople);
-        btnMyEvents = findViewById(R.id.btnMyEvents);
+       // btnMyEvents = findViewById(R.id.btnMyEvents);
 
         db = FirebaseFirestore.getInstance();
 
