@@ -38,6 +38,8 @@ import java.util.List;
  */
 public class EntrantEventDetailsFragment extends Fragment {
     private Entrant currentEntrant;
+    private TextView waitingCountView;
+    private int waitingCount = -1;
 
     public EntrantEventDetailsFragment() { }
 
@@ -91,6 +93,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         ViewGroup inviteActions = view.findViewById(R.id.invite_actions);
         MaterialButton acceptBtn  = view.findViewById(R.id.btn_accept);
         MaterialButton declineBtn = view.findViewById(R.id.btn_decline);
+        waitingCountView = view.findViewById(R.id.waiting_list_count);
 
         String eventName = null;
         String eventDocId = null;
@@ -130,8 +133,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
         // this code is so event detail is refreshed every time it's accessed
         if (eventDocId != null) {
+            loadWaitingListCount(eventDocId, eventForLocal);
             refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
         } else {
+            waitingCountView.setText("Waiting list: --");
             // backup plan -> local states (copy got from when app first boot)
             bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
         }
@@ -272,6 +277,10 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // bind to dropping list behaviour on next click
                         dropWaitingList(eventDocId, actionBtn, eventForLocal);
 
+                        // increment #entrants
+                        waitingCount++;
+                        updateWaitingCountLabel();
+
                         Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
                     },
                     // fail to enroll due to firebase shenanigans
@@ -311,6 +320,10 @@ public class EntrantEventDetailsFragment extends Fragment {
 
                         // rebind to enroll behavior so a subsequent tap enrolls again
                         enrollWaiting(eventDocId, actionBtn, eventForLocal);
+
+                        // decrement #entrants
+                        waitingCount--;
+                        updateWaitingCountLabel();
                     },
                     // fail to enroll due to firebase shenanigans
                     e -> {
@@ -421,5 +434,38 @@ public class EntrantEventDetailsFragment extends Fragment {
                     }
             );
         });
+    }
+
+    /**
+     * Fetch and display number of entrants on waiting list
+     *
+     * @param eventDocId    Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     */
+    private void loadWaitingListCount(String eventDocId, Event eventForLocal) {
+
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventDocId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<String> waiting = (List<String>) snapshot.get("waitingList");
+                    waitingCount = (waiting != null) ? waiting.size() : 0;
+                    if (eventForLocal != null) { // get newest event details to local
+                        eventForLocal.setWaitingList(waiting != null ? new ArrayList<>(waiting) : new ArrayList<>());
+                    }
+                    updateWaitingCountLabel();
+                })
+                .addOnFailureListener(e -> {
+                    waitingCountView.setText("Waiting list: --");
+                });
+    }
+
+    /**
+     * Update the number of entrants on waiting list displayed on screen
+     */
+    private void updateWaitingCountLabel() {
+        String label = "Waiting list: " + waitingCount + (waitingCount == 1 ? " entrant" : " entrants");
+        waitingCountView.setText(label);
     }
 }

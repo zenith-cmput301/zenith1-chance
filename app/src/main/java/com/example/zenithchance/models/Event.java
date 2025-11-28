@@ -96,7 +96,6 @@ public class Event implements Serializable {
     public void removeFromWaitingList(String uid) {
         this.waitingList.remove(uid);
     }
-
     public void removeFromInvitedList(String uid) {
         this.invitedList.remove(uid);
     }

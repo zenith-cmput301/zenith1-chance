@@ -117,6 +117,28 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 
+        <!-- Waiting list count row -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_profile"
+                app:tint="@color/theme_color"/>
+
+            <TextView
+                android:id="@+id/waiting_list_count"
+                android:layout_marginStart="12dp"
+                android:text="Waiting list count: --"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
     </LinearLayout>
 
     <!-- Scrollable Description -->
