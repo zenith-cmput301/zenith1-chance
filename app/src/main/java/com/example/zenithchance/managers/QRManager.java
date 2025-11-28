@@ -3,7 +3,11 @@ package com.example.zenithchance.managers;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import com.example.zenithchance.R;
+import com.example.zenithchance.fragments.OrganizerEventDetailsFragment;
+import com.example.zenithchance.fragments.OrganizerEventsFragment;
 import com.example.zenithchance.models.Event;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
@@ -18,6 +22,7 @@ import com.google.zxing.MultiFormatWriter;
  */
 public class QRManager {
 
+    private FirebaseFirestore db;
     public QRManager() {
     }
 
@@ -64,5 +69,24 @@ public class QRManager {
         return;
     }
 
-
+//    public void parseQRText(String link) {
+//
+//        // Removes prefix
+//        String docId = link.replace("zenith1/", "");
+//
+//        db = FirebaseFirestore.getInstance();
+//
+//        // Grabs Event
+//        db.collection("events")
+//                .document(docId)
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        Event event = (Event) documentSnapshot.toObject(Event.class);
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                });
+//
+//    }
 }

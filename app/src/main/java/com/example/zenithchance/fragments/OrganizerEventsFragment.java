@@ -104,8 +104,8 @@ public class OrganizerEventsFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable("organizer", organizer);
 
-//            OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
-            QRScannerFragment createFragment = new QRScannerFragment();
+            OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+//            QRScannerFragment createFragment = new QRScannerFragment();
             createFragment.setArguments(bundle);
 
             requireActivity().getSupportFragmentManager().beginTransaction()

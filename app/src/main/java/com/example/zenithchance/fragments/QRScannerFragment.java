@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.R;
 import com.example.zenithchance.managers.QRManager;
+import com.example.zenithchance.models.Event;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.journeyapps.barcodescanner.DefaultDecoderFactory;
@@ -22,11 +24,15 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Locale;
 
 public class QRScannerFragment extends Fragment {
 
     private DecoratedBarcodeView barcodeView;
+
+    private FirebaseFirestore db;
 
     public QRScannerFragment() {}
 
@@ -36,7 +42,6 @@ public class QRScannerFragment extends Fragment {
             @NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-
 
         View view = inflater.inflate(R.layout.fragment_qr_scanner, container, false);
         barcodeView = view.findViewById(R.id.qr_scanner);
@@ -61,7 +66,8 @@ public class QRScannerFragment extends Fragment {
             String text = result.getText();
 
             if (text != null) {
-                QRManager manager = new QRManager();
+
+                navigateToEvent(text);
             }
         });
     }
@@ -79,13 +85,52 @@ public class QRScannerFragment extends Fragment {
                     public void onPermissionDenied(PermissionDeniedResponse response) {}
 
                     @Override
-                    public void onPermissionRationaleShouldBeShown(
-                            PermissionRequest permission,
-                            PermissionToken token
-                    ) {
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
                         token.continuePermissionRequest();
                     }
                 }).check();
+    }
+
+    public void navigateToEvent(String link) {
+
+        // Removes prefix
+        String docId = link.replace("zenith1/", "");
+
+        db = FirebaseFirestore.getInstance();
+
+        // Grabs Event
+        db.collection("events")
+                .document(docId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Event event = documentSnapshot.toObject(Event.class);
+                        populateDetailFragment(event);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                });
+
+    }
+
+    public void populateDetailFragment (Event event) {
+        EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+
+        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+
+        Bundle bundle = new Bundle();
+        bundle.putString("event_name", event.getName());
+        bundle.putString("event_location", event.getLocation());
+        bundle.putString("event_organizer", event.getOrganizer());
+        bundle.putString("event_time", fmt.format(event.getDate()));
+        bundle.putString("event_description", event.getDescription());
+        bundle.putString("event_image_url", event.getImageUrl());
+        bundle.putString("event_doc_id", event.getDocId());
+        fragment.setArguments(bundle);
+
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .commit();
     }
 
     @Override
