@@ -2,6 +2,8 @@ package com.example.zenithchance.fragments;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.example.zenithchance.models.User;
 import com.example.zenithchance.navigation.EntrantNavigationHelper;
 import com.example.zenithchance.R;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -56,6 +59,11 @@ public class AllEventsFragment extends Fragment {
     private SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
     private SimpleDateFormat displayDateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
+    // for searching events
+    private TextInputEditText searchEditText;
+    private String searchQuery = "";
+
+
     /**
      * This method defines what happens when this fragment is created
      *
@@ -73,11 +81,11 @@ public class AllEventsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_events, container, false);
 
-        // recycler view
+        // Recycler view
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // buttons + their listeners
+        // Buttons + their listeners
         startDateButton = view.findViewById(R.id.btn_start_date);
         endDateButton = view.findViewById(R.id.btn_end_date);
         clearDatesButton = view.findViewById(R.id.btn_clear_dates);
@@ -86,8 +94,21 @@ public class AllEventsFragment extends Fragment {
         endDateButton.setOnClickListener(v -> showDatePicker(false));
         clearDatesButton.setOnClickListener(v -> clearDateFilters());
 
-        adapter = new AllEventsAdapter(requireContext(), events, event -> {
+        // Search bar + set listener
+        searchEditText = view.findViewById(R.id.search_edit_text);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchQuery = s.toString().trim().toLowerCase(Locale.getDefault());
+                applyFilters();
+            }
+        });
+
+        // Setup adapter
+        adapter = new AllEventsAdapter(requireContext(), events, event -> {
             // Setup
             User currentUser = null;
             if (requireActivity() instanceof UserProviderInterface) currentUser = ((UserProviderInterface) requireActivity()).getCurrentUser();
@@ -130,7 +151,6 @@ public class AllEventsFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
-
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
@@ -153,8 +173,7 @@ public class AllEventsFragment extends Fragment {
                             events.add(event);
                         }
                     }
-                    // adapter.updateList(eventList);
-                    applyDateFilter();
+                    applyFilters();
                 })
                 .addOnFailureListener(e -> Log.e("AllEventsFragment", "Error fetching events", e));
     }
@@ -191,7 +210,7 @@ public class AllEventsFragment extends Fragment {
                         endDateFilter = picked.getTime();
                         endDateButton.setText(displayDateFormat.format(endDateFilter));
                     }
-                    applyDateFilter();
+                    applyFilters();
                 },
                 year, month, day
         );
@@ -207,34 +226,43 @@ public class AllEventsFragment extends Fragment {
         endDateFilter = null;
         startDateButton.setText("Start date");
         endDateButton.setText("End date");
-        applyDateFilter();
+        searchQuery = "";
+        searchEditText.setText("");
+        applyFilters();
     }
 
     /**
      * Apply set filters to list of events
      */
-    private void applyDateFilter() {
+    private void applyFilters() {
         if (events.isEmpty()) {
             adapter.updateList(new ArrayList<>());
             return;
         }
 
-        // No filter
-        if (startDateFilter == null && endDateFilter == null) {
-            adapter.updateList(new ArrayList<>(events));
-            return;
-        }
-
-        // Filter
+        // Filter date + name
         List<Event> filtered = new ArrayList<>();
         for (Event event : events) {
+            // Date filter
             Date d = event.getDate();
-            boolean inRange = true;
+            if (startDateFilter != null && d.before(startDateFilter)) continue;
+            if (endDateFilter != null && d.after(endDateFilter)) continue;
 
-            if (startDateFilter != null && d.before(startDateFilter)) inRange = false;
-            if (endDateFilter != null && d.after(endDateFilter)) inRange = false;
+            // Name + description filter
+            String eventName = event.getName();
+            String description = event.getDescription();
+            boolean match = true;
+            if (!searchQuery.isEmpty()) {
+                match = false;
+                if (eventName.toLowerCase(Locale.getDefault()).contains(searchQuery.toLowerCase())) {
+                    match = true;
+                }
+                if (description.toLowerCase(Locale.getDefault()).contains(searchQuery.toLowerCase())) {
+                    match = true;
+                }
+            }
 
-            if (inRange) filtered.add(event);
+            if (match) filtered.add(event);
         }
         adapter.updateList(filtered);
     }
