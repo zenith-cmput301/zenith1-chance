@@ -122,6 +122,7 @@ public class AllEventsFragment extends Fragment {
 
             String formattedDate = (event.getDate() != null) ? fmt.format(event.getDate()) : "Date not available";
             bundle.putString("event_time", formattedDate);
+            bundle.putLong("event_date_millis", event.getDate().getTime());
 
             bundle.putString("event_description", event.getDescription());
             bundle.putString("event_image_url", event.getImageUrl());

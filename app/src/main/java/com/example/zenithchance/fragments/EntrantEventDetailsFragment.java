@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -104,6 +105,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         String eventLocation = null;
         String eventOrganizer = null;
         String eventTime = null;
+        Long eventDateMillis = null;
         String eventDesc = null;
 
         Bundle args = getArguments();
@@ -112,6 +114,7 @@ public class EntrantEventDetailsFragment extends Fragment {
             eventLocation = args.getString("event_location");
             eventOrganizer = args.getString("event_organizer");
             eventTime = args.getString("event_time");
+            eventDateMillis = args.getLong("event_date_millis");
             eventDesc = args.getString("event_description");
             imageUrl = args.getString("event_image_url");
             eventDocId = args.getString("event_doc_id");
@@ -133,6 +136,7 @@ public class EntrantEventDetailsFragment extends Fragment {
         eventForLocal.setName(eventName);
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
+        eventForLocal.setDate(new Date(eventDateMillis));
 
         // this code is so event detail is refreshed every time it's accessed
         if (eventDocId != null) {
@@ -211,6 +215,17 @@ public class EntrantEventDetailsFragment extends Fragment {
                                     MaterialButton acceptBtn,
                                     MaterialButton declineBtn) {
         actionBtn.setOnClickListener(null); // clear previous listener
+
+        // Check if event has passed
+        Date now = new Date();
+        if (eventForLocal != null && eventForLocal.isPast(now)) {
+            actionBtn.setVisibility(View.VISIBLE);
+            inviteActions.setVisibility(View.GONE);   // hide accept/decline buttons
+            actionBtn.setText("Event passed");
+            actionBtn.setEnabled(false);
+            actionBtn.setTextColor(Color.WHITE);      // or a softer gray if you prefer
+            return;
+        }
 
         // Case 1: Enroll
         if (!currentEntrant.isInAnyList(eventDocId)) {
