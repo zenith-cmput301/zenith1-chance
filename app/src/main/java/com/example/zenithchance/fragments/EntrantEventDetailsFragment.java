@@ -390,6 +390,13 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
+    /**
+     * Allow entrant to decline accepted spot
+     *
+     * @param eventDocId        Firestore document id of event
+     * @param actionBtn         Button to drop out of accepted list
+     * @param eventForLocal     Local copy of event fetched from Firestore
+     */
     public void cancelAccepted(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
 
         actionBtn.setOnClickListener(v -> {
@@ -400,17 +407,12 @@ public class EntrantEventDetailsFragment extends Fragment {
             currentEntrant.cancelAccepted(
                     eventForLocal,
                     eventDocId,
-                    // success
                     () -> {
-                        Toast.makeText(requireContext(),
-                                "You cancelled your spot", Toast.LENGTH_SHORT).show();
-
-                        // After cancelling, reflect that they have declined
+                        Toast.makeText(requireContext(), "You cancelled your spot", Toast.LENGTH_SHORT).show();
                         actionBtn.setText("Declined");
                         actionBtn.setTextColor(Color.WHITE);
                         actionBtn.setEnabled(false);
                     },
-                    // failure
                     e -> {
                         actionBtn.setText("Cancel Spot");
                         actionBtn.setEnabled(true);

@@ -219,7 +219,14 @@ public class Entrant extends User implements Serializable {
         }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
     }
 
-
+    /**
+     * Allows entrant to decline accepted spot
+     *
+     * @param event         Event to respond to
+     * @param eventDocId    Firebase document id of event
+     * @param onSuccess     A callback to run if the Firestore update succeeds
+     * @param onError       Signal that contains error if update fail
+     */
     public void cancelAccepted(Event event, String eventDocId, Runnable onSuccess,
                                java.util.function.Consumer<Exception> onError) {
 
