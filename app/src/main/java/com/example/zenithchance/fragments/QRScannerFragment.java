@@ -119,6 +119,7 @@ public class QRScannerFragment extends Fragment {
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
         Bundle bundle = new Bundle();
+        bundle.putSerializable("event", event);
         bundle.putString("event_name", event.getName());
         bundle.putString("event_location", event.getLocation());
         bundle.putString("event_organizer", event.getOrganizer());

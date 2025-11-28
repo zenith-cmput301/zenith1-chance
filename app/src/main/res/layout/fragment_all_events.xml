@@ -99,4 +99,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/entrant_event_list_item" />
 
+    <ImageView
+        android:id="@+id/qr_scanner_button"
+        android:layout_width="41dp"
+        android:layout_height="33dp"
+        android:src="@drawable/baseline_camera_alt_24"
+        android:strokeColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/search_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.843"
+        app:layout_constraintStart_toEndOf="@+id/all_events_heading"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.444" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
