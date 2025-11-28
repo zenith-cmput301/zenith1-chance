@@ -16,6 +16,11 @@ import android.widget.NumberPicker;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import java.util.UUID;
+
+
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -32,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Class for the UI used in event creation and modification
@@ -256,20 +262,12 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setMaxEntrants(maxEntrants);
 
         // push the updated event to Firestore
-        db.collection("events")
-                .document(event.getDocId())
-                .set(event)   // overwrite the doc with the updated POJO
-                .addOnSuccessListener(unused -> {
-                    Toast.makeText(getContext(), "Event updated", Toast.LENGTH_SHORT).show();
+        if (selectedImageUri != null) {
+            uploadImageAndUpdateEvent(event);
+        } else {
+            saveUpdatedEventToFirestore(event);
+        }
 
-                    // go back to the details screen or events list
-                    requireActivity().getSupportFragmentManager().popBackStack();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(),
-                            "Error updating event: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
 
     }
 
@@ -319,9 +317,13 @@ public class OrganizerCreateEventFragment extends Fragment {
                 registrationdate,
                 maxEntrants);
 
-        // handle image
+        // handle image + save
         if (selectedImageUri != null) {
-            newEvent.setImageUrl(selectedImageUri.toString());
+            // upload image first, then save event with download URL
+            uploadImageAndCreateEvent(newEvent);
+        } else {
+            // no image; just save event
+            saveNewEventToFirestore(newEvent);
         }
 
         // Adds event to firebase
@@ -413,5 +415,92 @@ public class OrganizerCreateEventFragment extends Fragment {
             datePicker.show();
         });
     }
+
+    private void uploadImageAndCreateEvent(Event newEvent) {
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
+                        imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                            String downloadUrl = uri.toString();
+                            newEvent.setImageUrl(downloadUrl);
+
+                            // now save event with proper imageUrl
+                            saveNewEventToFirestore(newEvent);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed", Toast.LENGTH_LONG).show();
+                    // still save event without image
+                    saveNewEventToFirestore(newEvent);
+                });
+    }
+
+    private void saveNewEventToFirestore(Event newEvent) {
+        db.collection("events")
+                .add(newEvent)
+                .addOnSuccessListener(documentReference -> {
+
+                    String docId = documentReference.getId();
+
+                    Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
+
+                    ArrayList<String> organizerEventList = organizerId.getOrgEvents();
+                    organizerEventList.add(docId);
+
+                    db.collection("users")
+                            .document(organizerId.getUserId())
+                            .update("orgEvents", organizerEventList);
+
+                    organizerId.addOrgEvent(docId);
+
+                    OrganizerEventsFragment fragment = new OrganizerEventsFragment();
+                    requireActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, fragment)
+                            .commit();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void uploadImageAndUpdateEvent(Event event) {
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
+                        imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                            String downloadUrl = uri.toString();
+                            event.setImageUrl(downloadUrl);
+
+                            saveUpdatedEventToFirestore(event);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed", Toast.LENGTH_LONG).show();
+                    saveUpdatedEventToFirestore(event);
+                });
+    }
+
+    private void saveUpdatedEventToFirestore(Event event) {
+        db.collection("events")
+                .document(event.getDocId())
+                .set(event)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(getContext(), "Event updated", Toast.LENGTH_SHORT).show();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(),
+                            "Error updating event: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+    }
+
+
 
 }
