@@ -175,6 +175,17 @@
                 android:id="@+id/event_geolocation_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+
+            <!-- Caption for geolocation box -->
+            <TextView
+                android:id="@+id/geolocation_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Restricts waiting-list access to attendees at the event location."
+                android:textSize="12sp"
+                android:textColor="@android:color/darker_gray" />
         </LinearLayout>
 
         <!-- Buttons row -->

@@ -55,13 +55,16 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    //    Glide: Dependencies added  for processing image URLs better
+    // Glide: Dependencies added  for processing image URLs better
     implementation("com.github.bumptech.glide:glide:5.0.5")
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
     implementation("com.google.android.material:material:1.12.0")
     implementation("com.google.firebase:firebase-storage:20.3.0")
 
-//    Fragment testing dependency
+    // Fragment testing dependency
     debugImplementation("androidx.fragment:fragment-testing:1.8.2")
+
+    // maps services for location
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
 
 }

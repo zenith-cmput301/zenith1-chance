@@ -1,5 +1,7 @@
 package com.example.zenithchance.models;
 
+import com.google.firebase.firestore.GeoPoint;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,18 +10,21 @@ import java.util.Date;
  * The representative class for all Events.
  * All information pertaining to an event should be found here.
  *
- * @author Percy
+ * @author Percy, Sabrina
  * @version 1.1
  */
 
 public class Event implements Serializable {
     private Date date;
     private String name;
-    private String location;
     private String organizer; // name of organizer, not document id
     private String status;
     private String description;
     private Boolean geolocation_required;
+
+    private String location; // readable location String (e.g. "University of Alberta")
+    private GeoPoint locationPoint; // actual coordinates of location
+
     private Date registration_date;
     private Date finalDeadline;
     private Integer max_entrants;
@@ -127,9 +132,6 @@ public class Event implements Serializable {
         return name;
     }
 
-    public String getLocation() {
-        return location;
-    }
 
     public String getOrganizer() {
         return organizer;
@@ -191,9 +193,26 @@ public class Event implements Serializable {
         return docId;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public GeoPoint getLocationPoint() {
+        return locationPoint;
+    }
+
     /**
      * Setters
      */
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setLocationPoint(GeoPoint locationPoint) {
+        this.locationPoint = locationPoint;
+    }
+
 
     public void setDate(Date date) {
         this.date = date;
@@ -203,9 +222,7 @@ public class Event implements Serializable {
         this.name = name;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+
 
     public void setOrganizer(String organizer) {
         this.organizer = organizer;

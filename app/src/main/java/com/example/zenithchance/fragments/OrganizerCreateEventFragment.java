@@ -18,10 +18,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.firestore.GeoPoint;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.UUID;
 
 import androidx.annotation.Nullable;
@@ -69,6 +67,9 @@ public class OrganizerCreateEventFragment extends Fragment {
     private Uri selectedImageUri;
 
     private ActivityResultLauncher<String> pickImageLauncher;
+
+    private Double eventLat = null;
+    private Double eventLng = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -181,10 +182,18 @@ public class OrganizerCreateEventFragment extends Fragment {
         if (event == null) return;
 
         eventName.setText(event.getName());
-        eventLocation.setText(event.getLocation());
+        eventLocation.setText(event.getLocation()); // String, no cast needed
         eventMaxEntrants.setText(String.valueOf(event.getMaxEntrants()));
         eventDescription.setText(event.getDescription());
         eventGeolocationRequired.setChecked(event.getGeolocationRequired());
+
+        // get coordinates from locationPoint
+        GeoPoint point = event.getLocationPoint();
+        if (point != null) {
+            eventLat = point.getLatitude();
+            eventLng = point.getLongitude();
+
+        }
 
         SimpleDateFormat fmt =
                 new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
@@ -205,6 +214,7 @@ public class OrganizerCreateEventFragment extends Fragment {
     }
 
 
+
     /**
      * Updates the event values to the field values currently selected
      * @param args the bundle of arguments passed to the fragment
@@ -222,7 +232,6 @@ public class OrganizerCreateEventFragment extends Fragment {
                 new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
 
         try {
-            // parse dates from the buttons, same format as createNewEvent
             Date eventDate = fmt.parse(eventDateButton.getText().toString());
             Date registrationDate = fmt.parse(eventRegistrationButton.getText().toString());
 
@@ -237,14 +246,13 @@ public class OrganizerCreateEventFragment extends Fragment {
             return;
         }
 
-        // update rest of fields from UI
         event.setName(eventName.getText().toString());
         event.setLocation(eventLocation.getText().toString());
         event.setDescription(eventDescription.getText().toString());
         event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 0;
 
         if (!text.isEmpty()) {
             try {
@@ -256,6 +264,11 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         event.setMaxEntrants(maxEntrants);
 
+        // save GeoPoint if there are coordinates
+        if (eventLat != null && eventLng != null) {
+            event.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        }
+
         // push the updated event to Firestore
         if (selectedImageUri != null) {
             uploadImageAndUpdateEvent(event);
@@ -263,7 +276,6 @@ public class OrganizerCreateEventFragment extends Fragment {
             saveUpdatedEventToFirestore(event);
         }
     }
-
 
     /**
      * Creates the event using the fields selected by the user and updates the users FireStore document
@@ -300,6 +312,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         Log.d("organizer name", organizerId.getName());
 
         Event newEvent = new Event(
+
                 eventdate,
                 eventName.getText().toString(),
                 eventLocation.getText().toString(),
@@ -311,6 +324,12 @@ public class OrganizerCreateEventFragment extends Fragment {
                 registrationdate,
                 maxEntrants
         );
+
+        // handle location
+        if (eventLat != null && eventLng != null) {
+            newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        }
+
 
         // handle image + save
         if (selectedImageUri != null) {
