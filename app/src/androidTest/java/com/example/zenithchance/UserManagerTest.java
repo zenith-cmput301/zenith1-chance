@@ -198,7 +198,7 @@ public class UserManagerTest {
         assertEquals("entrant", doc.getString("type"));
         assertEquals("New Entrant", doc.getString("name"));
 
-        users.sendNotification("Test Event", "Test Status", e.getUserId());
+        users.sendNotification("Test Event", "Test Status", e);
         Thread.sleep(3000); // Wait 3 seconds for Firestore to process
 
         // Fetching the UPDATED document from Firestore to verify the change actually happened
