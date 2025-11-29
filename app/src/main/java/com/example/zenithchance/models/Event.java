@@ -50,7 +50,7 @@ public class Event implements Serializable {
      * @param organizer             organizer of the event
      * @param description           event description
      * @param geolocation_required  boolean representing if geolocation is toggled
-     * @param registration_date     date in which to close registration (lottery is drawn)
+     * @param registration_date     date in which the lottery is drawn
      * @param finalDeadline         date of finalizing attendees
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
