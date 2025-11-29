@@ -156,6 +156,12 @@
                 android:layout_marginBottom="24dp"
                 android:textSize="16sp" />
 
+            <ImageView
+                android:id="@+id/qr_placeholder"
+                android:layout_width="369dp"
+                android:layout_height="127dp"
+                app:srcCompat="@android:drawable/ic_menu_gallery" />
+
             <!-- Buttons -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/edit_button"

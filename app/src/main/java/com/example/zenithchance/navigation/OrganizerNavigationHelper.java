@@ -53,6 +53,6 @@ public class OrganizerNavigationHelper {
         });
 
         // Set default tab to All Events
-        bottomNav.setSelectedItemId(R.id.nav_profile);
+        bottomNav.setSelectedItemId(R.id.nav_my_events);
     }
 }

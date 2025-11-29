@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,8 +33,8 @@ import java.util.Set;
 /**
  * Class for the Organizer Events page logic
  *
- * @author Emerson
- * @version 1.0
+ * @author Emerson, Lauren, Percy
+ * @version 1.1
  * @see Event
  * @see Organizer
  * @see OrganizerEventListFragment
@@ -46,6 +47,7 @@ public class OrganizerEventsFragment extends Fragment {
     private Organizer organizer;
 
     Button createEventButton;
+    Button runLotteriesButton;
 
     @Nullable
     @Override
@@ -75,10 +77,12 @@ public class OrganizerEventsFragment extends Fragment {
         fm.executePendingTransactions();
 
         createEventButton = view.findViewById(R.id.create_event_button);
+        runLotteriesButton = view.findViewById(R.id.run_lotteries_button);
 
         // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
 
         initCreateEventButton();
+        runLotteries();
 
         organizer.checkAndRunLotteries();
 
@@ -105,13 +109,27 @@ public class OrganizerEventsFragment extends Fragment {
             bundle.putSerializable("organizer", organizer);
 
             OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+//            QRScannerFragment createFragment = new QRScannerFragment();
             createFragment.setArguments(bundle);
 
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, createFragment)
                     .commit();
         });
+    }
 
+    private void runLotteries() {
+        runLotteriesButton.setOnClickListener(v -> {
+            if (organizer == null && getActivity() instanceof OrganizerMainActivity) {
+                organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
+            }
+
+            // Manually trigger both checks
+            organizer.checkAndRunLotteries();
+            organizer.checkAndRedraw();
+
+            Toast.makeText(getContext(), "Lotteries ran", Toast.LENGTH_SHORT).show();
+        });
     }
 
 }
