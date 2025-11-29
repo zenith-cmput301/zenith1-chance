@@ -18,6 +18,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -235,32 +236,43 @@ public final class UserManager {
      * Credit: Gemini AI for debugging purposes
      * @author Lauren
      *
-     * @param user This is the user to have their Notifications updated.
+     * @param id This is the user to have their Notifications updated.
      */
-    public void updateUserNotifications(User user) {
-        String id = user.getUserId();
+    public void updateUserNotifications(String id) {
 
         // Checks the ID
         if (id == null || id.isEmpty()) {
             Log.e("UserManager", "CRITICAL ERROR: User ID is NULL or Empty. Cannot update.");
             return;
         }
-
-        // Checks the List Content
-        List<String> currentList = user.getNotifications();
-        if (currentList == null) {
-            Log.e("UserManager", "CRITICAL ERROR: getNotifications() returned null.");
-            return;
-        }
-
-        // Create the fresh copy
-        List<String> listForFirestore = new ArrayList<>(currentList);
-
         userCollection.document(id)
-                .update("notifications", listForFirestore)
-                .addOnSuccessListener(aVoid -> Log.d("UserManager", "SUCCESS: Firestore confirms update for Doc: " + id))
-                .addOnFailureListener(e -> Log.e("UserManager", "FAILURE: Firestore rejected update.", e));
-    }
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> currentList = (List<String>) documentSnapshot.get("notifications");
+
+                        Log.d("Firestore", "notifications: " + currentList);
+                        if (currentList == null) {
+                            Log.e("UserManager", "CRITICAL ERROR: getNotifications() returned null.");
+                            return;
+                        }
+
+                        // Create the fresh copy
+                        List<String> listForFirestore = new ArrayList<>(currentList);
+
+                        userCollection.document(id)
+                                .update("notifications", listForFirestore)
+                                .addOnSuccessListener(aVoid -> Log.d("UserManager", "SUCCESS: Firestore confirms update for Doc: " + id))
+                                .addOnFailureListener(e -> Log.e("UserManager", "FAILURE: Firestore rejected update.", e));
+
+                    } else {
+                        Log.d("Firestore", "Document does not exist");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error getting document", e);
+                });}
+
 
     /**
      * Sends a notification (if recipient doesn't have them blocked) and updates a user's Notifications in the Firestore "users" collection using their document id.
@@ -270,16 +282,40 @@ public final class UserManager {
      * @param status This is the status for the notification: Waiting, Chosen, etc.
      * @param recipient This is the user to have their Notifications updated.
      */
-    public void sendNotification(String eventName, String status, User recipient){
-        if(recipient.getNotificationStatus() == true){
-            Notification newNotification = new Notification(eventName, status, recipient.getUserId());
-            String newNotiString = newNotification.getToDisplay();
+//    public void sendNotification(String eventName, String status, User recipient){
+//        if(recipient.getNotificationStatus() == true){
+//            Notification newNotification = new Notification(eventName, status, recipient.getUserId());
+//            String newNotiString = newNotification.getToDisplay();
+//
+//            // Update local object
+//            recipient.addNotification(newNotiString);
+//
+//            // Update Firestore
+//            updateUserNotifications(recipient);
+//        }
+//        }
 
-            // Update local object
-            recipient.addNotification(newNotiString);
+    public void sendNotification(String eventName, String status, String recipient){
+        userCollection.document(recipient)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String notificationStatus = documentSnapshot.getString("notificationStatus");
 
-            // Update Firestore
-            updateUserNotifications(recipient);
-        }
-        }
-        }
+                        Log.d("Firestore", "notificationStatus: " + notificationStatus);
+
+                        if(Objects.equals(notificationStatus, "true")){
+                            Notification newNotification = new Notification(eventName, status, recipient);
+
+                            // Update Firestore
+                            updateUserNotifications(recipient);
+                        }
+                    } else {
+                        Log.d("Firestore", "Document does not exist");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error getting document", e);
+                });
+
+    }}
