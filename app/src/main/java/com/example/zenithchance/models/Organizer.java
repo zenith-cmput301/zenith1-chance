@@ -30,10 +30,6 @@ public class Organizer extends User implements Serializable {
         setType("organizer");
     }
 
-    public ArrayList<String> getOrgEvents() {
-        return orgEvents;
-    }
-
     public void checkAndRunLotteries() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Timestamp now = Timestamp.now();
@@ -193,8 +189,67 @@ public class Organizer extends User implements Serializable {
         return new ArrayList<>(pool.subList(0, Math.min(slots, pool.size())));
     }
 
+    public void checkFinalDeadlines() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Timestamp now = Timestamp.now();
+
+        db.collection("events")
+                .whereEqualTo("organizer", this.getName())
+                .whereLessThanOrEqualTo("finalDeadline", now)
+                .orderBy("finalDeadline")
+                .get()
+                .addOnSuccessListener(snap -> {
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        expireInvitesForEvent(doc.getId());
+                    }
+                });
+    }
+
+    private Task<Void> expireInvitesForEvent(String eventId) {
+        android.util.Log.d("Organizer", "got here 1");
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference evRef = db.collection("events").document(eventId);
+
+        return db.runTransaction(trans -> {
+            DocumentSnapshot ev = trans.get(evRef);
+
+            // get current lists
+            List<String> invited = (List<String>) ev.get("invitedList");
+            List<String> declined = (List<String>) ev.get("declinedList");
+
+            if (invited == null || invited.isEmpty()) return null;
+            if (declined == null) declined = new ArrayList<>(); // because empty lists in firebase return null
+
+            // update local events
+            List<String> newDeclined = new ArrayList<>(declined);
+            newDeclined.addAll(invited);
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("invitedList", new ArrayList<String>()); // clear invited
+            updates.put("declinedList", newDeclined); // append newly declined to list of declines
+
+            trans.update(evRef, updates);
+
+            // update online
+            for (String entrantId : invited) {
+                DocumentReference userRef = db.collection("users").document(entrantId);
+                trans.update(userRef,
+                        "onInvite", FieldValue.arrayRemove(eventId),
+                        "onDeclined", FieldValue.arrayUnion(eventId)
+                );
+                android.util.Log.d("Organizer", "got here 2");
+            }
+            return null;
+        });
+    }
+
     public void setOrgEvents(ArrayList<String> orgEvents) {
         this.orgEvents = orgEvents;
+    }
+
+    public ArrayList<String> getOrgEvents() {
+        return orgEvents;
     }
 
     public void addOrgEvent(String orgEvent) {
