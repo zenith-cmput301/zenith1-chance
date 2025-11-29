@@ -27,7 +27,6 @@ import com.example.zenithchance.models.Notification;
 import com.example.zenithchance.models.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,8 +43,6 @@ public class NotificationsActivity extends AppCompatActivity {
 
     ImageButton backArrow;
     ToggleButton notificationToggle;
-    private final CollectionReference userCollection =
-            FirebaseFirestore.getInstance().collection("users");
 
 
     /**
@@ -66,13 +63,7 @@ public class NotificationsActivity extends AppCompatActivity {
             });
         }
         User myUser = UserManager.getInstance().getCurrentUser();
-        userCollection.document(myUser.getUserId())
-                .addSnapshotListener((snapshot, error) -> {
-                    if (error != null || snapshot == null || !snapshot.exists()) return;
 
-                    myUser.setNotifications((List<String>) snapshot.get("notifications"));
-                    // Update notifications automatically
-                });
 
         // Initialize buttons
         backArrow = findViewById(R.id.backButton);
