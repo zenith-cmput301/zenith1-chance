@@ -1,3 +1,4 @@
+/*
 package com.example.zenithchance;
 
 import android.os.Bundle;
@@ -165,3 +166,4 @@ public class PeopleActivity extends AppCompatActivity {
         }
     }
 }
+*/
