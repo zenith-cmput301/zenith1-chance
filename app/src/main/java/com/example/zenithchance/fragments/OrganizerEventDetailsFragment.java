@@ -168,8 +168,29 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     .commit();
         });
 
+        MaterialButton peopleButton = view.findViewById(R.id.People_button);
+        peopleButton.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "People button clicked", Toast.LENGTH_SHORT).show();
+
+
+            PeopleListFragment fragment = new PeopleListFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);
+            fragment.setArguments(bundle);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
+
         return view;
     }
+
+
 
     private void setOptionalText(TextView tv, @Nullable String value) {
         if (value == null || value.trim().isEmpty()) {
