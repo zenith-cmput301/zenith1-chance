@@ -43,16 +43,14 @@ public final class UserManager {
     private final List<Entrant> entrants = new ArrayList<>();
     private final List<Organizer> organizers = new ArrayList<>();
     private final List<Admin> admins = new ArrayList<>();
-
-    private final CollectionReference userCollection =
-            FirebaseFirestore.getInstance().collection("users");
+    private final CollectionReference userCollection = FirebaseFirestore.getInstance().collection("users");
+    private final CollectionReference notificationsCollection = FirebaseFirestore.getInstance().collection("notifications");
 
     private ListenerRegistration listener;
 
     public User getCurrentUser() {
         return currentUser;
     }
-
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
@@ -262,24 +260,27 @@ public final class UserManager {
                 .addOnFailureListener(e -> Log.e("UserManager", "FAILURE: Firestore rejected update.", e));
     }
 
-    /**
-     * Sends a notification (if recipient doesn't have them blocked) and updates a user's Notifications in the Firestore "users" collection using their document id.
-     * @author Lauren
-     *
-     * @param eventName This is the event name for the notification.
-     * @param status This is the status for the notification: Waiting, Chosen, etc.
-     * @param recipient This is the user to have their Notifications updated.
-     */
-    public void sendNotification(String eventName, String status, User recipient){
-        if(recipient.getNotificationStatus() == true){
-            Notification newNotification = new Notification(eventName, status, recipient.getUserId());
-            String newNotiString = newNotification.getToDisplay();
+    public void sendNotification(String eid, String status, String uid){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(uid);
+        DocumentReference evRef = db.collection("events").document(eid);
 
-            // Update local object
-            recipient.addNotification(newNotiString);
+        userRef.get().addOnSuccessListener(userSnap -> {
+            // don't send noti if user blocked noti
+            Boolean enabled = userSnap.getBoolean("notificationStatus");
+            if (!enabled) return;
 
-            // Update Firestore
-            updateUserNotifications(recipient);
-        }
-        }
-        }
+            evRef.get().addOnSuccessListener(eventSnap -> {
+                // preps for notification
+                String eventName = eventSnap.getString("name");
+                String entrantName = userSnap.getString("name");
+                Notification notification = new Notification(eventName, status, entrantName);
+                String display = notification.getToDisplay();
+
+                // push to firebase
+                userRef.update("notifications", FieldValue.arrayUnion(display)); // to entrant's noti list
+                notificationsCollection.add(notification); // to general noti collection
+            });
+        });
+    }
+}
