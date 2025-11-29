@@ -52,17 +52,14 @@ public class OrganizerCreateEventFragment extends Fragment {
     EditText eventName;
     Button eventDateButton;
     Button eventRegistrationButton;
+    Button eventDeadlineButton;
     EditText eventLocation;
     EditText eventMaxEntrants;
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
-
     Button discardButton, submitButton;
-
     Organizer organizerId;
-
     private FirebaseFirestore db;
-
 
     // image launcher
     private ImageView eventImage;
@@ -117,6 +114,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         eventName = root.findViewById(R.id.event_name_box);
         eventDateButton = root.findViewById(R.id.event_date_button);
         eventRegistrationButton = root.findViewById(R.id.event_registration_button);
+        eventDeadlineButton = root.findViewById(R.id.event_deadline_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
         eventDescription = root.findViewById(R.id.event_description_box);
@@ -124,6 +122,7 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         attachDateTimePicker(eventDateButton);
         attachDateTimePicker(eventRegistrationButton);
+        attachDateTimePicker(eventDeadlineButton);
 
         // Initializing buttons
         discardButton = root.findViewById(R.id.event_creation_discard_button);
@@ -197,6 +196,10 @@ public class OrganizerCreateEventFragment extends Fragment {
             eventRegistrationButton.setText(fmt.format(event.getRegistrationDate()));
         }
 
+        if (event.getFinalDeadline() != null) {
+            eventDeadlineButton.setText(fmt.format(event.getFinalDeadline()));
+        }
+
         if (event.getImageUrl() != null) {
             Glide.with(this)
                     .load(event.getImageUrl())
@@ -225,12 +228,16 @@ public class OrganizerCreateEventFragment extends Fragment {
             // parse dates from the buttons, same format as createNewEvent
             Date eventDate = fmt.parse(eventDateButton.getText().toString());
             Date registrationDate = fmt.parse(eventRegistrationButton.getText().toString());
+            Date deadlineDate = fmt.parse(eventDeadlineButton.getText().toString());
 
             if (eventDate != null) {
                 event.setDate(eventDate);
             }
             if (registrationDate != null) {
                 event.setRegistrationDate(registrationDate);
+            }
+            if (deadlineDate != null) {
+                event.setFinalDeadline(deadlineDate);
             }
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
@@ -244,13 +251,14 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 1000;   // default if empty
 
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-                // invalid number format
+                Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
+                return;
             }
         }
 
@@ -275,10 +283,12 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         Date eventdate;
         Date registrationdate;
+        Date finalDeadline;
 
         try {
             eventdate = fmt.parse(eventDateButton.getText().toString());
             registrationdate = fmt.parse(eventRegistrationButton.getText().toString());
+            finalDeadline = fmt.parse(eventDeadlineButton.getText().toString());
             Log.d("to string", eventDateButton.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
@@ -286,13 +296,14 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 1000;   // default if empty
 
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-                // you might want a Toast here
+                Toast.makeText(getContext(), "Invalid Number, Try Again", Toast.LENGTH_LONG).show();
+                return;
             }
         }
 
@@ -308,7 +319,7 @@ public class OrganizerCreateEventFragment extends Fragment {
                 eventDescription.getText().toString(),
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
-                registrationdate,
+                finalDeadline,
                 maxEntrants
         );
 

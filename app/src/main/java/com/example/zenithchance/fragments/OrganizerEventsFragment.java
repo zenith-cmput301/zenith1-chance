@@ -1,7 +1,6 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,20 +14,11 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
-import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Class for the Organizer Events page logic
@@ -82,9 +72,10 @@ public class OrganizerEventsFragment extends Fragment {
         // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
 
         initCreateEventButton();
-        runLotteries();
+        runLotteriesCheckDeadline();
 
         organizer.checkAndRunLotteries();
+        organizer.checkFinalDeadlines();
 
         return view;
     }
@@ -118,7 +109,7 @@ public class OrganizerEventsFragment extends Fragment {
         });
     }
 
-    private void runLotteries() {
+    private void runLotteriesCheckDeadline() {
         runLotteriesButton.setOnClickListener(v -> {
             if (organizer == null && getActivity() instanceof OrganizerMainActivity) {
                 organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
@@ -127,8 +118,10 @@ public class OrganizerEventsFragment extends Fragment {
             // Manually trigger both checks
             organizer.checkAndRunLotteries();
             organizer.checkAndRedraw();
+            // Check if invitation deadline has passed
+            organizer.checkFinalDeadlines();
 
-            Toast.makeText(getContext(), "Lotteries ran", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Lotteries ran and invitation deadlines checked", Toast.LENGTH_SHORT).show();
         });
     }
 
