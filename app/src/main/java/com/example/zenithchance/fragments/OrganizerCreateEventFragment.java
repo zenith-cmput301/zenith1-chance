@@ -251,7 +251,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 1000;   // default if empty
 
         if (!text.isEmpty()) {
             try {
@@ -296,7 +296,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 1000;   // default if empty
 
         if (!text.isEmpty()) {
             try {

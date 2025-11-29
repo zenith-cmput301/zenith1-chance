@@ -79,6 +79,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
         TextView tvDate = view.findViewById(R.id.tv_date);
         TextView tvLocation = view.findViewById(R.id.tv_location);
         TextView tvRegistrationDeadline = view.findViewById(R.id.tv_registration_deadline);
+        TextView tvInvitationDeadline = view.findViewById(R.id.tv_invitation_deadline);
         TextView tvMaxEntrants = view.findViewById(R.id.tv_max_entrants);
         TextView tvGeolocation = view.findViewById(R.id.tv_geolocation);
         TextView tvOrganizer = view.findViewById(R.id.tv_organizer);
@@ -118,6 +119,15 @@ public class OrganizerEventDetailsFragment extends Fragment {
         } else {
             tvRegistrationDeadline.setText("None");
             tvRegistrationDeadline.setTypeface(null, Typeface.ITALIC);
+        }
+
+        // Invitation deadline == finalDeadline
+        if (event.getFinalDeadline() != null) {
+            tvInvitationDeadline.setText(dateTimeFmt.format(event.getFinalDeadline()));
+            tvInvitationDeadline.setTypeface(null, Typeface.NORMAL);
+        } else {
+            tvInvitationDeadline.setText("None");
+            tvInvitationDeadline.setTypeface(null, Typeface.ITALIC);
         }
 
         // Fill fields with fallback "None"
