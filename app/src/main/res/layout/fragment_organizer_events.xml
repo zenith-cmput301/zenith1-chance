@@ -9,6 +9,10 @@
     android:background="@color/white"
     tools:context=".fragments.AllEventsFragment">
 
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <!-- RecyclerView showing all events -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_all_events"
@@ -22,5 +26,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="0.901"
         tools:listitem="@layout/entrant_event_list_item" />
+        <!-- Loading spinner overlay -->
+        <ProgressBar
+            android:id="@+id/progress_loading_events"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

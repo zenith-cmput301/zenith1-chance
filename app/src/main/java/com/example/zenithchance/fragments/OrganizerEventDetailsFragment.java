@@ -1,6 +1,8 @@
 package com.example.zenithchance.fragments;
 
 import android.app.AlertDialog;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +17,14 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
+import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -34,7 +39,7 @@ import java.util.Locale;
  * Edit Event, View Waitlist, Draw Random Users (from waitlist),
  * Send Notifications to selected and rejected entrants
  *
- * @author Kiran Kaur
+ * @author Kiran Kaur, Sabrina Ghadieh
  * @version 1.0
  */
 
@@ -45,12 +50,12 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_organizer_event_details, container, false);
-        SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
-
+        SimpleDateFormat dateTimeFmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
@@ -61,29 +66,67 @@ public class OrganizerEventDetailsFragment extends Fragment {
             return view;
         }
 
-        // BACK ARROW
+        // Toolbar back arrow
         MaterialToolbar toolbar = view.findViewById(R.id.organizer_event_toolbar);
-        toolbar.setNavigationOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
+        toolbar.setNavigationOnClickListener(
+                v -> requireActivity().getSupportFragmentManager().popBackStack()
+        );
 
-        // UI elements
+        // Header image & title
         ImageView headerImage = view.findViewById(R.id.header_image);
-        TextView eventName = view.findViewById(R.id.event_name);
-        TextView location = view.findViewById(R.id.location);
-        TextView time = view.findViewById(R.id.time);
-        TextView description = view.findViewById(R.id.description);
-        MaterialButton deleteButton = view.findViewById(R.id.delete_button);
+        TextView tvEventName = view.findViewById(R.id.event_name);
 
-        // UI
-        eventName.setText(event.getName());
-        location.setText(event.getLocation());
-        time.setText(fmt.format(event.getDate()));
-        description.setText(event.getDescription());
+        TextView tvDate = view.findViewById(R.id.tv_date);
+        TextView tvLocation = view.findViewById(R.id.tv_location);
+        TextView tvRegistrationDeadline = view.findViewById(R.id.tv_registration_deadline);
+        TextView tvMaxEntrants = view.findViewById(R.id.tv_max_entrants);
+        TextView tvGeolocation = view.findViewById(R.id.tv_geolocation);
+        TextView tvOrganizer = view.findViewById(R.id.tv_organizer);
+        TextView tvDescription = view.findViewById(R.id.tv_description);
+
+        MaterialButton deleteButton = view.findViewById(R.id.delete_button);
+        MaterialButton editButton = view.findViewById(R.id.edit_button);
+        ImageView qr = view.findViewById(R.id.qr_placeholder);
+
+        // Title & image
+        tvEventName.setText(event.getName()); // required, so no "None" here
 
         Glide.with(requireContext())
                 .load(event.getImageUrl())
                 .placeholder(R.drawable.celebration_placeholder)
                 .error(R.drawable.celebration_placeholder)
                 .into(headerImage);
+
+        // QR
+        QRManager manager = new QRManager();
+        manager.updateImageView(qr, event);
+
+
+        // Date (required)
+        if (event.getDate() != null) {
+            tvDate.setText(dateTimeFmt.format(event.getDate()));
+            tvDate.setTypeface(null, Typeface.NORMAL);
+        } else {
+            tvDate.setText("None");
+            tvDate.setTypeface(null, Typeface.ITALIC);
+        }
+
+        // Registration deadline (optional)
+        if (event.getRegistrationDate() != null) {
+            tvRegistrationDeadline.setText(dateTimeFmt.format(event.getRegistrationDate()));
+            tvRegistrationDeadline.setTypeface(null, Typeface.NORMAL);
+        } else {
+            tvRegistrationDeadline.setText("None");
+            tvRegistrationDeadline.setTypeface(null, Typeface.ITALIC);
+        }
+
+        // Fill fields with fallback "None"
+        setOptionalText(tvLocation, event.getLocation());                             // location
+        setOptionalInteger(tvMaxEntrants, event.getMaxEntrants());                    // status
+        setOptionalBoolean(tvGeolocation, event.getGeolocationRequired());           // geolocation_required (Boolean)
+        setOptionalText(tvOrganizer,
+                event.getOrganizer());                                                // organizer (String, or swap to organizer.getName())
+        setOptionalText(tvDescription, event.getDescription());                       // description
 
         // DELETE BUTTON
         deleteButton.setOnClickListener(v -> {
@@ -96,16 +139,65 @@ public class OrganizerEventDetailsFragment extends Fragment {
                                 .document(event.getDocId())
                                 .delete()
                                 .addOnSuccessListener(unused -> {
-                                    Toast.makeText(requireContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(),
+                                            "Event deleted", Toast.LENGTH_SHORT).show();
                                     requireActivity().getSupportFragmentManager().popBackStack();
                                 })
                                 .addOnFailureListener(e ->
-                                        Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                                        Toast.makeText(requireContext(),
+                                                "Delete failed: " + e.getMessage(),
+                                                Toast.LENGTH_LONG).show());
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
         });
 
+        // UPDATE / EDIT BUTTON
+        editButton.setOnClickListener(v -> {
+            OrganizerCreateEventFragment fragment = new OrganizerCreateEventFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);        // the existing event
+            bundle.putSerializable("organizer", organizer);
+            fragment.setArguments(bundle);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         return view;
+    }
+
+    private void setOptionalText(TextView tv, @Nullable String value) {
+        if (value == null || value.trim().isEmpty()) {
+            tv.setText("None");
+            tv.setTypeface(null, Typeface.ITALIC);
+        } else {
+            tv.setText(value);
+            tv.setTypeface(null, Typeface.NORMAL);
+        }
+    }
+
+    private void setOptionalBoolean(TextView tv, @Nullable Boolean value) {
+        if (value == null) {
+            tv.setText("None");
+            tv.setTypeface(null, Typeface.ITALIC);
+        } else {
+            tv.setText(value ? "Yes" : "No");
+            tv.setTypeface(null, Typeface.NORMAL);
+        }
+    }
+
+    private void setOptionalInteger(TextView tv, @Nullable Integer value) {
+        if (value == null || value <= 0) {
+            tv.setText("None");
+            tv.setTypeface(null, Typeface.ITALIC);
+        } else {
+            tv.setText(String.valueOf(value));
+            tv.setTypeface(null, Typeface.NORMAL);
+        }
     }
 }

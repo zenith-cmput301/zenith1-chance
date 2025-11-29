@@ -55,6 +55,7 @@ public class Organizer extends User implements Serializable {
                 });
     }
 
+
     // called when an invited entrant declines
     public void checkAndRedraw() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -112,15 +113,15 @@ public class Organizer extends User implements Serializable {
 
             trans.update(evRef, updates);
             // Get Event Name for Notifications:
-            String eventName = ev.getString("name");
+//            String eventName = ev.getString("name");
 
             // move event from user's onWaiting to onInvite
             for (String entrantId : winners) {
                 // Get User for Send Notification
                 DocumentReference userRef = db.collection("users").document(entrantId);
-                DocumentSnapshot userSnap = trans.get(userRef);
-                User user = userSnap.toObject(User.class);
-                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+//                DocumentSnapshot userSnap = trans.get(userRef);
+//                User user = userSnap.toObject(User.class);
+//                 user.setUserId(entrantId); // This is just in case it doesn't set correctly
 
                 // no need to read user doc: use atomic array transforms
                 trans.update(userRef,
@@ -128,18 +129,18 @@ public class Organizer extends User implements Serializable {
                         "onInvite",  FieldValue.arrayUnion(eventId)
                 );
 
-                UserManager.getInstance().sendNotification(eventName, "Chosen", user);
+                //UserManager.getInstance().sendNotification(eventName, "Chosen", user);
             }
 
-            for (String entrantId : newWaiting) {
-                // Get User for Send Notification
-                DocumentReference userRef = db.collection("users").document(entrantId);
-                DocumentSnapshot userSnap = trans.get(userRef);
-                User user = userSnap.toObject(User.class);
-                user.setUserId(entrantId); // This is just in case it doesn't set correctly
-
-                UserManager.getInstance().sendNotification(eventName, "Waiting", user);
-            }
+//            for (String entrantId : newWaiting) {
+//                // Get User for Send Notification
+//                DocumentReference userRef = db.collection("users").document(entrantId);
+//                DocumentSnapshot userSnap = trans.get(userRef);
+//                User user = userSnap.toObject(User.class);
+//                user.setUserId(entrantId); // This is just in case it doesn't set correctly
+//
+//                //UserManager.getInstance().sendNotification(eventName, "Waiting", user);
+//            }
 
             return null;
         });
@@ -160,7 +161,7 @@ public class Organizer extends User implements Serializable {
             User user = userSnap.toObject(User.class);
             user.setUserId(entrantId); // This is just in case it doesn't set correctly
 
-            UserManager.getInstance().sendNotification(eventName, "Cancelled", user);
+            //UserManager.getInstance().sendNotification(eventName, "Cancelled", user);
     }
             return null;
         });}
@@ -181,7 +182,7 @@ public class Organizer extends User implements Serializable {
                 User user = userSnap.toObject(User.class);
                 user.setUserId(entrantId); // This is just in case it doesn't set correctly
 
-                UserManager.getInstance().sendNotification(eventName, "Not Chosen", user);
+                //UserManager.getInstance().sendNotification(eventName, "Not Chosen", user);
             }
             return null;
         });}
