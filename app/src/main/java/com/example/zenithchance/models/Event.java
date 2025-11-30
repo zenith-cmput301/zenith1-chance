@@ -23,6 +23,7 @@ public class Event implements Serializable {
     private Date registration_date;
     private Date finalDeadline;
     private Integer max_entrants;
+    private Integer max_waiting_list;
     private String imageUrl;
     private boolean lotteryRan = false;
     private boolean needRedraw = false;
@@ -55,7 +56,7 @@ public class Event implements Serializable {
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants) {
+    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants, Integer max_waiting_list) {
         this.date = date;
         this.name = name;
         this.location = location;
@@ -66,6 +67,7 @@ public class Event implements Serializable {
         this.registration_date = registration_date;
         this.finalDeadline = finalDeadline;
         this.max_entrants = max_entrants;
+        this.max_waiting_list = max_waiting_list;
     }
 
     /**
@@ -159,6 +161,8 @@ public class Event implements Serializable {
         return max_entrants;
     }
 
+    public Integer getMaxMaitingList() {return max_waiting_list;}
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -234,6 +238,8 @@ public class Event implements Serializable {
     public void setMaxEntrants(Integer max_entrants) {
         this.max_entrants = max_entrants;
     }
+
+    public void setMaxWaitingList(Integer max_waiting_list) {this.max_waiting_list = max_waiting_list;}
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;

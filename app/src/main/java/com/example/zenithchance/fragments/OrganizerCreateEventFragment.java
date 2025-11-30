@@ -54,7 +54,7 @@ public class OrganizerCreateEventFragment extends Fragment {
     Button eventRegistrationButton;
     Button eventDeadlineButton;
     EditText eventLocation;
-    EditText eventMaxEntrants;
+    EditText eventMaxEntrants, eventMaxWaitingList;
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
     Button discardButton, submitButton;
@@ -117,6 +117,7 @@ public class OrganizerCreateEventFragment extends Fragment {
         eventDeadlineButton = root.findViewById(R.id.event_deadline_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
+        eventMaxWaitingList = root.findViewById(R.id.event_max_waiting_box);
         eventDescription = root.findViewById(R.id.event_description_box);
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
@@ -257,12 +258,26 @@ public class OrganizerCreateEventFragment extends Fragment {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-                Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Invalid Max Entrants, Try Again", Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
         event.setMaxEntrants(maxEntrants);
+
+        text = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 1000;   // default if empty
+
+        if (!text.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Max Waiting List, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        event.setMaxWaitingList(maxWaitingList);
 
         // push the updated event to Firestore
         if (selectedImageUri != null) {
@@ -302,7 +317,19 @@ public class OrganizerCreateEventFragment extends Fragment {
             try {
                 maxEntrants = Integer.parseInt(text);
             } catch (NumberFormatException e) {
-                Toast.makeText(getContext(), "Invalid Number, Try Again", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Invalid Entrants Number, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        String waitingText = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 1000;   // default if empty
+
+        if (!waitingText.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(waitingText);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Waiting List Number, Try Again", Toast.LENGTH_LONG).show();
                 return;
             }
         }
@@ -320,7 +347,8 @@ public class OrganizerCreateEventFragment extends Fragment {
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 finalDeadline,
-                maxEntrants
+                maxEntrants,
+                maxWaitingList
         );
 
         // handle image + save

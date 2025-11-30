@@ -124,6 +124,7 @@ public class QRScannerFragment extends Fragment {
         bundle.putString("event_location", event.getLocation());
         bundle.putString("event_organizer", event.getOrganizer());
         bundle.putString("event_time", fmt.format(event.getDate()));
+        bundle.putLong("event_date_millis", event.getDate().getTime());
         bundle.putString("event_description", event.getDescription());
         bundle.putString("event_image_url", event.getImageUrl());
         bundle.putString("event_doc_id", event.getDocId());

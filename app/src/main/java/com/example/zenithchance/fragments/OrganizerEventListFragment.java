@@ -120,6 +120,11 @@ public class OrganizerEventListFragment extends Fragment {
 
                 if (organizerEventIds == null || organizerEventIds.isEmpty()) {
                     adapter.updateList(new ArrayList<>());
+
+                    // done loading
+                    progressBar.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+
                     return;
                 }
 
