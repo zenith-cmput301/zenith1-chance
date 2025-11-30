@@ -6,11 +6,13 @@ import java.util.List;
 public class Notification {
     private String eventName;
     private String status;
-    private String uid; // recipient entrant's Firebase id
+    private String entrant;
     private String toDisplay;
 
-    public Notification (String eventName, String status, String uid) {
-        this.uid = uid; 
+    public Notification() {}
+
+    public Notification (String eventName, String status, String entrant) {
+        this.entrant = entrant;
         this.eventName = eventName;
         this.status = status;
         this.toDisplay = "You have been " + status + " for " + eventName;
@@ -24,8 +26,8 @@ public class Notification {
         return status;
     }
 
-    public String getUid() {
-        return uid;
+    public String getEntrant() {
+        return entrant;
     }
 
     public String getToDisplay() {
@@ -40,8 +42,8 @@ public class Notification {
         this.status = status;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setEntrant(String entrant) {
+        this.entrant = entrant;
     }
 
     public void setToDisplay(String toDisplay) {

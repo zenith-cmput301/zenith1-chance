@@ -41,9 +41,14 @@ public class Organizer extends User implements Serializable {
                 .orderBy("registrationDate")
                 .get()
                 .addOnSuccessListener(snap -> {
-                    for (var doc : snap.getDocuments()) {
-                        Log.d("Organizer", "Qualifying event detected");
-                        runLottery(doc.getId(), false);
+                    for (DocumentSnapshot  doc : snap.getDocuments()) {
+                        String eventId = doc.getId();
+                        runLottery(doc.getId(), false).addOnSuccessListener(winners -> {
+                            if (winners == null) return; // no entrants selected
+                            for (String uid : winners) { // send notifications to selected entrants
+                                UserManager.getInstance().sendNotification(eventId, "chosen", uid);
+                            }
+                        });
                     }
                 })
                 .addOnFailureListener(snap -> {
@@ -61,14 +66,19 @@ public class Organizer extends User implements Serializable {
                 .whereEqualTo("needRedraw", true)
                 .get()
                 .addOnSuccessListener(snap -> {
-                    List<Task<Void>> tasks = new ArrayList<>();
                     for (DocumentSnapshot d : snap.getDocuments()) {
-                        tasks.add(this.runLottery(d.getId(), true));
+                        String eventId = d.getId();
+                        runLottery(eventId, true).addOnSuccessListener(winners -> {
+                            if (winners == null) return; // no entrants selected
+                            for (String uid : winners) { // send notifications to selected entrants
+                                UserManager.getInstance().sendNotification(eventId, "chosen", uid);
+                            }
+                        });
                     }
                 });
     }
 
-    public Task<Void> runLottery(String eventId, boolean rollOne) {
+    public Task<List<String>> runLottery(String eventId, boolean rollOne) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference evRef = db.collection("events").document(eventId);
 
@@ -88,10 +98,7 @@ public class Organizer extends User implements Serializable {
             Map<String, Object> updates = new HashMap<>();
 
             // if no one left to sample
-            if (slots == 0 || waiting.isEmpty()) {
-                trans.update(evRef, updates);
-                return null;
-            }
+            if (slots == 0 || waiting.isEmpty()) return null;
 
             // random sampling
             List<String> winners = randomSample(waiting, slots);
@@ -108,80 +115,20 @@ public class Organizer extends User implements Serializable {
             updates.put("lotteryRan", true);
 
             trans.update(evRef, updates);
-            // Get Event Name for Notifications:
-//            String eventName = ev.getString("name");
 
             // move event from user's onWaiting to onInvite
             for (String entrantId : winners) {
-                // Get User for Send Notification
                 DocumentReference userRef = db.collection("users").document(entrantId);
-//                DocumentSnapshot userSnap = trans.get(userRef);
-//                User user = userSnap.toObject(User.class);
-//                 user.setUserId(entrantId); // This is just in case it doesn't set correctly
 
-                // no need to read user doc: use atomic array transforms
                 trans.update(userRef,
                         "onWaiting", FieldValue.arrayRemove(eventId),
                         "onInvite",  FieldValue.arrayUnion(eventId)
                 );
-
-                //UserManager.getInstance().sendNotification(eventName, "Chosen", user);
             }
 
-//            for (String entrantId : newWaiting) {
-//                // Get User for Send Notification
-//                DocumentReference userRef = db.collection("users").document(entrantId);
-//                DocumentSnapshot userSnap = trans.get(userRef);
-//                User user = userSnap.toObject(User.class);
-//                user.setUserId(entrantId); // This is just in case it doesn't set correctly
-//
-//                //UserManager.getInstance().sendNotification(eventName, "Waiting", user);
-//            }
-
-            return null;
+            return winners;
         });
     }
-    public Task<Void> sendCancellationNotification(String eventId, List<String> waiting) {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference evRef = db.collection("events").document(eventId);
-
-        return db.runTransaction(trans -> {
-            DocumentSnapshot ev = trans.get(evRef);
-            String eventName = ev.getString("name");
-
-        for (String entrantId : waiting) {
-            // Get User for Send Notification
-            DocumentReference userRef = db.collection("users").document(entrantId);
-            DocumentSnapshot userSnap = trans.get(userRef);
-            User user = userSnap.toObject(User.class);
-            user.setUserId(entrantId); // This is just in case it doesn't set correctly
-
-            //UserManager.getInstance().sendNotification(eventName, "Cancelled", user);
-    }
-            return null;
-        });}
-
-    public Task<Void> sendLoseNotification(String eventId, List<String> waiting) {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference evRef = db.collection("events").document(eventId);
-
-        return db.runTransaction(trans -> {
-            DocumentSnapshot ev = trans.get(evRef);
-            String eventName = ev.getString("name");
-
-            for (String entrantId : waiting) {
-                // Get User for Send Notification
-                DocumentReference userRef = db.collection("users").document(entrantId);
-                DocumentSnapshot userSnap = trans.get(userRef);
-                User user = userSnap.toObject(User.class);
-                user.setUserId(entrantId); // This is just in case it doesn't set correctly
-
-                //UserManager.getInstance().sendNotification(eventName, "Not Chosen", user);
-            }
-            return null;
-        });}
 
     public List<String> randomSample(List<String> waiting, int slots) {
         List<String> pool = new ArrayList<>(waiting); // copy to not affect original waiting list

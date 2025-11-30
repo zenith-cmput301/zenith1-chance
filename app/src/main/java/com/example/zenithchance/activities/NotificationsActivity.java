@@ -27,6 +27,7 @@ import com.example.zenithchance.models.Notification;
 import com.example.zenithchance.models.User;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.List;
 /**
  * Class to display notifications for users. Does not currently display anything, but will in a future release
  *
- * @author Lauren
+ * @author Lauren, Percy
  * @version 4.0
  *
  */
@@ -43,6 +44,9 @@ public class NotificationsActivity extends AppCompatActivity {
 
     ImageButton backArrow;
     ToggleButton notificationToggle;
+    ListView notificationsListView;
+    ArrayAdapter<String> adapter;
+    List<String> notificationTexts = new ArrayList<>();
 
 
     /**
@@ -76,13 +80,8 @@ public class NotificationsActivity extends AppCompatActivity {
                 });
 
         // Setting up ListView
-        ListView notificationsListView = findViewById(R.id.notificationListView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.notification_items,
-                R.id.notificationText,
-                myUser.getNotifications()
-        );
+        notificationsListView = findViewById(R.id.notificationListView);
+        adapter = new ArrayAdapter<>(this, R.layout.notification_items, R.id.notificationText, notificationTexts);
         notificationsListView.setAdapter(adapter);
 
         // Implementing Back Button OnClickListener
@@ -91,7 +90,27 @@ public class NotificationsActivity extends AppCompatActivity {
             setResult(RESULT_OK, resultIntent);
             finish();
         });
-                    }
+
+        // get notifications to display
+        fetchNotifications(myUser.getUserId());
+    }
+
+    private void fetchNotifications(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    List<String> notifs = (List<String>) doc.get("notifications");
+
+                    // refresh notifications
+                    notificationTexts.clear();
+                    notificationTexts.addAll(notifs);
+
+                    adapter.notifyDataSetChanged();
+                });
+    }
 
     private boolean isRunningInTest() {
         return android.app.ActivityManager.isRunningInTestHarness()
