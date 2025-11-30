@@ -170,13 +170,17 @@
                 android:layout_marginBottom="24dp"
                 android:textSize="16sp" />
 
+            <!-- Buttons -->
+
             <ImageView
                 android:id="@+id/qr_placeholder"
-                android:layout_width="369dp"
-                android:layout_height="127dp"
+                android:layout_width="328dp"
+                android:layout_height="109dp"
+                android:layout_margin="20dp"
+                android:background="@drawable/rounded_qr_background"
+                android:clipToOutline="true"
                 app:srcCompat="@android:drawable/ic_menu_gallery" />
 
-            <!-- Buttons -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/edit_button"
                 android:layout_width="match_parent"

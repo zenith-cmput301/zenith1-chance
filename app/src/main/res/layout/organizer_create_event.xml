@@ -164,6 +164,26 @@
             android:inputType="number"
             android:maxLines="1" />
 
+        <!-- Max waiting list -->
+        <TextView
+            android:id="@+id/event_max_waiting_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Maximum waiting list (optional):"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/event_max_waiting_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="e.g. 100"
+            android:padding="12dp"
+            android:inputType="number"
+            android:maxLines="1" />
+
         <!-- Description -->
         <TextView
             android:id="@+id/event_description_label"
