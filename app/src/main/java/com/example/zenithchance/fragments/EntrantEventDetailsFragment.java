@@ -357,6 +357,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // decrement #entrants
                         waitingCount--;
                         updateWaitingCountLabel();
+
+                        // send notifications
+                        UserManager.getInstance().sendNotification(eventDocId, "dropped", currentEntrant.getUserId());
                     },
                     // fail to enroll due to firebase shenanigans
                     e -> {
@@ -458,6 +461,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                         actionBtn.setText("Declined");
                         actionBtn.setTextColor(Color.WHITE);
                         actionBtn.setEnabled(false);
+                        UserManager.getInstance().sendNotification(eventDocId, "cancelled", currentEntrant.getUserId());
                     },
                     e -> {
                         actionBtn.setText("Cancel Spot");
