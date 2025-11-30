@@ -1,7 +1,22 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
 }
+
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        FileInputStream(file).use { fis ->
+            load(fis)
+        }
+    }
+}
+
+val MAPS_API_KEY: String = localProps.getProperty("MAPS_API_KEY") ?: ""
+
 
 android {
     namespace = "com.example.zenithchance"
@@ -15,6 +30,14 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        manifestPlaceholders["MAPS_API_KEY"] = MAPS_API_KEY
+
+        buildConfigField(
+            "String",
+            "MAPS_API_KEY",
+            "\"$MAPS_API_KEY\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -31,6 +54,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -64,7 +91,10 @@ dependencies {
     // Fragment testing dependency
     debugImplementation("androidx.fragment:fragment-testing:1.8.2")
 
-    // maps services for location
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    // Google Maps API
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+    // Places SDK (for geocoding / places)
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
 }

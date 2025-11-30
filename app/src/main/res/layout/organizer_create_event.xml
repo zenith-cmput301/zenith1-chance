@@ -112,8 +112,32 @@
             android:id="@+id/event_location_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/event_location_blank"
-            android:padding="12dp" />
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:hint="Tap to search location"
+            android:drawableEnd="@drawable/ic_search"
+            android:drawablePadding="8dp"
+            android:padding="12dp"
+            android:minHeight="48dp" />
+
+
+        <!-- Map for picking event location -->
+        <fragment
+            android:id="@+id/event_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/event_location_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Tap to search or click on the map below"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
         <!-- Maximum entrants -->
         <TextView
@@ -177,16 +201,17 @@
                 android:layout_height="wrap_content" />
 
 
-            <!-- Caption for geolocation box -->
-            <TextView
-                android:id="@+id/geolocation_caption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Restricts waiting-list access to attendees at the event location."
-                android:textSize="12sp"
-                android:textColor="@android:color/darker_gray" />
         </LinearLayout>
+
+        <!-- Caption for geolocation box -->
+        <TextView
+            android:id="@+id/geolocation_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Restricts waiting-list access to attendees at the event location."
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
         <!-- Buttons row -->
         <LinearLayout
