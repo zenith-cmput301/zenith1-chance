@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.managers.QRManager;
+import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
@@ -309,6 +310,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // increment #entrants
                         waitingCount++;
                         updateWaitingCountLabel();
+
+                        // send enrollemnt notification
+                        UserManager.getInstance().sendNotification(eventDocId, "enrolled", currentEntrant.getUserId());
 
                         Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
                     },

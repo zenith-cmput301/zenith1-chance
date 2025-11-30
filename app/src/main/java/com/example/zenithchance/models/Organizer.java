@@ -153,7 +153,6 @@ public class Organizer extends User implements Serializable {
     }
 
     private Task<Void> expireInvitesForEvent(String eventId) {
-        android.util.Log.d("Organizer", "got here 1");
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference evRef = db.collection("events").document(eventId);
@@ -185,7 +184,6 @@ public class Organizer extends User implements Serializable {
                         "onInvite", FieldValue.arrayRemove(eventId),
                         "onDeclined", FieldValue.arrayUnion(eventId)
                 );
-                android.util.Log.d("Organizer", "got here 2");
             }
             return null;
         });
