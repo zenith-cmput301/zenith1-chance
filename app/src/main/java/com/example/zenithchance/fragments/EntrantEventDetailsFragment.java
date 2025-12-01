@@ -72,6 +72,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         if (currentEntrant == null && context instanceof EntrantProviderInterface) {
             currentEntrant = ((EntrantProviderInterface) context).getCurrentEntrant();
         }
+
+        locationHelper = new LocationHelper(context.getApplicationContext());
     }
 
     /**
@@ -118,6 +120,16 @@ public class EntrantEventDetailsFragment extends Fragment {
         Long eventDateMillis = null;
         String eventDesc = null;
 
+        if (currentEntrant == null) {
+            Toast.makeText(requireContext(),
+                    "Error: no current entrant found.",
+                    Toast.LENGTH_LONG).show();
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Unavailable");
+            waitingCountView.setText("Waiting list: --");
+            return view;
+        }
+
         Bundle args = getArguments();
         if (args != null) {
             event = (Event) args.getSerializable("event");
@@ -146,12 +158,32 @@ public class EntrantEventDetailsFragment extends Fragment {
                     .into(image);
         }
 
-        // wiring action buttons, first create holder event
-        Event eventForLocal = new Event();
-        eventForLocal.setName(eventName);
-        eventForLocal.setLocation(eventLocation);
-        eventForLocal.setDescription(eventDesc);
-        eventForLocal.setDate(new Date(eventDateMillis));
+        // Use the real Event from arguments if available
+        Event eventForLocal = null;
+
+        if (args != null) {
+            Event eventFromArgs = (Event) args.getSerializable("event");
+            if (eventFromArgs != null) {
+                eventForLocal = eventFromArgs;
+            } else {
+                // fallback: build a partial event just from strings
+                eventForLocal = new Event();
+                eventForLocal.setName(eventName);
+                eventForLocal.setLocation(eventLocation);
+                eventForLocal.setDescription(eventDesc);
+                if (eventDateMillis != null) {
+                    eventForLocal.setDate(new Date(eventDateMillis));
+                }
+            }
+        }
+
+// If we *still* don’t have an event, disable actions
+        if (eventForLocal == null) {
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Event not available");
+            waitingCountView.setText("Waiting list: --");
+            return view;
+        }
 
         // this code is so event detail is refreshed every time it's accessed
         if (eventDocId != null) {
@@ -302,6 +334,19 @@ public class EntrantEventDetailsFragment extends Fragment {
             actionBtn.setEnabled(false);
             actionBtn.setText("Enrolling...");
             actionBtn.setTextColor(Color.WHITE);
+
+            if (locationHelper == null) {
+                locationHelper = new LocationHelper(requireContext().getApplicationContext());
+            }
+            if (locationHelper == null) {
+                actionBtn.setText("Enroll");
+                actionBtn.setEnabled(true);
+                Toast.makeText(requireContext(),
+                        "Location service unavailable. Please try again.",
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
 
             boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
 

@@ -479,7 +479,10 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
             return;
         }
 
-        if (eventLat == null || eventLng == null || eventLocation.getText().toString().trim().isEmpty()) {
+        String locText = eventLocation.getText().toString().trim();
+        if (eventLat == null || eventLng == null || locText.isEmpty()) {
+            eventLocation.setError("Location is required");
+            eventLocation.requestFocus();
             Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
             return;
         }
@@ -493,42 +496,30 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         try {
             Date eventDate = fmt.parse(eventDateButton.getText().toString());
             Date registrationDate = fmt.parse(eventRegistrationButton.getText().toString());
-
-            if (eventDate != null) {
-                event.setDate(eventDate);
-            }
-            if (registrationDate != null) {
-                event.setRegistrationDate(registrationDate);
-            }
+            if (eventDate != null) event.setDate(eventDate);
+            if (registrationDate != null) event.setRegistrationDate(registrationDate);
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
         }
 
         event.setName(eventName.getText().toString());
-        event.setLocation(eventLocation.getText().toString());
+        event.setLocation(locText);
         event.setDescription(eventDescription.getText().toString());
         event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
         String text = eventMaxEntrants.getText().toString().trim();
         int maxEntrants = 0;
-
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
-            } catch (NumberFormatException e) {
-                // invalid number format
-            }
+            } catch (NumberFormatException ignored) {}
         }
-
         event.setMaxEntrants(maxEntrants);
 
-        // save GeoPoint if there are coordinates
-        if (eventLat != null && eventLng != null) {
-            event.setLocationPoint(new GeoPoint(eventLat, eventLng));
-        }
+        // always save GeoPoint
+        event.setLocationPoint(new GeoPoint(eventLat, eventLng));
 
-        // push the updated event to Firestore
         if (selectedImageUri != null) {
             uploadImageAndUpdateEvent(event);
         } else {
@@ -536,10 +527,19 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         }
     }
 
+
     /**
      * Creates the event using the fields selected by the user and updates the users FireStore document
      */
     private void createNewEvent() {
+        // location must be set
+        String locText = eventLocation.getText().toString().trim();
+        if (eventLat == null || eventLng == null || locText.isEmpty()) {
+            eventLocation.setError("Location is required");
+            eventLocation.requestFocus();
+            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
+            return;
+        }
 
         SimpleDateFormat fmt =
                 new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
@@ -550,31 +550,24 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         try {
             eventdate = fmt.parse(eventDateButton.getText().toString());
             registrationdate = fmt.parse(eventRegistrationButton.getText().toString());
-            Log.d("to string", eventDateButton.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
         }
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;   // default if empty
+        int maxEntrants = 0;
 
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
-            } catch (NumberFormatException e) {
-                // you might want a Toast here
-            }
+            } catch (NumberFormatException ignored) {}
         }
 
-        // Constructs event based on inputted data
-        Log.d("organizer name", organizerId.getName());
-
         Event newEvent = new Event(
-
                 eventdate,
                 eventName.getText().toString(),
-                eventLocation.getText().toString(),
+                locText,
                 "waiting",
                 organizerId.getName(),
                 eventDescription.getText().toString(),
@@ -584,21 +577,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 maxEntrants
         );
 
-        // handle location
-        if (eventLat == null || eventLng == null || eventLocation.getText().toString().trim().isEmpty()) {
-            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
-            return;
-        } else {
-            newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
-        }
+        newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
 
-
-        // handle image + save
         if (selectedImageUri != null) {
-            // upload image first, then save event with download URL
             uploadImageAndCreateEvent(newEvent);
         } else {
-            // no image; just save event
             saveNewEventToFirestore(newEvent);
         }
     }

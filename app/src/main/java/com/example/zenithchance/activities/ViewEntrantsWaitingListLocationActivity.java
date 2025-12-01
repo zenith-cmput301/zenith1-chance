@@ -80,30 +80,33 @@ public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity i
      * Load all WaitingListEntry docs for this event and display their entrantLocation.
      */
     private void loadEntrantLocations() {
-        db.collection("waitingList")
+        db.collection("waitingListEntries")
                 .whereEqualTo("eventId", eventDocId)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
+
+                    // if there are no entrants on the waiting list of this event
                     if (querySnapshot.isEmpty()) {
-                        Toast.makeText(this, "No entrants in waiting list", Toast.LENGTH_SHORT).show();
-                        // Show default location (e.g., Edmonton)
+                        Toast.makeText(this,
+                                "No entrants have joined the waiting list yet.",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Center map to a default (or event location)
                         LatLng defaultLocation = new LatLng(53.5461, -113.4938);
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 10f));
+
                         return;
                     }
 
-                    int totalEntries = querySnapshot.size();
-                    int[] loadedCount = {0};
+                    int total = querySnapshot.size();
+                    int[] loaded = {0};
 
                     for (DocumentSnapshot doc : querySnapshot) {
                         WaitingListEntry entry = doc.toObject(WaitingListEntry.class);
 
                         if (entry == null || entry.getEntrantLocation() == null) {
-                            // No location stored for this entry
-                            loadedCount[0]++;
-                            if (loadedCount[0] == totalEntries) {
-                                adjustCameraToShowAllMarkers();
-                            }
+                            loaded[0]++;
+                            if (loaded[0] == total) adjustCameraToShowAllMarkers();
                             continue;
                         }
 
@@ -113,14 +116,13 @@ public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity i
 
                         String userId = entry.getUserId();
 
-                        // Optional: look up user name for nicer marker titles
                         db.collection("users").document(userId)
                                 .get()
                                 .addOnSuccessListener(userDoc -> {
-                                    String userName = null;
-                                    if (userDoc.exists()) {
-                                        userName = userDoc.getString("name");
-                                    }
+                                    String userName = userDoc.exists()
+                                            ? userDoc.getString("name")
+                                            : "Entrant";
+
                                     if (userName == null || userName.isEmpty()) {
                                         userName = "Entrant";
                                     }
@@ -130,34 +132,30 @@ public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity i
                                             .title(userName)
                                             .snippet("Joined from here"));
 
-                                    loadedCount[0]++;
-                                    if (loadedCount[0] == totalEntries) {
-                                        adjustCameraToShowAllMarkers();
-                                    }
+                                    loaded[0]++;
+                                    if (loaded[0] == total) adjustCameraToShowAllMarkers();
                                 })
                                 .addOnFailureListener(e -> {
-                                    // If user lookup fails, still show marker
                                     mMap.addMarker(new MarkerOptions()
                                             .position(latLng)
                                             .title("Entrant")
                                             .snippet("Joined from here"));
 
-                                    loadedCount[0]++;
-                                    if (loadedCount[0] == totalEntries) {
-                                        adjustCameraToShowAllMarkers();
-                                    }
+                                    loaded[0]++;
+                                    if (loaded[0] == total) adjustCameraToShowAllMarkers();
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading entrant locations: " + e.getMessage(),
+                    Toast.makeText(this,
+                            "Error loading entrant locations: " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
 
-                    // Show default location on failure
                     LatLng defaultLocation = new LatLng(53.5461, -113.4938);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 10f));
                 });
     }
+
 
     /**
      * Adjust the map camera to show all entrant markers.
