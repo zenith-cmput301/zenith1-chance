@@ -62,7 +62,7 @@ public final class UserManager {
      * Starts a listener; useful for operations that require real-time updates.
      *
      * @return ListenerRegistration
-     * This is a listener for the Firebase "users" collection,
+     * This is a listener for the Firebase "users" collection
      */
     public ListenerRegistration startListener() {
         listener = userCollection.addSnapshotListener((value, error) -> {

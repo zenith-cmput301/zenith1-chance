@@ -65,10 +65,11 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Class for the UI used in event creation and modification
+ * Fragment for creating and editing events with location selection via Google Maps.
+ * Handles event creation, updates, image uploads, and interactive map-based location selection.
  *
  * @author Emerson, Sabrina
- * @version 1.0
+ * @version 2.0
  * @see Event
  */
 public class OrganizerCreateEventFragment extends Fragment implements OnMapReadyCallback {
@@ -102,9 +103,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
     private ActivityResultLauncher<Intent> autocompleteLauncher;
 
-
-
-
+    /**
+     * Initializes image picker and location autocomplete launchers.
+     *
+     * @param savedInstanceState Previous saved state
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,6 +178,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         );
     }
 
+    /**
+     * Initializes the Google Map with default location or existing event location.
+     *
+     * @param googleMap The GoogleMap instance to configure
+     */
     /*
      The following function is from OpenAI, ChatGPT, "How to add Google maps fragment to my code?", 2025-11-30
      */
@@ -329,7 +337,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     }
 
     /**
-     * This method sets up the submit button to for creation or updating
+     * Configures the submit button to create a new event or update an existing one.
      */
     private void setupSubmitButton() {
         submitButton.setOnClickListener(v -> {
@@ -344,7 +352,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
 
     /**
-     * This method sets up the discard button to  return the user to the events fragment
+     * Configures the discard button to return to the events list.
      */
     private void setupDiscardButton() {
         discardButton.setOnClickListener(v -> {
@@ -356,7 +364,12 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     }
 
 
-
+    /**
+     * Reverse geocodes coordinates to a human-readable address.
+     * Updates the location field with the address on the main thread.
+     *
+     * @param latLng The coordinates to convert to an address
+     */
     /*
      The following function is from Anthropic, Claude, "How to add Google maps fragment to my code?", 2025-11-30
      */
@@ -423,7 +436,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     }
 
     /**
-     * Updates the text within the selection boxes to the pre-existing values if they exist
+     * Updates the text within the selection boxes to the pre-existing values if they exist.
      * @param args the bundle of arguments passed to the fragment
      */
 
@@ -470,7 +483,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
 
     /**
-     * Updates the event values to the field values currently selected
+     * Updates the event values to the field values currently selected.
      * @param args the bundle of arguments passed to the fragment
      */
 
@@ -529,7 +542,8 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
 
     /**
-     * Creates the event using the fields selected by the user and updates the users FireStore document
+     * Creates a new event from form inputs and saves to Firestore.
+     * Validates required fields before creation.
      */
     private void createNewEvent() {
         // location must be set
@@ -588,6 +602,12 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         }
     }
 
+    /**
+     * Attaches date and time picker dialogs to a button.
+     * Shows date picker followed by time picker.
+     *
+     * @param targetButton The button to attach the picker to
+     */
     private void attachDateTimePicker(Button targetButton) {
 
         targetButton.setOnClickListener(v -> {
@@ -646,6 +666,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         });
     }
 
+    /**
+     * Uploads event image to Firebase Storage and creates the event.
+     *
+     * @param newEvent The event to create after image upload
+     */
     private void uploadImageAndCreateEvent(Event newEvent) {
         if (selectedImageUri == null) {
             saveNewEventToFirestore(newEvent);
@@ -668,7 +693,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
-
+    /**
+     * Saves a new event to Firestore and updates the organizer's event list.
+     *
+     * @param newEvent The event to save
+     */
     private void saveNewEventToFirestore(Event newEvent) {
         db.collection("events")
                 .add(newEvent)
@@ -701,6 +730,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
+    /**
+     * Uploads event image to Firebase Storage and updates the event.
+     *
+     * @param event The event to update after image upload
+     */
     private void uploadImageAndUpdateEvent(Event event) {
         if (selectedImageUri == null) {
             saveUpdatedEventToFirestore(event);
@@ -723,6 +757,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
+    /**
+     * Saves an updated event to Firestore.
+     *
+     * @param event The event to save
+     */
     private void saveUpdatedEventToFirestore(Event event) {
         db.collection("events")
                 .document(event.getDocId())

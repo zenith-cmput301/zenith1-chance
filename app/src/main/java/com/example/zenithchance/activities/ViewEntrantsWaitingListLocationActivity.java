@@ -24,10 +24,14 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-This class lets the organizer view where entrants joined the waiting list from, for a certain event.
-*/
 
+/**
+ * Activity that displays a map showing where entrants joined an event's waiting list.
+ * Organizers can view markers for each entrant's location when they enrolled.
+ *
+ * @author Sabrina
+ * @version 1.0
+ */
 public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -36,6 +40,12 @@ public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity i
     private FirebaseFirestore db;
     private final List<LatLng> entrantLocations = new ArrayList<>();
 
+    /**
+     * Initializes the activity and sets up the toolbar and map fragment.
+     * Retrieves event data from the intent.
+     *
+     * @param savedInstanceState Previous saved state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +76,11 @@ public class ViewEntrantsWaitingListLocationActivity extends AppCompatActivity i
         }
     }
 
+    /**
+     * Initializes the Google Map with zoom controls and loads entrant locations.
+     *
+     * @param googleMap The GoogleMap instance to configure
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;

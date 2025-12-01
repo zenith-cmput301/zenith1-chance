@@ -5,17 +5,33 @@ import com.google.firebase.firestore.GeoPoint;
 
 import java.io.Serializable;
 
+/**
+ * Represents an entry in an event's waiting list with location data.
+ * Stores where the entrant joined from and when they joined.
+ * Used for displaying entrant locations on organizer's map view.
+ *
+ * @author Sabrina
+ * @version 1.0
+ */
 public class WaitingListEntry implements Serializable {
-    private String entryId;           // Firestore document ID
-    private String eventId;           // Event document ID
-    private String userId;            // User/Entrant document ID
-    private GeoPoint eventLocation;   // Where the event is
+    private String entryId;
+    private String eventId; // Event document ID
+    private String userId; // User/Entrant document ID
+    private GeoPoint eventLocation; // Where the event is
     private GeoPoint entrantLocation; // Where entrant joined from
-    private Timestamp joinedAt;       // When they joined
+    private Timestamp joinedAt; // When they joined
 
     // Empty constructor required for Firestore
     public WaitingListEntry() {}
 
+    /**
+     * Creates a new waiting list entry with location data.
+     *
+     * @param eventId The event's Firestore document ID
+     * @param userId The entrant's Firestore document ID
+     * @param eventLocation The event's location
+     * @param entrantLocation Where the entrant joined from
+     */
     public WaitingListEntry(String eventId, String userId,
                             GeoPoint eventLocation, GeoPoint entrantLocation) {
         this.eventId = eventId;

@@ -46,7 +46,7 @@ import java.util.Locale;
 /**
  * This fragment displays details of the selected event.
  *
- * @author Percy
+ * @author Percy, Sabrina
  * @version 1.0
  * @see AllEventsFragment
  * @see EntrantEventListFragment
@@ -94,6 +94,11 @@ public class EntrantEventDetailsFragment extends Fragment {
         locationHelper = new LocationHelper(context.getApplicationContext());
     }
 
+    /**
+     * Registers the location permission request handler.
+     *
+     * @param savedInstanceState Previous state if being reconstructed
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -263,7 +268,12 @@ public class EntrantEventDetailsFragment extends Fragment {
         return view;
     }
 
-    // Add this helper method
+    /**
+     * Formats a date for display in the event details.
+     *
+     * @param date The event date
+     * @return Formatted date string
+     */
     private String formatEventDateTime(Date date) {
         if (date == null) {
             return "Date not set";
@@ -276,12 +286,12 @@ public class EntrantEventDetailsFragment extends Fragment {
      * This function fetches newest event details data to accurately shows buttons
      * (in case queue status changes)
      *
-     * @param eventDocId        Firestore document id of event
-     * @param eventForLocal     Local copy of event fetched from Firestore
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
+     * @param eventDocId Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     * @param inviteActions Special group of buttons in case entrant is invited
+     * @param actionBtn Button to enroll/drop out of waiting list
+     * @param acceptBtn Button to accept invitation
+     * @param declineBtn Button to decline invitation
      */
     private void refreshEntrantListsAndBind(String eventDocId, Event eventForLocal, ViewGroup inviteActions, MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn) {
 
@@ -320,12 +330,12 @@ public class EntrantEventDetailsFragment extends Fragment {
     /**
      * Binds action button behaviour to specific state (enroll, invited, etc.)
      *
-     * @param eventDocId        Firestore document id of event
-     * @param eventForLocal     Local copy of event fetched from Firestore
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
+     * @param eventDocId Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     * @param inviteActions Special group of buttons in case entrant is invited
+     * @param actionBtn Button to enroll/drop out of waiting list
+     * @param acceptBtn Button to accept invitation
+     * @param declineBtn Button to decline invitation
      */
     private void bindActionForState(String eventDocId, Event eventForLocal,
                                     ViewGroup inviteActions,
@@ -338,10 +348,10 @@ public class EntrantEventDetailsFragment extends Fragment {
         Date now = new Date();
         if (eventForLocal != null && eventForLocal.isPast(now)) {
             actionBtn.setVisibility(View.VISIBLE);
-            inviteActions.setVisibility(View.GONE);   // hide accept/decline buttons
+            inviteActions.setVisibility(View.GONE); // hide accept/decline buttons
             actionBtn.setText("Event passed");
             actionBtn.setEnabled(false);
-            actionBtn.setTextColor(Color.WHITE);      // or a softer gray if you prefer
+            actionBtn.setTextColor(Color.WHITE);
             return;
         }
 
@@ -390,8 +400,13 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Checks if entrant can enroll in event's waiting list.
-     * Requests location permission if needed.
+     * Sets up the enroll button to request location permission and verify requirements.
+     * Always requests location permission to record where entrants join from.
+     * For geolocation-enabled events, also enforces distance requirements.
+     *
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to configure
+     * @param eventForLocal Event to enroll in
      */
     public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
         actionBtn.setOnClickListener(v -> {
@@ -416,7 +431,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Check if we have location permission
+     * Checks if the app has fine location permission.
+     *
+     * @return True if permission granted, false otherwise
      */
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(
@@ -426,9 +443,13 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Get location, optionally enforce distance from event, then enroll.
+     * Gets the user's location and optionally enforces distance requirements.
+     * Always records the entrant's location for the organizer's map view.
      *
-     * @param enforceDistance true if event requires geolocation (must be within 500m)
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to update with status
+     * @param eventForLocal Event to enroll in
+     * @param enforceDistance True to require entrant be within 500m of event location
      */
     private void proceedWithLocationCheck(String eventDocId,
                                           MaterialButton actionBtn,
@@ -508,7 +529,12 @@ public class EntrantEventDetailsFragment extends Fragment {
 
 
     /**
-     * Performs the actual enrollment
+     * Enrolls the entrant in the event's waiting list with their location.
+     *
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to update on success/failure
+     * @param eventForLocal Event to enroll in
+     * @param location Entrant's current location (required)
      */
     private void performEnrollment(String eventDocId, MaterialButton actionBtn,
                                    Event eventForLocal, GeoPoint location) {
@@ -537,11 +563,11 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to drop from event's waiting list
+     * Sets up the button to remove the entrant from the waiting list.
      *
-     * @param eventDocId        Firestore id of event
-     * @param actionBtn         Button to wire
-     * @param eventForLocal     Event to drop from
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to configure
+     * @param eventForLocal Event to drop from
      */
     public void dropWaitingList(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
@@ -579,14 +605,14 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to respond to invitation (accept/decline)
+     * Sets up accept and decline buttons for responding to an event invitation.
      *
-     * @param eventDocId        Firestore document id of event
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
-     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param eventDocId Event's Firestore document ID
+     * @param inviteActions Container for accept/decline buttons
+     * @param actionBtn Main action button (hidden when showing invite actions)
+     * @param acceptBtn Accept invitation button
+     * @param declineBtn Decline invitation button
+     * @param eventForLocal Event being responded to
      */
     public void respondInvitation(String eventDocId, ViewGroup inviteActions,
                                   MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn,
@@ -649,9 +675,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     /**
      * Allow entrant to decline accepted spot
      *
-     * @param eventDocId        Firestore document id of event
-     * @param actionBtn         Button to drop out of accepted list
-     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param eventDocId Firestore document id of event
+     * @param actionBtn Button to drop out of accepted list
+     * @param eventForLocal Local copy of event fetched from Firestore
      */
     public void cancelAccepted(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
 
