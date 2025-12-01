@@ -28,7 +28,6 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.managers.LocationHelper;
 import com.example.zenithchance.managers.QRManager;
-import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
@@ -47,7 +46,7 @@ import java.util.Locale;
 /**
  * This fragment displays details of the selected event.
  *
- * @author Percy
+ * @author Percy, Sabrina
  * @version 1.0
  * @see AllEventsFragment
  * @see EntrantEventListFragment
@@ -95,6 +94,11 @@ public class EntrantEventDetailsFragment extends Fragment {
         locationHelper = new LocationHelper(context.getApplicationContext());
     }
 
+    /**
+     * Registers the location permission request handler.
+     *
+     * @param savedInstanceState Previous state if being reconstructed
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -264,7 +268,12 @@ public class EntrantEventDetailsFragment extends Fragment {
         return view;
     }
 
-    // Add this helper method
+    /**
+     * Formats a date for display in the event details.
+     *
+     * @param date The event date
+     * @return Formatted date string
+     */
     private String formatEventDateTime(Date date) {
         if (date == null) {
             return "Date not set";
@@ -277,12 +286,12 @@ public class EntrantEventDetailsFragment extends Fragment {
      * This function fetches newest event details data to accurately shows buttons
      * (in case queue status changes)
      *
-     * @param eventDocId        Firestore document id of event
-     * @param eventForLocal     Local copy of event fetched from Firestore
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
+     * @param eventDocId Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     * @param inviteActions Special group of buttons in case entrant is invited
+     * @param actionBtn Button to enroll/drop out of waiting list
+     * @param acceptBtn Button to accept invitation
+     * @param declineBtn Button to decline invitation
      */
     private void refreshEntrantListsAndBind(String eventDocId, Event eventForLocal, ViewGroup inviteActions, MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn) {
 
@@ -321,12 +330,12 @@ public class EntrantEventDetailsFragment extends Fragment {
     /**
      * Binds action button behaviour to specific state (enroll, invited, etc.)
      *
-     * @param eventDocId        Firestore document id of event
-     * @param eventForLocal     Local copy of event fetched from Firestore
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
+     * @param eventDocId Firestore document id of event
+     * @param eventForLocal Local copy of event fetched from Firestore
+     * @param inviteActions Special group of buttons in case entrant is invited
+     * @param actionBtn Button to enroll/drop out of waiting list
+     * @param acceptBtn Button to accept invitation
+     * @param declineBtn Button to decline invitation
      */
     private void bindActionForState(String eventDocId, Event eventForLocal,
                                     ViewGroup inviteActions,
@@ -339,10 +348,10 @@ public class EntrantEventDetailsFragment extends Fragment {
         Date now = new Date();
         if (eventForLocal != null && eventForLocal.isPast(now)) {
             actionBtn.setVisibility(View.VISIBLE);
-            inviteActions.setVisibility(View.GONE);   // hide accept/decline buttons
+            inviteActions.setVisibility(View.GONE); // hide accept/decline buttons
             actionBtn.setText("Event passed");
             actionBtn.setEnabled(false);
-            actionBtn.setTextColor(Color.WHITE);      // or a softer gray if you prefer
+            actionBtn.setTextColor(Color.WHITE);
             return;
         }
 
@@ -391,8 +400,13 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Checks if entrant can enroll in event's waiting list.
-     * Requests location permission if needed.
+     * Sets up the enroll button to request location permission and verify requirements.
+     * Always requests location permission to record where entrants join from.
+     * For geolocation-enabled events, also enforces distance requirements.
+     *
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to configure
+     * @param eventForLocal Event to enroll in
      */
     public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
         actionBtn.setOnClickListener(v -> {
@@ -416,24 +430,111 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
-                        // send enrollemnt notification
-                        UserManager.getInstance().sendNotification(eventDocId, "enrolled", currentEntrant.getUserId());
+    /**
+     * Checks if the app has fine location permission.
+     *
+     * @return True if permission granted, false otherwise
+     */
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
 
-                        Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
-                    },
-                    // fail to enroll due to firebase shenanigans
-                    e -> {
-                        actionBtn.setText("Enroll");
-                        actionBtn.setEnabled(true);
-                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-            );
+    /**
+     * Gets the user's location and optionally enforces distance requirements.
+     * Always records the entrant's location for the organizer's map view.
+     *
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to update with status
+     * @param eventForLocal Event to enroll in
+     * @param enforceDistance True to require entrant be within 500m of event location
+     */
+    private void proceedWithLocationCheck(String eventDocId,
+                                          MaterialButton actionBtn,
+                                          Event eventForLocal,
+                                          boolean enforceDistance) {
+
+        actionBtn.setEnabled(false);
+        actionBtn.setText(enforceDistance ? "Checking location..." : "Getting location...");
+        actionBtn.setTextColor(Color.WHITE);
+
+        if (locationHelper == null) {
+            locationHelper = new LocationHelper(requireContext().getApplicationContext());
+        }
+
+        locationHelper.getCurrentLocation(location -> {
+            GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
+            GeoPoint eventPoint = eventForLocal.getLocationPoint();
+
+            // We MUST have entrant location for both cases
+            if (entrantPoint == null) {
+                actionBtn.setText("Enroll");
+                actionBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Location Unavailable")
+                        .setMessage("Could not get your current location. Please make sure location services are enabled and try again.")
+                        .setPositiveButton("Retry", (dialog, which) ->
+                                proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, enforceDistance))
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                return;
+            }
+
+            // If we need to enforce distance, we also need event location
+            if (enforceDistance) {
+                if (eventPoint == null) {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Event Location Not Set")
+                            .setMessage("This event requires you to be at a specific location, " +
+                                    "but the organizer hasn't set it yet. You can't join until it's fixed.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return;
+                }
+
+                // Check distance only when enforceDistance == true
+                float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
+                Log.d("Enrollment", "Distance: " + distance + "m (max: " + MAX_DISTANCE_METERS + "m)");
+
+                if (distance > MAX_DISTANCE_METERS) {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
+
+                    String distanceText = distance > 1000
+                            ? String.format("%.1f km", distance / 1000)
+                            : String.format("%.0f meters", distance);
+
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Too Far From Event")
+                            .setMessage("You must be within " + (int) MAX_DISTANCE_METERS + " meters of the event location.\n\n" +
+                                    "You are currently " + distanceText + " away from:\n" +
+                                    eventForLocal.getLocation())
+                            .setPositiveButton("OK", null)
+                            .setNeutralButton("Retry", (dialog, which) ->
+                                    proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, true))
+                            .show();
+                    return;
+                }
+            }
+
+            // All checks passed; enroll and always record entrantPoint
+            actionBtn.setText("Enrolling...");
+            performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
         });
     }
 
 
     /**
-     * Performs the actual enrollment
+     * Enrolls the entrant in the event's waiting list with their location.
+     *
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to update on success/failure
+     * @param eventForLocal Event to enroll in
+     * @param location Entrant's current location (required)
      */
     private void performEnrollment(String eventDocId, MaterialButton actionBtn,
                                    Event eventForLocal, GeoPoint location) {
@@ -462,11 +563,11 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to drop from event's waiting list
+     * Sets up the button to remove the entrant from the waiting list.
      *
-     * @param eventDocId        Firestore id of event
-     * @param actionBtn         Button to wire
-     * @param eventForLocal     Event to drop from
+     * @param eventDocId Event's Firestore document ID
+     * @param actionBtn Button to configure
+     * @param eventForLocal Event to drop from
      */
     public void dropWaitingList(String eventDocId, MaterialButton actionBtn,
                               Event eventForLocal) {
@@ -492,9 +593,6 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // decrement #entrants
                         waitingCount--;
                         updateWaitingCountLabel();
-
-                        // send notifications
-                        UserManager.getInstance().sendNotification(eventDocId, "dropped", currentEntrant.getUserId());
                     },
                     // fail to enroll due to firebase shenanigans
                     e -> {
@@ -507,14 +605,14 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to respond to invitation (accept/decline)
+     * Sets up accept and decline buttons for responding to an event invitation.
      *
-     * @param eventDocId        Firestore document id of event
-     * @param inviteActions     Special group of buttons in case entrant is invited
-     * @param actionBtn         Button to enroll/drop out of waiting list
-     * @param acceptBtn         Button to accept invitation
-     * @param declineBtn        Button to decline invitation
-     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param eventDocId Event's Firestore document ID
+     * @param inviteActions Container for accept/decline buttons
+     * @param actionBtn Main action button (hidden when showing invite actions)
+     * @param acceptBtn Accept invitation button
+     * @param declineBtn Decline invitation button
+     * @param eventForLocal Event being responded to
      */
     public void respondInvitation(String eventDocId, ViewGroup inviteActions,
                                   MaterialButton actionBtn, MaterialButton acceptBtn, MaterialButton declineBtn,
@@ -577,9 +675,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     /**
      * Allow entrant to decline accepted spot
      *
-     * @param eventDocId        Firestore document id of event
-     * @param actionBtn         Button to drop out of accepted list
-     * @param eventForLocal     Local copy of event fetched from Firestore
+     * @param eventDocId Firestore document id of event
+     * @param actionBtn Button to drop out of accepted list
+     * @param eventForLocal Local copy of event fetched from Firestore
      */
     public void cancelAccepted(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
 
@@ -596,7 +694,6 @@ public class EntrantEventDetailsFragment extends Fragment {
                         actionBtn.setText("Declined");
                         actionBtn.setTextColor(Color.WHITE);
                         actionBtn.setEnabled(false);
-                        UserManager.getInstance().sendNotification(eventDocId, "cancelled", currentEntrant.getUserId());
                     },
                     e -> {
                         actionBtn.setText("Cancel Spot");

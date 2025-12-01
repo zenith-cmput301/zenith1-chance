@@ -13,10 +13,22 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.GeoPoint;
 
+/**
+ * Helper class for getting device location using Google Play Services.
+ * Provides methods to get current location and calculate distances between points.
+ *
+ * @author Sabrina
+ * @version 1.0
+ */
 public class LocationHelper {
 
     private final FusedLocationProviderClient fusedLocationClient;
 
+    /**
+     * Creates a new LocationHelper instance.
+     *
+     * @param context Application context
+     */
     public LocationHelper(Context context) {
         // Use app context to avoid leaking an Activity
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(
@@ -25,8 +37,9 @@ public class LocationHelper {
     }
 
     /**
-     * Get a single current location update.
-     * Assumes location permission has already been granted.
+     * Requests a single location update.
+     *
+     * @param callback Callback to receive the location result
      */
     @SuppressLint("MissingPermission") // permission handled elsewhere
     public void getCurrentLocation(LocationCallback callback) {
@@ -56,7 +69,10 @@ public class LocationHelper {
     }
 
     /**
-     * Convert Android Location to Firebase GeoPoint.
+     * Converts an Android Location to a Firebase GeoPoint.
+     *
+     * @param location The Android Location object
+     * @return GeoPoint with latitude and longitude, or null if location is null
      */
     @Nullable
     public static GeoPoint locationToGeoPoint(@Nullable Location location) {
@@ -65,7 +81,11 @@ public class LocationHelper {
     }
 
     /**
-     * Calculate distance in meters between two GeoPoints.
+     * Calculates the distance between two GeoPoints in meters.
+     *
+     * @param point1 First GeoPoint
+     * @param point2 Second GeoPoint
+     * @return Distance in meters, or Float.MAX_VALUE if either point is null
      */
     public static float distanceMeters(GeoPoint point1, GeoPoint point2) {
         if (point1 == null || point2 == null) return Float.MAX_VALUE;
@@ -80,7 +100,15 @@ public class LocationHelper {
     }
 
 
+    /**
+     * Callback interface for receiving location results.
+     */
     public interface LocationCallback {
+        /**
+         * Called when location is retrieved or fails.
+         *
+         * @param location The location result, or null if location unavailable
+         */
         void onLocationResult(@Nullable Location location);
     }
 }
