@@ -31,7 +31,14 @@ import java.util.List;
  * @author Sabrina
  */
 public class AdminBrowseProfilesFragment extends Fragment {
-
+    /**
+     * onCreateView
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return View
+     */
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -87,7 +94,16 @@ public class AdminBrowseProfilesFragment extends Fragment {
         ((AdminMainActivity) requireActivity()).showBackButton(true);
         return view;
     }
-
+    /**
+     * bindCard
+     *
+     * @param card , Is a view
+     * @param userId , is the users firebase ID
+     * @param name , users name
+     * @param email , users email
+     * @param type , users type (entrant, admin, orgamizer)
+     * @return void
+     */
     private void bindCard(View card, String userId, String name, String email, String type) {
         TextView nameTv  = card.findViewById(R.id.browse_profile_name);
         TextView emailTv = card.findViewById(R.id.browse_profile_email);

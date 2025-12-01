@@ -94,14 +94,26 @@ public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.Even
             imageView = itemView.findViewById(R.id.event_image);
         }
     }
-
+   /**
+    * EventViewHolder.
+    *
+    * @param viewType
+    * @param parent
+    * @return EventViewHolder
+    */
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.all_events_list_item, parent, false);
         return new EventViewHolder(view);
     }
-
+   /**
+    * onBindViewHolder.
+    *
+    * @param holder
+    * @param position
+    * @return onBindViewHolder
+    */
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
@@ -119,7 +131,11 @@ public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.Even
             if (listener != null) listener.onEventClick(event);
         });
     }
-
+    /**
+    * getItemCount, gets the events.size()
+    *
+    * @return int 
+    */
     @Override
     public int getItemCount() {
         return events.size();

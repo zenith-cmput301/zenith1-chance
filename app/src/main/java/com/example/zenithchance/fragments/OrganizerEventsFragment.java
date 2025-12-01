@@ -38,7 +38,13 @@ public class OrganizerEventsFragment extends Fragment {
 
     Button createEventButton;
     Button runLotteriesButton;
-
+    /**
+     * onCreateView
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return View
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -79,7 +85,9 @@ public class OrganizerEventsFragment extends Fragment {
 
         return view;
     }
-
+    /**
+     * onResume
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -91,7 +99,9 @@ public class OrganizerEventsFragment extends Fragment {
 
         organizer.checkAndRedraw();
     }
-
+     /**
+     * initCreateEventButton , Create event button on click listener
+     */
     private void initCreateEventButton() {
         createEventButton.setOnClickListener(v -> {
 
@@ -108,7 +118,9 @@ public class OrganizerEventsFragment extends Fragment {
                     .commit();
         });
     }
-
+    /**
+     * runLotteriesCheckDeadline , Checks deadline for run lotteries
+     */
     private void runLotteriesCheckDeadline() {
         runLotteriesButton.setOnClickListener(v -> {
             if (organizer == null && getActivity() instanceof OrganizerMainActivity) {

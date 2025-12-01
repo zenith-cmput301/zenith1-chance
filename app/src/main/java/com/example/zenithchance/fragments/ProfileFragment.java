@@ -44,7 +44,14 @@ public class ProfileFragment extends Fragment {
     ConstraintLayout editInformation;
     EditText editUsername, editEmail;
     ImageButton notificationPage;
-
+    /**
+     * onCreateView
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return View
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,

@@ -55,7 +55,13 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
     private Organizer organizer;
 
     private GoogleMap mMap;
-
+/**
+ * onCreateView
+ * @param inflater
+ * @param container
+ * @param savedInstanceState
+ * @return View
+ */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -262,7 +268,11 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
             // view.findViewById(R.id.event_map).setVisibility(View.GONE);
         }
     }
-
+    /**
+     * setOptionalText , sets optional text
+     * @param tv TextView
+     * @param value String to set
+     */
     private void setOptionalText(TextView tv, @Nullable String value) {
         if (value == null || value.trim().isEmpty()) {
             tv.setText("None");
@@ -272,7 +282,11 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
             tv.setTypeface(null, Typeface.NORMAL);
         }
     }
-
+    /**
+     * setOptionalBoolean , sets optional boolean
+     * @param tv TextView
+     * @param value Boolean to set
+     */
     private void setOptionalBoolean(TextView tv, @Nullable Boolean value) {
         if (value == null) {
             tv.setText("None");
@@ -282,7 +296,11 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
             tv.setTypeface(null, Typeface.NORMAL);
         }
     }
-
+    /**
+     * setOptionalInteger , sets optional integer
+     * @param tv TextView
+     * @param value Integer to set
+     */
     private void setOptionalInteger(TextView tv, @Nullable Integer value) {
         if (value == null || value <= 0) {
             tv.setText("None");
