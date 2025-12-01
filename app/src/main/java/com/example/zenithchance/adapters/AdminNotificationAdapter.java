@@ -43,7 +43,7 @@ public class AdminNotificationAdapter extends RecyclerView.Adapter<AdminNotifica
 
         holder.organizer.setText("Organizer: Loading...");
 
-        db.collection("Events")
+        db.collection("events")
                 .whereEqualTo("name", log.getEventName())
                 .limit(1)
                 .get()
