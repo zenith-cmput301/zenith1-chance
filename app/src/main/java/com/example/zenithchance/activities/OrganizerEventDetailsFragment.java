@@ -13,7 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.zenithchance.R;
-
+/**
+ * Creates the fragment and has methods to populate UI
+ *
+ */
 public class OrganizerEventDetailsFragment extends Fragment {
 
     private TextView tvEventName, tvEventDate, tvEventTime, tvLocation, tvOrganizer, tvAboutDescription;
@@ -24,7 +27,14 @@ public class OrganizerEventDetailsFragment extends Fragment {
     public OrganizerEventDetailsFragment() {
         // Required empty public constructor
     }
-
+/**
+ * onCreateView
+ *
+ * @param inflater
+ * @param container
+ * @param savedInstanceState
+ * @return View
+ */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -32,7 +42,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
         // Inflate the layout
         return inflater.inflate(R.layout.organizer_event_details, container, false);
     }
-
+/**
+ * onViewCreated
+ *
+ * @param view
+ * @param savedInstanceState
+ * @return void
+ */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -70,7 +86,11 @@ public class OrganizerEventDetailsFragment extends Fragment {
                 Toast.makeText(requireContext(), "Edit event (to be implemented)", Toast.LENGTH_SHORT).show()
         );
     }
-
+/**
+ * populateUI, sets text for UI
+ *
+ * @return void
+ */
     private void populateUI() {
         tvEventName.setText(eventName != null ? eventName : "No Event Name");
         tvEventDate.setText(eventDate != null ? eventDate : "No Date");
