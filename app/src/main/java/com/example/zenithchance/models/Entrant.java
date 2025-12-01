@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * This class represents Entrant users.
  *
- * @author Percy
+ * @author Percy, Lauren
  * @version 1.0
  */
 public class Entrant extends User implements Serializable {
@@ -22,7 +22,7 @@ public class Entrant extends User implements Serializable {
     private ArrayList<String> onAccepted = new ArrayList<String>();
     private ArrayList<String> onDeclined = new ArrayList<String>();
 
-    private List<String> notifications = new ArrayList<>(); // Do Not Delete, used for notifications
+    private List<String> notifications = new ArrayList<>(); // Used for notifications
 
     public Entrant() { setType("entrant"); }
 
