@@ -65,6 +65,7 @@ public class EntrantEventsFragment extends Fragment {
         // get current entrant
         currentEntrant = (Entrant) getArguments().getSerializable("entrant");
 
+
         View view = inflater.inflate(R.layout.fragment_entrant_my_events, container, false);
 
         // Inflate child fragment
