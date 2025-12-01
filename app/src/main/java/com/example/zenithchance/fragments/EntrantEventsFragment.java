@@ -131,6 +131,7 @@ public class EntrantEventsFragment extends Fragment {
                     List<String> allIds = new ArrayList<>(idSet);
                     List<Task<QuerySnapshot>> tasks = new ArrayList<>();
 
+                    // The use of fetching data and converting to Java class using whereIn is from OpenAI, ChatGPT, "How do I fetch events from Firebase?", "How do I convert data from Firebase to actual Java classes?", 2025-10-09
                     // fetch 10 at a time due to whereIn's limit 10
                     for (int i = 0; i < allIds.size(); i += 10) {
                         int end = Math.min(i + 10, allIds.size());

@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/logMessage"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notification message here" />
+
+    <TextView
+        android:id="@+id/logEventName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Event: "/>
+
+    <TextView
+        android:id="@+id/logStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: "/>
+
+    <TextView
+        android:id="@+id/logUid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Entrant: "/>
+
+    <TextView
+        android:id="@+id/logOrganizer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Organizer: "/>
+
+</LinearLayout>

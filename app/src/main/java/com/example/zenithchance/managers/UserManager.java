@@ -268,6 +268,13 @@ public final class UserManager {
                 .addOnFailureListener(e -> Log.e("UserManager", "FAILURE: Firestore rejected update.", e));
     }
 
+    /**
+     * Send notification to provided user with uid.
+     *
+     * @param eid       Event's Firebase id
+     * @param status    Entrant's status on event
+     * @param uid       Entrant's Firebase id
+     */
     public void sendNotification(String eid, String status, String uid){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = db.collection("users").document(uid);

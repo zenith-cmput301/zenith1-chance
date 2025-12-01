@@ -41,8 +41,10 @@ public class AdminMenuFragment extends Fragment {
         // Initialize UI components
         Button browseProfilesBtn = view.findViewById(R.id.browseProfilesButton);
         Button browseEventsBtn = view.findViewById(R.id.browseEventsButton);
+        Button browseImagesBtn = view.findViewById(R.id.browseImagesButton);
+        Button browseNotificationsBtn = view.findViewById(R.id.browseNotificationsButton);
 
-        // Navigate to AdminBrowseProfilesFragment when button clicked
+        //        BROWSE PROFILE -> Switch to AdminBrowseProfiles Fragment
         browseProfilesBtn.setOnClickListener(v -> {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -51,7 +53,7 @@ public class AdminMenuFragment extends Fragment {
                     .commit();
         });
 
-        // Navigate to AllEventsFragment when button clicked
+//        BROWSE EVENTS -> Switch tab to All Events
         browseEventsBtn.setOnClickListener(v -> {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -59,6 +61,28 @@ public class AdminMenuFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+//        BROWSE IMAGES
+
+        browseImagesBtn.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.adminFragmentContainer, new AdminBrowseImagesFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+//        BROWSE NOTIFICATIONS
+        browseNotificationsBtn.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.adminFragmentContainer, new AdminNotificationLogsFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
+
 
         // Hide back button in AdminMainActivity
         ((AdminMainActivity) requireActivity()).showBackButton(false);
