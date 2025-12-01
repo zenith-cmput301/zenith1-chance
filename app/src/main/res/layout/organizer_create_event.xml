@@ -94,7 +94,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="The date the registration closes (day of the lottery selection)"
+            android:text="The date of the lottery selection"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <!-- Invitation deadline date -->
+        <TextView
+            android:id="@+id/event_deadline_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Invitation deadline:"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/event_deadline_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="@string/event_date_blank"
+            android:textColor="@color/black"
+            android:backgroundTint="@android:color/darker_gray"
+            android:gravity="center_vertical|start" />
+
+        <TextView
+            android:id="@+id/event_deadline_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Deadline to respond to invitations"
             android:textSize="12sp"
             android:textColor="@android:color/darker_gray" />
 
@@ -151,6 +180,26 @@
 
         <EditText
             android:id="@+id/event_max_entrants_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="e.g. 100"
+            android:padding="12dp"
+            android:inputType="number"
+            android:maxLines="1" />
+
+        <!-- Max waiting list -->
+        <TextView
+            android:id="@+id/event_max_waiting_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Maximum waiting list (optional):"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/event_max_waiting_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"

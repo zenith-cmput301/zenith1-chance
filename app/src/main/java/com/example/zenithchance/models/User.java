@@ -11,7 +11,7 @@ import java.util.List;
  * This class represents a User object.
  * This class is the superclass for entrants, organizers, and admins.
  *
- * @author Sabrina
+ * @author Sabrina, Lauren
  */
 public abstract class User {
 
@@ -43,9 +43,6 @@ public abstract class User {
 
     // ADDED FOR NOTIFICATION THINGS:
 
-    public void addNotification(String newNotification){
-        notifications.add(newNotification);
-    }
     public List<String> getNotifications() {
         return notifications;
     }
