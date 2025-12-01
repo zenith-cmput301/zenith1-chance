@@ -66,6 +66,7 @@ public class EntrantEventDetailsFragment extends Fragment {
     private MaterialButton pendingActionButton;
     private String pendingEventDocId;
     private Event pendingEvent;
+    private Boolean pendingGeoRequired;
 
 
     private LocationHelper locationHelper;
@@ -93,7 +94,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         locationHelper = new LocationHelper(context.getApplicationContext());
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,8 +105,17 @@ public class EntrantEventDetailsFragment extends Fragment {
                     if (isGranted) {
                         Log.d("Permission", "Location permission granted");
                         // Permission granted, proceed with enrollment
-                        if (pendingActionButton != null && pendingEventDocId != null && pendingEvent != null) {
-                            proceedWithLocationCheck(pendingEventDocId, pendingActionButton, pendingEvent);
+                        if (pendingActionButton != null
+                                && pendingEventDocId != null
+                                && pendingEvent != null
+                                && pendingGeoRequired != null) {
+
+                            proceedWithLocationCheck(
+                                    pendingEventDocId,
+                                    pendingActionButton,
+                                    pendingEvent,
+                                    pendingGeoRequired
+                            );
                         }
                     } else {
                         Log.d("Permission", "Location permission denied");
@@ -118,7 +127,7 @@ public class EntrantEventDetailsFragment extends Fragment {
 
                         new MaterialAlertDialogBuilder(requireContext())
                                 .setTitle("Location Permission Required")
-                                .setMessage("This event requires location access to verify you're at the event location. Please grant location permission to join.")
+                                .setMessage("This event requires location access to record where you joined from. Please grant location permission to join.")
                                 .setPositiveButton("OK", null)
                                 .show();
                     }
@@ -127,9 +136,11 @@ public class EntrantEventDetailsFragment extends Fragment {
                     pendingActionButton = null;
                     pendingEventDocId = null;
                     pendingEvent = null;
+                    pendingGeoRequired = null;
                 }
         );
     }
+
 
     /**
      * This method defines what happens when this fragment is created
@@ -384,19 +395,23 @@ public class EntrantEventDetailsFragment extends Fragment {
      */
     public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
         actionBtn.setOnClickListener(v -> {
+
+            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
+
+            // Always require permission, regardless of geoRequired
             if (!hasLocationPermission()) {
-                // Store pending action
+                // Save pending action so you can retry after permission result
                 pendingActionButton = actionBtn;
                 pendingEventDocId = eventDocId;
                 pendingEvent = eventForLocal;
+                pendingGeoRequired = geoRequired;
 
-                // Request permission
                 locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                 return;
             }
 
-            // Permission already granted, proceed
-            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
+            // Permission already granted; always go through location check
+            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, geoRequired);
         });
     }
 
@@ -413,9 +428,18 @@ public class EntrantEventDetailsFragment extends Fragment {
     /**
      * Proceed with getting location and checking distance
      */
-    private void proceedWithLocationCheck(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+    /**
+     * Get location, optionally enforce distance from event, then enroll.
+     *
+     * @param enforceDistance true if event requires geolocation (must be within 500m)
+     */
+    private void proceedWithLocationCheck(String eventDocId,
+                                          MaterialButton actionBtn,
+                                          Event eventForLocal,
+                                          boolean enforceDistance) {
+
         actionBtn.setEnabled(false);
-        actionBtn.setText("Checking location...");
+        actionBtn.setText(enforceDistance ? "Checking location..." : "Getting location...");
         actionBtn.setTextColor(Color.WHITE);
 
         if (locationHelper == null) {
@@ -426,63 +450,65 @@ public class EntrantEventDetailsFragment extends Fragment {
             GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
             GeoPoint eventPoint = eventForLocal.getLocationPoint();
 
-            // Check if event has location set
-            if (eventPoint == null) {
-                actionBtn.setText("Enroll");
-                actionBtn.setEnabled(true);
-                new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Event Location Not Set")
-                        .setMessage("This event requires you to be at a specific location, but the organizer hasn't set it yet.")
-                        .setPositiveButton("OK", null)
-                        .show();
-                return;
-            }
-
-            // Check if we got user's location
+            // We MUST have entrant location for both cases
             if (entrantPoint == null) {
                 actionBtn.setText("Enroll");
                 actionBtn.setEnabled(true);
                 new MaterialAlertDialogBuilder(requireContext())
                         .setTitle("Location Unavailable")
                         .setMessage("Could not get your current location. Please make sure location services are enabled and try again.")
-                        .setPositiveButton("Retry", (dialog, which) -> {
-                            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
-                        })
+                        .setPositiveButton("Retry", (dialog, which) ->
+                                proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, enforceDistance))
                         .setNegativeButton("Cancel", null)
                         .show();
                 return;
             }
 
-            // Check distance
-            float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
-            Log.d("Enrollment", "Distance: " + distance + "m (max: " + MAX_DISTANCE_METERS + "m)");
+            // If we need to enforce distance, we also need event location
+            if (enforceDistance) {
+                if (eventPoint == null) {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Event Location Not Set")
+                            .setMessage("This event requires you to be at a specific location, " +
+                                    "but the organizer hasn't set it yet. You can't join until it's fixed.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return;
+                }
 
-            if (distance > MAX_DISTANCE_METERS) {
-                actionBtn.setText("Enroll");
-                actionBtn.setEnabled(true);
+                // Check distance only when enforceDistance == true
+                float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
+                Log.d("Enrollment", "Distance: " + distance + "m (max: " + MAX_DISTANCE_METERS + "m)");
 
-                String distanceText = distance > 1000
-                        ? String.format("%.1f km", distance / 1000)
-                        : String.format("%.0f meters", distance);
+                if (distance > MAX_DISTANCE_METERS) {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
 
-                new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Too Far From Event")
-                        .setMessage("You must be within " + MAX_DISTANCE_METERS + " meters of the event location.\n\n" +
-                                "You are currently " + distanceText + " away from:\n" +
-                                eventForLocal.getLocation())
-                        .setPositiveButton("OK", null)
-                        .setNeutralButton("Retry", (dialog, which) -> {
-                            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
-                        })
-                        .show();
-                return;
+                    String distanceText = distance > 1000
+                            ? String.format("%.1f km", distance / 1000)
+                            : String.format("%.0f meters", distance);
+
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Too Far From Event")
+                            .setMessage("You must be within " + (int) MAX_DISTANCE_METERS + " meters of the event location.\n\n" +
+                                    "You are currently " + distanceText + " away from:\n" +
+                                    eventForLocal.getLocation())
+                            .setPositiveButton("OK", null)
+                            .setNeutralButton("Retry", (dialog, which) ->
+                                    proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, true))
+                            .show();
+                    return;
+                }
             }
 
-            // All checks passed - enroll!
+            // All checks passed; enroll and always record entrantPoint
             actionBtn.setText("Enrolling...");
             performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
         });
     }
+
 
     /**
      * Performs the actual enrollment
