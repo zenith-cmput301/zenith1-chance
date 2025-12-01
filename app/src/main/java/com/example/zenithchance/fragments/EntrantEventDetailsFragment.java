@@ -280,6 +280,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         if (date == null) {
             return "Date not set";
         }
+
+        // The use of SimpleDateFormat is from OpenAI, ChatGPT, "How do I convert date from Firebase to a Java Date?", 2025-10-10
         SimpleDateFormat formatter = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
         return formatter.format(date);
     }
