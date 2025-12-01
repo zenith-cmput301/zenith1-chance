@@ -32,7 +32,7 @@
         android:text="Entrant: "/>
 
     <TextView
-        android:id="@+id/logOrg"
+        android:id="@+id/logOrganizer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Organizer: "/>
