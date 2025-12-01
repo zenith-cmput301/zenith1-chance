@@ -62,7 +62,7 @@ public class AdminBrowseImagesFragment extends Fragment {
 
                     adapter.notifyDataSetChanged();
 
-                    // Update visibility AFTER loading images
+                    // Update visibility
                     if (imageUrls.isEmpty()) {
                         emptyMessage.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);

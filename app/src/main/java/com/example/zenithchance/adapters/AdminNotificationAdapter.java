@@ -25,7 +25,7 @@ public class AdminNotificationAdapter extends RecyclerView.Adapter<AdminNotifica
     @Override
     public LogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_notification_log, parent, false);
+                .inflate(R.layout.item_admin_notification_log, parent, false);
         return new LogViewHolder(view);
     }
 
@@ -36,10 +36,9 @@ public class AdminNotificationAdapter extends RecyclerView.Adapter<AdminNotifica
         // Display the message already prepared in your model
         holder.logMessage.setText(log.getToDisplay());
 
-        // Additional details (optional)
         holder.eventName.setText("Event: " + log.getEventName());
         holder.status.setText("Status: " + log.getStatus());
-        holder.uid.setText("User: " + log.getUid());
+        holder.uid.setText("User: " + log.getEntrant());
     }
 
     @Override

@@ -29,6 +29,12 @@
         android:id="@+id/logUid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User: "/>
+        android:text="Entrant: "/>
+
+    <TextView
+        android:id="@+id/logOrg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Organizer: "/>
 
 </LinearLayout>
