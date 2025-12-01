@@ -79,7 +79,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     Button eventRegistrationButton;
     Button eventDeadlineButton;
     EditText eventLocation;
-    EditText eventMaxEntrants;
+    EditText eventMaxEntrants, eventMaxWaitingList;;
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
 
@@ -282,6 +282,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         eventDeadlineButton = root.findViewById(R.id.event_deadline_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
+        eventMaxWaitingList = root.findViewById(R.id.event_max_waiting_box);
         eventDescription = root.findViewById(R.id.event_description_box);
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
@@ -454,6 +455,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         eventName.setText(event.getName());
         eventLocation.setText(event.getLocation()); // String, no cast needed
         eventMaxEntrants.setText(String.valueOf(event.getMaxEntrants()));
+        eventMaxWaitingList.setText(String.valueOf(event.getMaxWaitingList()));
         eventDescription.setText(event.getDescription());
         eventGeolocationRequired.setChecked(event.getGeolocationRequired());
 
@@ -533,6 +535,20 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         }
         event.setMaxEntrants(maxEntrants);
 
+        String waiting = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 0;   // default if empty
+
+        if (!waiting.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(waiting);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Max Waiting List, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        event.setMaxWaitingList(maxWaitingList);
+
         // always save GeoPoint
         event.setLocationPoint(new GeoPoint(eventLat, eventLng));
 
@@ -581,7 +597,17 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
             } catch (NumberFormatException ignored) {}
         }
 
-        Event newEvent = new Event(
+        String waitingText = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 0;   // default if empty
+
+        if (!waitingText.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(waitingText);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Waiting List Number, Try Again", Toast.LENGTH_LONG).show();
+            }}
+
+                Event newEvent = new Event(
                 eventdate,
                 eventName.getText().toString(),
                 locText,
@@ -591,7 +617,8 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 registrationdate,
-                maxEntrants
+                maxEntrants,
+                maxWaitingList
         );
 
         if (eventLat != null && eventLng != null) {

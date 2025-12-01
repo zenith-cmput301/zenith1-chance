@@ -237,6 +237,8 @@ public class EntrantEventDetailsFragment extends Fragment {
                     QRManager manager = new QRManager();
                     manager.updateImageView(qr, eventForLocal);
 
+                    Log.d("waiting list", "waiting list is after grabbing =" + eventForLocal.getMaxWaitingList());
+
                     // Image
                     String imageUrl = eventForLocal.getImageUrl();
                     if (imageUrl != null && !imageUrl.isEmpty()) {
@@ -355,8 +357,15 @@ public class EntrantEventDetailsFragment extends Fragment {
             return;
         }
 
+        // Case 0: Waiting List Full
+        if (!currentEntrant.isInAnyList(eventDocId) && eventForLocal.getWaitingList().size() >= eventForLocal.getMaxWaitingList() && eventForLocal.getMaxWaitingList() > 0) {
+            actionBtn.setText("Waiting List Full");
+            actionBtn.setEnabled(false);
+            actionBtn.setTextColor(Color.WHITE);
+        }
+
         // Case 1: Enroll
-        if (!currentEntrant.isInAnyList(eventDocId)) {
+        else if (!currentEntrant.isInAnyList(eventDocId)) {
             actionBtn.setText("Enroll");
             actionBtn.setEnabled(true);
             enrollWaiting(eventDocId, actionBtn, eventForLocal);

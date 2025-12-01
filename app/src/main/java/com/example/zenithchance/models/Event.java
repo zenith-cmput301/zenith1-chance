@@ -77,14 +77,6 @@ public class Event implements Serializable {
         this.max_waiting_list = max_waiting_list;
     }
 
-    public Event(Date date, String name, String location, String status, String organizer,
-                 String description, Boolean geolocation_required,
-                 Date registration_date, Date finalDeadline, Integer max_entrants) {
-        this(date, name, location, status, organizer, description,
-                geolocation_required, registration_date, finalDeadline,
-                max_entrants, null); // default waiting list size
-    }
-
 
     /**
      * Adders
@@ -174,7 +166,7 @@ public class Event implements Serializable {
         return max_entrants;
     }
 
-    public Integer getMaxMaitingList() {return max_waiting_list;}
+    public Integer getMaxWaitingList() {return max_waiting_list;}
 
     public String getImageUrl() {
         return imageUrl;
@@ -189,6 +181,7 @@ public class Event implements Serializable {
     }
 
     public ArrayList<String> getWaitingList() {
+        if (waitingList == null) waitingList = new ArrayList<>();
         return waitingList;
     }
 
