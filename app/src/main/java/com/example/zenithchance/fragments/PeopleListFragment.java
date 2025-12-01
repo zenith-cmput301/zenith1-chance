@@ -20,14 +20,23 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.io.OutputStream;
-
+/**
+ * Creates and manages the list of people waiting, chosen, etc
+ *
+ * @author Aayush
+ */
 public class PeopleListFragment extends Fragment {
 
     private static final String ARG_EVENT_ID = "event_id";
     private String eventId;
     private TextView textViewUsers;
     private String csvToSave = "";
-
+/**
+ * creates instance of PeopleListFragment
+ *
+ * @param eventId id of event in Firebase, as a String
+ * @return PeopleListFragment 
+ */
     public static PeopleListFragment newInstance(String eventId) {
         PeopleListFragment fragment = new PeopleListFragment();
         Bundle args = new Bundle();
@@ -35,6 +44,11 @@ public class PeopleListFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+    /**
+     * onCreate
+     *
+     * @param savedInstanceState , bundle
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +56,14 @@ public class PeopleListFragment extends Fragment {
             eventId = getArguments().getString(ARG_EVENT_ID);
         }
     }
+    /**
+     * onCreateView
+     *
+     * @param savedInstanceState , bundle
+     * @param container
+     * @param inflater
+     * @return View
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -65,6 +87,12 @@ public class PeopleListFragment extends Fragment {
         btnExport.setOnClickListener(v -> exportAcceptedAsCSV());
         return view;
     }
+    /**
+     * fetchEntrantsByStatus
+     *
+     * @param field String
+     * @param label String
+     */
     private void fetchEntrantsByStatus(String field, String label) {
         if (eventId == null) {
             Toast.makeText(getContext(), "Event ID missing", Toast.LENGTH_SHORT).show();
@@ -93,6 +121,9 @@ public class PeopleListFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+    /**
+     * exportAcceptedAsCSV , exports as CSV
+     */
     private void exportAcceptedAsCSV() {
         FirebaseFirestore.getInstance()
                 .collection("users")
@@ -119,6 +150,9 @@ public class PeopleListFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+     /**
+     * openSaveDialog
+     */
     private void openSaveDialog() {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.setType("text/csv");
@@ -127,6 +161,12 @@ public class PeopleListFragment extends Fragment {
 
         startActivityForResult(intent, 999);
     }
+    /**
+     * onActivityResult
+     * @param requestCode , int
+     * @param resultCode , int
+     * @param data , intent
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -137,6 +177,10 @@ public class PeopleListFragment extends Fragment {
             }
         }
     }
+    /**
+     * saveCSVToUri , saves to Uri
+     * @param uri Uri
+     */
     private void saveCSVToUri(Uri uri) {
         try {
             OutputStream out = requireContext().getContentResolver().openOutputStream(uri);
