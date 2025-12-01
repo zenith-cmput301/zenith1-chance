@@ -14,6 +14,12 @@ import com.example.zenithchance.models.Notification;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+/**
+ * Adapter used to display a list of notification logs in the admin interface.
+ * Each log corresponds to a Notification object and is shown inside a RecyclerView.
+ *
+ * @author Kiran
+ */
 
 public class AdminNotificationAdapter extends RecyclerView.Adapter<AdminNotificationAdapter.LogViewHolder> {
 

@@ -18,6 +18,16 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 
+/**
+ * Fragment that displays a full-screen preview of an image uploaded by an event.
+ * Administrators can view the image and permanently delete it from Firebase Storage
+ * and remove its reference from the associated event document in Firestore.
+ *
+ * Outstanding Issues:
+ * Multiple select images to delete not available yet
+ *
+ * @Author Kiran
+ **/
 
 public class AdminImagePreviewFragment extends Fragment {
 

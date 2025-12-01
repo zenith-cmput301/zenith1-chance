@@ -19,6 +19,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment used by administrators to browse all event images stored in Firestore.
+ * Images are presented in a grid, and tapping an image opens a preview screen.
+ *
+ * @author Kiran
+ */
+
 public class AdminBrowseImagesFragment extends Fragment {
 
     private RecyclerView recyclerView;
