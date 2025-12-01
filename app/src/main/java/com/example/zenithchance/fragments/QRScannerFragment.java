@@ -161,13 +161,17 @@ public class QRScannerFragment extends Fragment {
                 .replace(R.id.fragmentContainer, fragment)
                 .commit();
     }
-
+    /**
+     * onResume
+     */
     @Override
     public void onResume() {
         super.onResume();
         barcodeView.resume();
     }
-
+    /**
+     * onPause
+     */
     @Override
     public void onPause() {
         super.onPause();
