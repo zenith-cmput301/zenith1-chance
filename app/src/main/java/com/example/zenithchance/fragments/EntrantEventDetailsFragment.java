@@ -384,17 +384,6 @@ public class EntrantEventDetailsFragment extends Fragment {
      */
     public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
         actionBtn.setOnClickListener(v -> {
-            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
-
-            if (!geoRequired) {
-                // No geolocation required - enroll directly
-                actionBtn.setEnabled(false);
-                actionBtn.setText("Enrolling...");
-                performEnrollment(eventDocId, actionBtn, eventForLocal, null);
-                return;
-            }
-
-            // Geolocation IS required - check permission first
             if (!hasLocationPermission()) {
                 // Store pending action
                 pendingActionButton = actionBtn;
