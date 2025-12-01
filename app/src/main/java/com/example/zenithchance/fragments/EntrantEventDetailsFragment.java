@@ -57,7 +57,7 @@ public class EntrantEventDetailsFragment extends Fragment {
     private TextView waitingCountView;
     private int waitingCount = -1;
 
-    private static final float MAX_DISTANCE_METERS = 500f; // distance from actual event location (allows for some flexibility)
+    private static final float MAX_DISTANCE_METERS = 50000f; // distance from actual event location (allows for some flexibility)
 
     private Event eventForLocal;
 
@@ -425,9 +425,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         ) == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * Proceed with getting location and checking distance
-     */
     /**
      * Get location, optionally enforce distance from event, then enroll.
      *
