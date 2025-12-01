@@ -4,6 +4,7 @@ package com.example.zenithchance.models;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.io.Serializable;
@@ -99,7 +100,7 @@ public class Entrant extends User implements Serializable {
      * @param onSuccess
      * @param onError
      */
-    public void enrollInWaiting(Event event, String eventDocId, Runnable onSuccess,
+    public void enrollInWaiting(Event event, String eventDocId, GeoPoint location, Runnable onSuccess,
                                 java.util.function.Consumer<Exception> onError) {
 
         String uid = getUserId();
@@ -112,6 +113,25 @@ public class Entrant extends User implements Serializable {
         WriteBatch batch = db.batch();
         batch.update(userRef, "onWaiting", FieldValue.arrayUnion(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
+
+        // Create waiting list entry with location data
+        if (location != null) {
+            // Get event location
+            GeoPoint eventLocation = event != null ? event.getLocationPoint() : null;
+
+            // Create entry in waitingListEntries collection
+            WaitingListEntry entry = new WaitingListEntry(
+                    eventDocId,
+                    uid,
+                    eventLocation,
+                    location
+            );
+
+            // Use composite key "eventId_userId" (for querying)
+            String entryId = eventDocId + "_" + uid;
+            DocumentReference entryRef = db.collection("waitingListEntries").document(entryId);
+            batch.set(entryRef, entry);
+        }
 
         batch.commit().addOnSuccessListener(v -> {
             if (!onWaiting.contains(eventDocId)) onWaiting.add(eventDocId);
@@ -141,6 +161,11 @@ public class Entrant extends User implements Serializable {
         WriteBatch batch = db.batch();
         batch.update(userRef,  "onWaiting", FieldValue.arrayRemove(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayRemove(uid));
+
+        // Delete the waiting list entry
+        String entryId = eventDocId + "_" + uid;
+        DocumentReference entryRef = db.collection("waitingListEntries").document(entryId);
+        batch.delete(entryRef);
 
         batch.commit().addOnSuccessListener(v -> {
             onWaiting.remove(eventDocId);

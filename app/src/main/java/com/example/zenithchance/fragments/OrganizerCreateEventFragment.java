@@ -479,6 +479,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
             return;
         }
 
+        if (eventLat == null || eventLng == null || eventLocation.getText().toString().trim().isEmpty()) {
+            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Event event = (Event) args.getSerializable("event");
         if (event == null) return;
 
@@ -580,7 +585,10 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         );
 
         // handle location
-        if (eventLat != null && eventLng != null) {
+        if (eventLat == null || eventLng == null || eventLocation.getText().toString().trim().isEmpty()) {
+            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
+            return;
+        } else {
             newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
         }
 

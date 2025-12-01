@@ -45,4 +45,5 @@
     <string name="update_event">Update Event</string>
     <string name="maximum_entrants">Maximum Entrants</string>
     <string name="geolocation_required">Geolocation Required</string>
+    <string name="view_entrants_map">View Entrants Map</string>
 </resources>

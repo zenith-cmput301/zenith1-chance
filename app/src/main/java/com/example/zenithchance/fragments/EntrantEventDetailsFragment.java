@@ -1,7 +1,9 @@
 package com.example.zenithchance.fragments;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
+import com.example.zenithchance.managers.LocationHelper;
 import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
@@ -26,6 +29,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +49,9 @@ public class EntrantEventDetailsFragment extends Fragment {
     private TextView waitingCountView;
     private int waitingCount = -1;
 
+    private static final float MAX_DISTANCE_METERS = 500f; // distance from actual event location (allows for some flexibility)
+
+    private LocationHelper locationHelper;
     public EntrantEventDetailsFragment() { }
 
     /**
@@ -280,46 +287,103 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to enroll an event's waiting list
+     * Checks if entrant can enroll an event's waiting list.
+     * If geolocationRequired is true, and an entrant's location matches, entrant can enroll.
+     * Otherwise, entrant cannot enroll.
      *
      * @param eventDocId        Firestore id of event
      * @param actionBtn         Button to wire
      * @param eventForLocal     Event to enroll
      */
-    public void enrollWaiting(String eventDocId, MaterialButton actionBtn,
-                              Event eventForLocal) {
 
-        actionBtn.setOnClickListener( v -> {
-            actionBtn.setEnabled(false);   // prevent double taps during transition
+    public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+
+        actionBtn.setOnClickListener(v -> {
+            actionBtn.setEnabled(false);
             actionBtn.setText("Enrolling...");
             actionBtn.setTextColor(Color.WHITE);
 
-            currentEntrant.enrollInWaiting(
-                    eventForLocal,
-                    eventDocId,
-                    // success
-                    () -> {
-                        actionBtn.setText("Drop Waiting List");
-                        actionBtn.setTextColor(Color.WHITE);
-                        actionBtn.setEnabled(true);
+            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
 
-                        // bind to dropping list behaviour on next click
-                        dropWaitingList(eventDocId, actionBtn, eventForLocal);
+            // Always try to get current location (we assume permission is already granted app-wide)
+            locationHelper.getCurrentLocation(location -> {
+                GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
 
-                        // increment #entrants
-                        waitingCount++;
-                        updateWaitingCountLabel();
+                if (geoRequired) {
+                    GeoPoint eventPoint = eventForLocal.getLocationPoint();
 
-                        Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
-                    },
-                    // fail to enroll due to firebase shenanigans
-                    e -> {
+                    if (eventPoint == null) {
+                        // Event says geolocation required but has no location set
                         actionBtn.setText("Enroll");
                         actionBtn.setEnabled(true);
-                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(),
+                                "Event location not set. Contact organizer.",
+                                Toast.LENGTH_LONG).show();
+                        return;
                     }
-            );
+
+                    if (entrantPoint == null) {
+                        actionBtn.setText("Enroll");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(),
+                                "Could not get your location. Please enable location services.",
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
+                    if (distance > MAX_DISTANCE_METERS) {
+                        actionBtn.setText("Enroll");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(),
+                                "You must be near the event location to join.",
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+
+                // If geolocation not required OR all checks passed, enroll
+                performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
+            });
         });
+    }
+
+    /**
+     * Performs the entrant's enrollment in an event.
+     *
+     * @param eventDocId        Firestore id of event
+     * @param actionBtn         Button to wire
+     * @param eventForLocal     Event to enroll
+     */
+
+    private void performEnrollment(String eventDocId, MaterialButton actionBtn,
+                                   Event eventForLocal, GeoPoint location) {
+        currentEntrant.enrollInWaiting(
+                eventForLocal,
+                eventDocId,
+                location,
+                // success
+                () -> {
+                    actionBtn.setText("Drop Waiting List");
+                    actionBtn.setTextColor(Color.WHITE);
+                    actionBtn.setEnabled(true);
+
+                    // bind to dropping list behaviour on next click
+                    dropWaitingList(eventDocId, actionBtn, eventForLocal);
+
+                    // increment #entrants
+                    waitingCount++;
+                    updateWaitingCountLabel();
+
+                    Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
+                },
+                // fail to enroll
+                e -> {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
+                    Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+        );
     }
 
     /**
