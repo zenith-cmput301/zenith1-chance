@@ -94,7 +94,11 @@ public class NotificationsActivity extends AppCompatActivity {
         // get notifications to display
         fetchNotifications(myUser.getUserId());
     }
-
+/**
+ * Gets notifications from Firebase and refreshes them
+ *
+ * @param uid is a string that represents a Users ID in Firebase
+ */
     private void fetchNotifications(String uid) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -111,7 +115,11 @@ public class NotificationsActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                 });
     }
-
+/**
+ * Is used to determine if this is running in the test file.
+ *
+ * @return boolean
+ */
     private boolean isRunningInTest() {
         return android.app.ActivityManager.isRunningInTestHarness()
                 || "true".equals(System.getProperty("IS_TEST"));
