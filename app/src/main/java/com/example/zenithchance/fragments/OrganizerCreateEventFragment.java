@@ -77,6 +77,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     EditText eventName;
     Button eventDateButton;
     Button eventRegistrationButton;
+    Button eventDeadlineButton;
     EditText eventLocation;
     EditText eventMaxEntrants;
     EditText eventDescription;
@@ -278,6 +279,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         eventName = root.findViewById(R.id.event_name_box);
         eventDateButton = root.findViewById(R.id.event_date_button);
         eventRegistrationButton = root.findViewById(R.id.event_registration_button);
+        eventDeadlineButton = root.findViewById(R.id.event_deadline_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
         eventDescription = root.findViewById(R.id.event_description_box);
@@ -285,6 +287,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
         attachDateTimePicker(eventDateButton);
         attachDateTimePicker(eventRegistrationButton);
+        attachDateTimePicker(eventDeadlineButton);
 
         // Initializing buttons
         discardButton = root.findViewById(R.id.event_creation_discard_button);
