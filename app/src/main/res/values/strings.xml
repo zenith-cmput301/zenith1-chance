@@ -38,6 +38,9 @@
     <string name="browse_profiles">Browse Profiles</string>
     <string name="event_name">Event Name</string>
     <string name="zenithchance">ZenithChance</string>
+    <string name="no_images">No images have been uploaded :(</string>
+    <string name="view_notification_logs">View Notification Logs</string>
+    <string name="browse_images">Browse Images</string>
     <string name="date_and_time">Date and time:</string>
     <string name="location">Location</string>
     <string name="registration_deadline">Registration Deadline</string>
