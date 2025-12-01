@@ -28,6 +28,15 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Locale;
 
+
+/**
+ * Fragment responsible for scanning QR codes
+ *
+ * @author Emerson
+ * @version 1.0
+ * Outside Sources:
+ * https://www.geeksforgeeks.org/android/how-to-read-qr-code-using-zxing-library-in-android/
+ */
 public class QRScannerFragment extends Fragment {
 
     private DecoratedBarcodeView barcodeView;
@@ -52,8 +61,9 @@ public class QRScannerFragment extends Fragment {
         return view;
     }
 
+
     /**
-     * https://www.geeksforgeeks.org/android/how-to-read-qr-code-using-zxing-library-in-android/
+     * Scans QR code and passes text to the navigateToEvent method
      */
 
     private void scan() {
@@ -66,11 +76,17 @@ public class QRScannerFragment extends Fragment {
             String text = result.getText();
 
             if (text != null) {
-
                 navigateToEvent(text);
             }
         });
     }
+
+    /**
+     * Requests camera permissions from android and handles responses
+     *
+     * Outside Sources:
+     * https://www.geeksforgeeks.org/android/how-to-read-qr-code-using-zxing-library-in-android/
+     */
 
     private void requestCameraPermission() {
         Dexter.withContext(requireContext())
@@ -91,6 +107,12 @@ public class QRScannerFragment extends Fragment {
                 }).check();
     }
 
+
+    /**
+     * Finds the event corresponding to the scanned QR code
+     *
+     * @param link String containing the unique event document ID from a QR code
+     */
     public void navigateToEvent(String link) {
 
         // Removes prefix
@@ -113,6 +135,11 @@ public class QRScannerFragment extends Fragment {
 
     }
 
+    /**
+     * Creates an Event Detail fragment and populates the data
+     *
+     * @param event Event to be displayed
+     */
     public void populateDetailFragment (Event event) {
         EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
 
