@@ -89,6 +89,7 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
         TextView tvRegistrationDeadline = view.findViewById(R.id.tv_registration_deadline);
         TextView tvInvitationDeadline = view.findViewById(R.id.tv_invitation_deadline);
         TextView tvMaxEntrants = view.findViewById(R.id.tv_max_entrants);
+        TextView tvMaxWaitingList = view.findViewById(R.id.tv_max_waiting_list);
         TextView tvGeolocation = view.findViewById(R.id.tv_geolocation);
         TextView tvOrganizer = view.findViewById(R.id.tv_organizer);
         TextView tvDescription = view.findViewById(R.id.tv_description);
@@ -143,6 +144,7 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
 
         // Fill fields with fallback "None"
         setOptionalInteger(tvMaxEntrants, event.getMaxEntrants());
+        setOptionalInteger(tvMaxWaitingList, event.getMaxWaitingList());
         setOptionalBoolean(tvGeolocation, event.getGeolocationRequired());
         setOptionalText(tvOrganizer,
                 event.getOrganizer());
