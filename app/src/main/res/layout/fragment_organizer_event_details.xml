@@ -76,8 +76,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Location"
+                android:text="@string/location"
                 android:textStyle="bold" />
+
+            <fragment
+                android:id="@+id/event_map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp" />
 
             <TextView
                 android:id="@+id/tv_location"
@@ -90,7 +97,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Registration Deadline"
+                android:text="@string/registration_deadline"
                 android:textStyle="bold" />
 
             <TextView
@@ -118,7 +125,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Maximum Entrants"
+                android:text="@string/maximum_entrants"
                 android:textStyle="bold" />
 
             <TextView
@@ -132,7 +139,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Geolocation Required"
+                android:text="@string/geolocation_required"
                 android:textStyle="bold" />
 
             <TextView
@@ -170,19 +177,33 @@
                 android:layout_marginBottom="24dp"
                 android:textSize="16sp" />
 
+            <!-- Buttons -->
+
             <ImageView
                 android:id="@+id/qr_placeholder"
-                android:layout_width="369dp"
-                android:layout_height="127dp"
+                android:layout_width="328dp"
+                android:layout_height="109dp"
+                android:layout_margin="20dp"
+                android:background="@drawable/rounded_qr_background"
+                android:clipToOutline="true"
                 app:srcCompat="@android:drawable/ic_menu_gallery" />
 
-            <!-- Buttons -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/view_entrant_map_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/view_entrants_map"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@android:color/holo_green_dark" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/edit_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Update Event"
+                android:text="@string/update_event"
                 android:textAllCaps="false" />
 
             <com.google.android.material.button.MaterialButton
@@ -190,10 +211,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Delete Event"
+                android:text="@string/delete_event"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 app:backgroundTint="@android:color/holo_red_dark" />
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/map_button"

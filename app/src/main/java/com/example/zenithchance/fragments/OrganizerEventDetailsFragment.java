@@ -1,7 +1,7 @@
 package com.example.zenithchance.fragments;
 
 import android.app.AlertDialog;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,14 +17,20 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
+import com.example.zenithchance.activities.ViewEntrantsWaitingListLocationActivity;
 import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.w3c.dom.Text;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -43,10 +49,12 @@ import java.util.Locale;
  * @version 1.0
  */
 
-public class OrganizerEventDetailsFragment extends Fragment {
+public class OrganizerEventDetailsFragment extends Fragment implements OnMapReadyCallback {
 
     private Event event;
     private Organizer organizer;
+
+    private GoogleMap mMap;
 
     @Nullable
     @Override
@@ -87,10 +95,13 @@ public class OrganizerEventDetailsFragment extends Fragment {
 
         MaterialButton deleteButton = view.findViewById(R.id.delete_button);
         MaterialButton editButton = view.findViewById(R.id.edit_button);
+        MaterialButton viewEntrantMapButton = view.findViewById(R.id.view_entrant_map_button); // entrant map button
         ImageView qr = view.findViewById(R.id.qr_placeholder);
 
         // Title & image
-        tvEventName.setText(event.getName()); // required, so no "None" here
+        tvEventName.setText(event.getName()); // required
+        tvLocation.setText(event.getLocation()); // required
+        tvLocation.setTypeface(null, Typeface.NORMAL);
 
         Glide.with(requireContext())
                 .load(event.getImageUrl())
@@ -131,12 +142,26 @@ public class OrganizerEventDetailsFragment extends Fragment {
         }
 
         // Fill fields with fallback "None"
-        setOptionalText(tvLocation, event.getLocation());                             // location
-        setOptionalInteger(tvMaxEntrants, event.getMaxEntrants());                    // status
-        setOptionalBoolean(tvGeolocation, event.getGeolocationRequired());           // geolocation_required (Boolean)
+        setOptionalInteger(tvMaxEntrants, event.getMaxEntrants());
+        setOptionalBoolean(tvGeolocation, event.getGeolocationRequired());
         setOptionalText(tvOrganizer,
-                event.getOrganizer());                                                // organizer (String, or swap to organizer.getName())
-        setOptionalText(tvDescription, event.getDescription());                       // description
+                event.getOrganizer());
+        setOptionalText(tvDescription, event.getDescription());
+
+        // Setup the map fragment
+        SupportMapFragment mapFragment = (SupportMapFragment)
+                getChildFragmentManager().findFragmentById(R.id.event_map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+
+        // VIEW ENTRANT LOCATIONS BUTTON
+        viewEntrantMapButton.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), ViewEntrantsWaitingListLocationActivity.class);
+            intent.putExtra("eventDocId", event.getDocId());
+            intent.putExtra("eventName", event.getName());
+            startActivity(intent);
+        });
 
         // DELETE BUTTON
         deleteButton.setOnClickListener(v -> {
@@ -167,7 +192,7 @@ public class OrganizerEventDetailsFragment extends Fragment {
             OrganizerCreateEventFragment fragment = new OrganizerCreateEventFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putSerializable("event", event);        // the existing event
+            bundle.putSerializable("event", event); // the existing event
             bundle.putSerializable("organizer", organizer);
             fragment.setArguments(bundle);
 
@@ -178,18 +203,46 @@ public class OrganizerEventDetailsFragment extends Fragment {
                     .commit();
         });
 
-        MaterialButton peopleButton = view.findViewById(R.id.People_button);
-        peopleButton.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "People button clicked", Toast.LENGTH_SHORT).show();
-            PeopleListFragment fragment = PeopleListFragment.newInstance(event.getDocId());
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragmentContainer, fragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
         return view;
     }
+
+    /*
+    THe following function is from Anthropic, Claude, "How to add google maps to event details?", 2025-11-30
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Get the location from the event
+        GeoPoint locationPoint = event.getLocationPoint();
+
+        if (locationPoint != null) {
+            LatLng eventLocation = new LatLng(locationPoint.getLatitude(), locationPoint.getLongitude());
+
+            // Add marker at event location
+            mMap.addMarker(new MarkerOptions()
+                    .position(eventLocation)
+                    .title(event.getName())
+                    .snippet(event.getLocation()));
+
+            // Move camera to the location
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(eventLocation, 14f));
+
+            // Disable user interaction (read-only map)
+            mMap.getUiSettings().setAllGesturesEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        } else {
+            // No location data - show a default view or hide the map
+            // Option 1: Show Edmonton default
+            LatLng defaultLocation = new LatLng(53.5461, -113.4938);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 10f));
+
+            // Option 2: Hide the map (add this in onCreateView if no location)
+            // view.findViewById(R.id.event_map).setVisibility(View.GONE);
+        }
+    }
+
     private void setOptionalText(TextView tv, @Nullable String value) {
         if (value == null || value.trim().isEmpty()) {
             tv.setText("None");

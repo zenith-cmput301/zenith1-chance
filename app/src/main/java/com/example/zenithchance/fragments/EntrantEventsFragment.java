@@ -40,7 +40,6 @@ import java.util.Set;
 public class EntrantEventsFragment extends Fragment {
 
     private EntrantEventListFragment eventListFrag;
-    private List<Event> eventList = new ArrayList<>();
     private Entrant currentEntrant;
 
     /**

@@ -133,7 +133,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Event location:"
+            android:text="Event location: *"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -141,8 +141,32 @@
             android:id="@+id/event_location_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/event_location_blank"
-            android:padding="12dp" />
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:hint="Tap to search location"
+            android:drawableEnd="@drawable/ic_search"
+            android:drawablePadding="8dp"
+            android:padding="12dp"
+            android:minHeight="48dp" />
+
+
+        <!-- Map for picking event location -->
+        <fragment
+            android:id="@+id/event_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/event_location_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Tap to search or click on the map below"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
         <!-- Maximum entrants -->
         <TextView
@@ -156,6 +180,26 @@
 
         <EditText
             android:id="@+id/event_max_entrants_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="e.g. 100"
+            android:padding="12dp"
+            android:inputType="number"
+            android:maxLines="1" />
+
+        <!-- Max waiting list -->
+        <TextView
+            android:id="@+id/event_max_waiting_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Maximum waiting list (optional):"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/event_max_waiting_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -204,7 +248,19 @@
                 android:id="@+id/event_geolocation_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+
         </LinearLayout>
+
+        <!-- Caption for geolocation box -->
+        <TextView
+            android:id="@+id/geolocation_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Restricts waiting-list access to attendees at the event location."
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
 
         <!-- Buttons row -->
         <LinearLayout
