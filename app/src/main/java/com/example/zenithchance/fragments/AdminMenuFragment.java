@@ -23,6 +23,8 @@ public class AdminMenuFragment extends Fragment {
 
         Button browseProfilesBtn = view.findViewById(R.id.browseProfilesButton);
         Button browseEventsBtn = view.findViewById(R.id.browseEventsButton);
+        Button browseImagesBtn = view.findViewById(R.id.browseImagesButton);
+        Button browseNotificationsBtn = view.findViewById(R.id.browseNotificationsButton);
 
 //        BROWSE PROFILE -> Switch to AdminBrowseProfiles Fragment
         browseProfilesBtn.setOnClickListener(v -> {
@@ -41,6 +43,28 @@ public class AdminMenuFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+//        BROWSE IMAGES
+
+        browseImagesBtn.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.adminFragmentContainer, new AdminBrowseImagesFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+//        BROWSE NOTIFICATIONS
+        browseNotificationsBtn.setOnClickListener(v -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.adminFragmentContainer, new AdminNotificationLogsFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+
+
 
         ((AdminMainActivity) requireActivity()).showBackButton(false);
         return view;

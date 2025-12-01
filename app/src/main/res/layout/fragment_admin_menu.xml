@@ -19,4 +19,19 @@
         android:text="@string/browse_events"
         android:layout_marginTop="20dp"/>
 
+    <Button
+        android:id="@+id/browseImagesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/browse_images"
+        android:textColor="@android:color/white" />
+
+    <Button
+        android:id="@+id/browseNotificationsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/view_notification_logs"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>
