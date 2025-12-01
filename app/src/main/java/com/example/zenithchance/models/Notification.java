@@ -3,14 +3,33 @@ package com.example.zenithchance.models;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The representative class for all Notifications.
+ *
+ * @author Lauren, Percy
+ * @version 1.2
+ */
+
 public class Notification {
     private String eventName;
     private String status;
     private String entrant;
     private String toDisplay;
 
+    /**
+     * Empty constructor for class Notification.
+     *
+     * @return an instance of the Notification object
+     */
     public Notification() {}
 
+    /**
+     * Constructor to create a new Notificatio class
+     *
+     * @param eventName Name of event
+     * @param status    Status of entrant on event
+     * @param entrant   Name of entrant
+     */
     public Notification (String eventName, String status, String entrant) {
         this.entrant = entrant;
         this.eventName = eventName;
@@ -18,6 +37,9 @@ public class Notification {
         this.toDisplay = "You have been " + status + " for " + eventName;
     }
 
+    /**
+     * Getters
+     */
     public String getEventName() {
         return eventName;
     }
@@ -34,6 +56,9 @@ public class Notification {
         return toDisplay;
     }
 
+    /**
+     * Setters
+     */
     public void setEventName(String eventName) {
         this.eventName = eventName;
     }

@@ -43,9 +43,6 @@ public abstract class User {
 
     // ADDED FOR NOTIFICATION THINGS:
 
-    public void addNotification(String newNotification){
-        notifications.add(newNotification);
-    }
     public List<String> getNotifications() {
         return notifications;
     }

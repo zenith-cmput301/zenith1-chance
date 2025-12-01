@@ -185,7 +185,11 @@ public final class UserManager {
                 .addOnFailureListener(e -> System.err.println("Failed: " + e.getMessage()));
     }
 
-    // asynchronous functions that fetch users. Start a background network call immediately.
+    /**
+     * This method fetches entrants from Firebase.
+     *
+     * @return  List of entrant instances
+     */
     public Task<List<Entrant>> fetchEntrants() {
         return userCollection.whereIn("type", Arrays.asList("entrant","Entrant"))
                 .get()
@@ -201,6 +205,10 @@ public final class UserManager {
                 });
     }
 
+    /**
+     * This method fetches organizers from Firebase
+     * @return List of Organizer instances
+     */
     public Task<List<Organizer>> fetchOrganizers() {
         return userCollection.whereIn("type", Arrays.asList("organizer","Organizer"))
                 .get()
@@ -215,7 +223,7 @@ public final class UserManager {
                     return out;
                 });
     }
-// NEW ADDITIONS FOR NOTIFICATIONS HERE:
+
     /**
      * Updates a user's Notification Status in the Firestore "users" collection using their document id.
      *

@@ -67,6 +67,12 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     private ActivityResultLauncher<String> pickImageLauncher;
 
+    /**
+     * This function initialize the fragment when it is first accessed
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -361,6 +367,11 @@ public class OrganizerCreateEventFragment extends Fragment {
         }
     }
 
+    /**
+     * This method handles calendar time picker logic
+     *
+     * @param targetButton  calendar button
+     */
     private void attachDateTimePicker(Button targetButton) {
 
         targetButton.setOnClickListener(v -> {
@@ -419,6 +430,10 @@ public class OrganizerCreateEventFragment extends Fragment {
         });
     }
 
+    /**
+     * This method allows uploading event poster and creating an event with it
+     * @param newEvent  Event to be created
+     */
     private void uploadImageAndCreateEvent(Event newEvent) {
         if (selectedImageUri == null) {
             saveNewEventToFirestore(newEvent);
@@ -441,7 +456,11 @@ public class OrganizerCreateEventFragment extends Fragment {
                 });
     }
 
-
+    /**
+     * This method saves the local created event to Firebase
+     *
+     * @param newEvent  Event to be saved
+     */
     private void saveNewEventToFirestore(Event newEvent) {
         db.collection("events")
                 .add(newEvent)
@@ -474,6 +493,10 @@ public class OrganizerCreateEventFragment extends Fragment {
                 });
     }
 
+    /**
+     * This method allows for editing existed event and uploading its event poster
+     * @param event Event to be updated
+     */
     private void uploadImageAndUpdateEvent(Event event) {
         if (selectedImageUri == null) {
             saveUpdatedEventToFirestore(event);
@@ -496,6 +519,11 @@ public class OrganizerCreateEventFragment extends Fragment {
                 });
     }
 
+    /**
+     * This method updates the existed event (with event poster) to Firebase
+     *
+     * @param event  Event to be saved
+     */
     private void saveUpdatedEventToFirestore(Event event) {
         db.collection("events")
                 .document(event.getDocId())
