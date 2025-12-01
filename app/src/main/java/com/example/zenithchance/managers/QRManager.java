@@ -19,6 +19,8 @@ import com.google.zxing.MultiFormatWriter;
  *
  * @author Emerson
  * @version 1.0
+ * Outside Sources:
+ * https://www.geeksforgeeks.org/android/how-to-build-a-qr-code-android-app-using-firebase/
  */
 public class QRManager {
 
@@ -29,11 +31,8 @@ public class QRManager {
     /**
      * Creates a QR bitmap of the inputted string to be populated in an ImageView
      *
-     * @author Emerson
      * @param eventHash String of the unique event hash in FireBase
      * @return BitMap of a QR Code
-     * Outside Sources:
-     * https://www.geeksforgeeks.org/android/how-to-build-a-qr-code-android-app-using-firebase/
      */
     public Bitmap createQRBitMap(String eventHash) {
         String Gqr = eventHash;
@@ -57,11 +56,8 @@ public class QRManager {
     /**
      * Method for updating an ImageView to display a QR code for an event
      *
-     * @author Emerson
      * @param view ImageView of the fragment where the QR should be populated
      * @param event Event to be used as the QR link
-     * Outside Sources:
-     * https://www.geeksforgeeks.org/android/how-to-build-a-qr-code-android-app-using-firebase/
      */
     public void updateImageView(ImageView view, Event event) {
         Bitmap map = createQRBitMap("zenith1/" + event.getDocId());
@@ -69,24 +65,4 @@ public class QRManager {
         return;
     }
 
-//    public void parseQRText(String link) {
-//
-//        // Removes prefix
-//        String docId = link.replace("zenith1/", "");
-//
-//        db = FirebaseFirestore.getInstance();
-//
-//        // Grabs Event
-//        db.collection("events")
-//                .document(docId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        Event event = (Event) documentSnapshot.toObject(Event.class);
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                });
-//
-//    }
 }
