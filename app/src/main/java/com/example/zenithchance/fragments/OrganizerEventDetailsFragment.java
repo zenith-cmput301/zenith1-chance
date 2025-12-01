@@ -205,7 +205,25 @@ public class OrganizerEventDetailsFragment extends Fragment implements OnMapRead
                     .commit();
         });
 
+        MaterialButton peopleButton = view.findViewById(R.id.People_button);
+
+        peopleButton.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "People button clicked", Toast.LENGTH_SHORT).show();
+
+            PeopleListFragment fragment = new PeopleListFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("event_id", event.getDocId());
+            fragment.setArguments(bundle);
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragmentContainer, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
         return view;
+
     }
 
     /*
