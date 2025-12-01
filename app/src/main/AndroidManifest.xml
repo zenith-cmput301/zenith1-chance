@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,12 +15,17 @@
         android:supportsRtl="true"
 
         android:theme="@style/Theme.EntrantsProfilePage">
-        <activity android:name=".activities.PeopleActivity" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <activity android:name=".PeopleActivity" />
         <activity
             android:name=".activities.NotificationsActivity"
             android:exported="false" />
+        <activity android:name=".activities.ViewEntrantsWaitingListLocationActivity" />
 
-<!--        The Sign-in page should remain the first point of entry in our Application! -->
         <activity android:name=".activities.SignUpActivity"
             android:exported="true">
             <intent-filter>
@@ -29,10 +37,8 @@
         <activity android:name=".OrganizerMainActivity" />
         <activity android:name=".AdminMainActivity" />
 
-        <activity android:name=".activities.OrganizerEventDetailsActivity" />
 
-        <activity android:name=".activities.EntrantEventDetailsActivity"/>
-        <activity android:name=".activities.AdminBrowseProfilesActivity" />
+
 
     </application>
 

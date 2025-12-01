@@ -1,8 +1,6 @@
 package com.example.zenithchance.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +9,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.EventsAdapter;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
@@ -19,24 +16,23 @@ import com.example.zenithchance.models.Event;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Class for the list of events inside Entrant's My Events page.
+ * Fragment that displays list of event in Entrant's My Events page
  *
  * @author Percy
  * @version 1.0
  * @see Event
- * @see EventsAdapter
+ * @see EntrantEventsFragment
  */
 public class EntrantEventListFragment extends Fragment {
     private boolean upcoming = true;
     private EventsAdapter adapter;
     private RecyclerView rv;
-    private List<Event> list = new ArrayList<>();
+    private ArrayList<Event> list = new ArrayList<>();
 
     /**
      * Method to inflate fragment and attach adapter.
@@ -66,10 +62,12 @@ public class EntrantEventListFragment extends Fragment {
             EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
             // get info to fill
             Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);
             bundle.putString("event_name", event.getName());
             bundle.putString("event_location", event.getLocation());
             bundle.putString("event_organizer", event.getOrganizer());
             bundle.putString("event_time", fmt.format(event.getDate()));
+            bundle.putLong("event_date_millis", event.getDate().getTime());
             bundle.putString("event_description", event.getDescription());
             bundle.putString("event_image_url", event.getImageUrl());
             bundle.putString("event_doc_id", event.getDocId());

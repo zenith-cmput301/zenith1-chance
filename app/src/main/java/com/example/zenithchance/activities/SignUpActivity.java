@@ -36,6 +36,7 @@ import java.util.Locale;
  * It checks if the device id is available for any users in the Firebase "users" collection.
  * If yes, it gets the type of user (admin, entrant, organizer) and directs them to the correct screen.
  * Otherwise, ask to create an account with the sign up button.
+ * @author Sabrina
  */
 public class SignUpActivity extends AppCompatActivity {
 
@@ -46,6 +47,12 @@ public class SignUpActivity extends AppCompatActivity {
 
 
 
+    /**
+     * Initializes the sign-up screen and attempts automatic sign-in with device ID.
+     * Sets up role dropdown, input fields, and sign-up button.
+     *
+     * @param savedInstanceState Previous saved state
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +87,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     /**
-     * This validates the fields that the user entered for signing in and prevents duplicate accounts for the same device id.
+     * Validates the fields that the user entered for signing in and prevents duplicate accounts for the same device id.
      */
     // The following function is from OpenAI, ChatGPT, "How to validate fields for User class?", 2025-11-2
 
@@ -137,15 +144,11 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     /**
-     * This creates a User object and adds to Firebase.
-     * @param name
-     * This is the name of the user
-     * @param email
-     * This is the email of the user
-     * @param deviceId
-     * This is the device id of the user
-     * @param role
-     * This is the role of the user (entrant, organizer, admin)
+     * Creates a User object and adds to Firebase.
+     * @param name name of the user
+     * @param email email of the user
+     * @param deviceId device id of the user
+     * @param role role of the user (entrant, organizer, admin)
      */
     // The following function is from OpenAI, ChatGPT, "How to create a new user?", 2025-11-2
     private void createUser(String name, String email, String deviceId, String role) {
@@ -173,9 +176,8 @@ public class SignUpActivity extends AppCompatActivity {
 
 
     /**
-     * This gets the device id.
-     * @return
-     * Returns the device id.
+     * Gets the device id.
+     * @return Returns the device id.
      */
     private String getAndroidDeviceId() {
         try {
@@ -185,6 +187,10 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Signs users in using their device ID.
+     *
+     */
     private void signInWithDeviceId() {
         String deviceId = getAndroidDeviceId();
         Log.d("DeviceCheck", "Local deviceId: " + deviceId);
@@ -237,6 +243,11 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Routes the user to the appropriate home screen based on their role type.
+     *
+     * @param type User role ("entrant", "organizer", or "admin")
+     */
     private void routeToHomeByType(String type) {
         if ("entrant".equalsIgnoreCase(type)) {
             startActivity(new Intent(this, EntrantMainActivity.class));

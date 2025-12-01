@@ -2,6 +2,7 @@ package com.example.zenithchance.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
@@ -20,102 +21,99 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.zenithchance.R;
+//import com.example.zenithchance.managers.NotificationManager;
+import com.example.zenithchance.managers.UserManager;
+import com.example.zenithchance.models.Notification;
+import com.example.zenithchance.models.User;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Class to display notifications for users. Does not currently display anything, but will in a future release
+ *
+ * @author Lauren, Percy
+ * @version 4.0
+ *
+ */
 public class NotificationsActivity extends AppCompatActivity {
 
     ImageButton backArrow;
     ToggleButton notificationToggle;
+    ListView notificationsListView;
+    ArrayAdapter<String> adapter;
+    List<String> notificationTexts = new ArrayList<>();
 
-    ArrayList notificationList;
-    ArrayList notificationListBlocked;
 
+    /**
+     * OnCreate
+     *
+     * @param savedInstanceState Saved data to use with the activity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_notifications);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        if (!isRunningInTest()) {
+            EdgeToEdge.enable(this);
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
+        User myUser = UserManager.getInstance().getCurrentUser();
+
 
         // Initialize buttons
         backArrow = findViewById(R.id.backButton);
         notificationToggle = findViewById(R.id.toggleButton);
-        toggledNotifications();
-//        if(!notificationToggle.isChecked()){
-//        // === intent + extras handling ===
-//        Intent intent = getIntent();
-//        Bundle extras = intent.getExtras();
-//
-//        if (extras != null) {
-//            notificationList = extras.getStringArrayList("notificationList");
-//        }
-//
-//        if (notificationList == null) {
-//            // Provide a backup list
-//            notificationList = new ArrayList<>();
-//            notificationList.add("No notifications available");
-//        }}else{
-//            notificationList = new ArrayList<>();
-//            notificationList.add("Notifications Blocked");
-//        }
+        notificationToggle.setChecked(myUser.getNotificationStatus());
 
-        // === Setting up ListView ===
-        ListView notificationsListView = findViewById(R.id.notificationListView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.notification_items,
-                R.id.notificationText,
-                notificationList
-        );
+        notificationToggle.setOnClickListener(v -> {
+                    myUser.updateNotificationStatus(myUser.getNotificationStatus());
+                    UserManager.getInstance().updateNotificationStatus(myUser);
+                });
+
+        // Setting up ListView
+        notificationsListView = findViewById(R.id.notificationListView);
+        adapter = new ArrayAdapter<>(this, R.layout.notification_items, R.id.notificationText, notificationTexts);
         notificationsListView.setAdapter(adapter);
 
-        // === Implementing Back Button ===
+        // Implementing Back Button OnClickListener
         backArrow.setOnClickListener(v -> {
             Intent resultIntent = new Intent();
-            resultIntent.putStringArrayListExtra("notificationList", notificationList);
             setResult(RESULT_OK, resultIntent);
             finish();
         });
-        notificationToggle.setOnCheckedChangeListener((buttonView, isChecked)-> {
-            toggledNotifications();
-        });
+
+        // get notifications to display
+        fetchNotifications(myUser.getUserId());
     }
-    public void toggledNotifications(){
-        if(!notificationToggle.isChecked()) { // Notifications go through
-            // === intent + extras handling ===
-            Intent intent = getIntent();
-            Bundle extras = intent.getExtras();
 
-            if (extras != null) {
-                notificationList = extras.getStringArrayList("notificationList");
-            }
+    private void fetchNotifications(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-            ListView notificationsListView = null;
-            ArrayAdapter<String> adapter = null;
-            if (notificationList == null) {
-                // Provide a backup list
-                notificationList = new ArrayList<>();
-                notificationList.add("No notifications available");
-                notificationsListView = findViewById(R.id.notificationListView);
-                adapter = new ArrayAdapter<>(
-                        this,
-                        R.layout.notification_items,
-                        R.id.notificationText,
-                        notificationList
-                );
-                notificationsListView.setAdapter(adapter);
-            } else {
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    List<String> notifs = (List<String>) doc.get("notifications");
 
-            }
+                    // refresh notifications
+                    notificationTexts.clear();
+                    notificationTexts.addAll(notifs);
 
-                    }
+                    adapter.notifyDataSetChanged();
+                });
     }
-}
+
+    private boolean isRunningInTest() {
+        return android.app.ActivityManager.isRunningInTestHarness()
+                || "true".equals(System.getProperty("IS_TEST"));
+    }}
 

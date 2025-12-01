@@ -40,6 +40,13 @@ public class OrganizerMainActivity extends AppCompatActivity {
         OrganizerNavigationHelper.setupBottomNav(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (currentOrganizer != null) currentOrganizer.checkAndRunLotteries();
+    }
+
     public Organizer getOrganizer() { return currentOrganizer; }
 }
 

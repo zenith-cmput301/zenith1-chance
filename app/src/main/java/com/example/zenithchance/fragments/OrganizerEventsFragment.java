@@ -1,11 +1,11 @@
 package com.example.zenithchance.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,18 +16,20 @@ import com.example.zenithchance.OrganizerMainActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldPath;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+/**
+ * Class for the Organizer Events page logic
+ *
+ * @author Emerson, Lauren, Percy
+ * @version 1.1
+ * @see Event
+ * @see Organizer
+ * @see OrganizerEventListFragment
+ * @see OrganizerCreateEventFragment
+ */
 public class OrganizerEventsFragment extends Fragment {
     private OrganizerEventListFragment eventListFrag;
     private List<Event> eventList = new ArrayList<>();
@@ -35,6 +37,7 @@ public class OrganizerEventsFragment extends Fragment {
     private Organizer organizer;
 
     Button createEventButton;
+    Button runLotteriesButton;
 
     @Nullable
     @Override
@@ -64,14 +67,29 @@ public class OrganizerEventsFragment extends Fragment {
         fm.executePendingTransactions();
 
         createEventButton = view.findViewById(R.id.create_event_button);
+        runLotteriesButton = view.findViewById(R.id.run_lotteries_button);
 
         // Replaces the EventsFragment with a CreateEvent fragment when the create button is clicked
 
         initCreateEventButton();
+        runLotteriesCheckDeadline();
 
-//        getEvents();
+        organizer.checkAndRunLotteries();
+        organizer.checkFinalDeadlines();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (organizer == null && getActivity() instanceof OrganizerMainActivity) {
+            organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
+        }
+        if (organizer == null) return;
+
+        organizer.checkAndRedraw();
     }
 
     private void initCreateEventButton() {
@@ -82,13 +100,29 @@ public class OrganizerEventsFragment extends Fragment {
             bundle.putSerializable("organizer", organizer);
 
             OrganizerCreateEventFragment createFragment = new OrganizerCreateEventFragment();
+//            QRScannerFragment createFragment = new QRScannerFragment();
             createFragment.setArguments(bundle);
 
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, createFragment)
                     .commit();
         });
+    }
 
+    private void runLotteriesCheckDeadline() {
+        runLotteriesButton.setOnClickListener(v -> {
+            if (organizer == null && getActivity() instanceof OrganizerMainActivity) {
+                organizer = ((OrganizerMainActivity) getActivity()).getOrganizer();
+            }
+
+            // Manually trigger both checks
+            organizer.checkAndRunLotteries();
+            organizer.checkAndRedraw();
+            // Check if invitation deadline has passed
+            organizer.checkFinalDeadlines();
+
+            Toast.makeText(getContext(), "Lotteries ran and invitation deadlines checked", Toast.LENGTH_SHORT).show();
+        });
     }
 
 }

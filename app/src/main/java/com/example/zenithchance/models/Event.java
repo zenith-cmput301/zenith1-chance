@@ -1,32 +1,39 @@
 package com.example.zenithchance.models;
 
+import com.google.firebase.firestore.GeoPoint;
+
 import java.io.Serializable;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * The representative class for all Events.
  * All information pertaining to an event should be found here.
  *
- * @author Percy
+ * @author Percy, Sabrina
  * @version 1.1
  */
 
 public class Event implements Serializable {
     private Date date;
     private String name;
-    private String location;
-    private String organizer;
+    private String organizer; // name of organizer, not document id
     private String status;
     private String description;
     private Boolean geolocation_required;
+
+    private String location; // readable location String (e.g. "University of Alberta")
+
+    private Double latitude;   // latitude and longitude for location geopoint
+    private Double longitude;  //
+
     private Date registration_date;
     private Date finalDeadline;
     private Integer max_entrants;
+    private Integer max_waiting_list;
     private String imageUrl;
     private boolean lotteryRan = false;
+    private boolean needRedraw = false;
     private ArrayList<String> waitingList = new ArrayList<String>();
     private ArrayList<String> invitedList = new ArrayList<String>();
     private ArrayList<String> acceptedList = new ArrayList<String>();
@@ -51,12 +58,12 @@ public class Event implements Serializable {
      * @param organizer             organizer of the event
      * @param description           event description
      * @param geolocation_required  boolean representing if geolocation is toggled
-     * @param registration_date     date in which to close registration
+     * @param registration_date     date in which the lottery is drawn
      * @param finalDeadline         date of finalizing attendees
      * @param max_entrants          the maximum number of entrants allowed to attend the event
      * @return an instance of the Event object
      */
-    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants) {
+    public Event(Date date, String name, String location, String status, String organizer, String description, Boolean geolocation_required, Date registration_date, Date finalDeadline, Integer max_entrants, Integer max_waiting_list) {
         this.date = date;
         this.name = name;
         this.location = location;
@@ -67,22 +74,28 @@ public class Event implements Serializable {
         this.registration_date = registration_date;
         this.finalDeadline = finalDeadline;
         this.max_entrants = max_entrants;
+        this.max_waiting_list = max_waiting_list;
     }
 
+    public Event(Date date, String name, String location, String status, String organizer,
+                 String description, Boolean geolocation_required,
+                 Date registration_date, Date finalDeadline, Integer max_entrants) {
+        this(date, name, location, status, organizer, description,
+                geolocation_required, registration_date, finalDeadline,
+                max_entrants, null); // default waiting list size
+    }
+
+
+    /**
+     * Adders
+     * @param uid User id
+     */
     public void addWaitingList(String uid) {
         if (!waitingList.contains(uid)) waitingList.add(uid);
     }
 
-    public void removeFromWaitingList(String uid) {
-        this.waitingList.remove(uid);
-    }
-
     public void addInvitedList(String uid) {
         if (!invitedList.contains(uid)) invitedList.add(uid);
-    }
-
-    public void removeFromInvitedList(String uid) {
-        this.invitedList.remove(uid);
     }
 
     public void addAcceptedList(String uid) {
@@ -93,6 +106,25 @@ public class Event implements Serializable {
         if (!declinedList.contains(uid)) declinedList.add(uid);
     }
 
+    /**
+     * Removers
+     * @param uid User id
+     */
+
+    public void removeFromWaitingList(String uid) {
+        this.waitingList.remove(uid);
+    }
+    public void removeFromInvitedList(String uid) {
+        this.invitedList.remove(uid);
+    }
+    public void removeFromAcceptedList(String uid) {
+        this.acceptedList.remove(uid);
+    }
+
+    /**
+     * Time checks
+     */
+
     public boolean isPast(Date now) {
         return date != null && date.before(now);
     }
@@ -100,6 +132,10 @@ public class Event implements Serializable {
     public boolean isUpcoming(Date now) {
         return date == null || !date.before(now);
     }
+
+    /**
+     * Getters
+     */
 
     public Date getDate() {
         return date;
@@ -109,9 +145,6 @@ public class Event implements Serializable {
         return name;
     }
 
-    public String getLocation() {
-        return location;
-    }
 
     public String getOrganizer() {
         return organizer;
@@ -141,12 +174,18 @@ public class Event implements Serializable {
         return max_entrants;
     }
 
+    public Integer getMaxMaitingList() {return max_waiting_list;}
+
     public String getImageUrl() {
         return imageUrl;
     }
 
     public boolean isLotteryRan() {
         return lotteryRan;
+    }
+
+    public boolean isNeedRedraw() {
+        return needRedraw;
     }
 
     public ArrayList<String> getWaitingList() {
@@ -169,6 +208,47 @@ public class Event implements Serializable {
         return docId;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public GeoPoint getLocationPoint() {
+        if (latitude != null && longitude != null) {
+            return new GeoPoint(latitude, longitude);
+        }
+        return null;
+    }
+
+    // Also add individual getters/setters for Firestore
+    public Double getLatitude() { return latitude; }
+
+    public Double getLongitude() { return longitude; }
+
+    /**
+     * Setters
+     */
+
+    // Setter that accepts GeoPoint
+    public void setLocationPoint(GeoPoint geoPoint) {
+        if (geoPoint != null) {
+            this.latitude = geoPoint.getLatitude();
+            this.longitude = geoPoint.getLongitude();
+        } else {
+            this.latitude = null;
+            this.longitude = null;
+        }
+    }
+
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+
+
     public void setDate(Date date) {
         this.date = date;
     }
@@ -177,9 +257,7 @@ public class Event implements Serializable {
         this.name = name;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+
 
     public void setOrganizer(String organizer) {
         this.organizer = organizer;
@@ -209,12 +287,18 @@ public class Event implements Serializable {
         this.max_entrants = max_entrants;
     }
 
+    public void setMaxWaitingList(Integer max_waiting_list) {this.max_waiting_list = max_waiting_list;}
+
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
     public void setLotteryRan(boolean lotteryRan) {
         this.lotteryRan = lotteryRan;
+    }
+
+    public void setNeedRedraw(boolean needRedraw) {
+        this.needRedraw = needRedraw;
     }
 
     public void setWaitingList(ArrayList<String> waitingList) {

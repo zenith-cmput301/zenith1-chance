@@ -1,22 +1,20 @@
 package com.example.zenithchance.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.zenithchance.activities.EntrantEventDetailsActivity;
 import com.example.zenithchance.R;
 import com.example.zenithchance.adapters.AllEventsAdapter;
 import com.example.zenithchance.adapters.EventsAdapter;
-import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.models.Organizer;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -24,15 +22,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * Class for the list of events inside Organizer's My Events page.
+ * Utilizes logic and recyclerView from AllEvents
  *
  * @author Emerson
  * @version 1.0
@@ -46,37 +41,42 @@ public class OrganizerEventListFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Organizer organizer;
 
+    private ProgressBar progressBar;
+
+
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_events, container, false);
+        View view = inflater.inflate(R.layout.fragment_organizer_events, container, false);
 
         recyclerView = view.findViewById(R.id.recycler_all_events);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        progressBar = view.findViewById(R.id.progress_loading_events);
 
         SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
         // Create adapter
         adapter = new AllEventsAdapter(requireContext(), events, event -> {
-
-            /**
-             *
-             * Aayush, this is where the events details can be populated, currently it's using the Entrant details
-             * but you can change it to inflate your fragments instead.
-             *
-             */
-
-            EntrantEventDetailsFragment fragment = new EntrantEventDetailsFragment();
+            OrganizerEventDetailsFragment fragment = new OrganizerEventDetailsFragment();
 
             Bundle bundle = new Bundle();
-            bundle.putString("event_name", event.getName());
-            bundle.putString("event_location", event.getLocation());
-            bundle.putString("event_organizer", event.getOrganizer());
-            bundle.putString("event_time", fmt.format(event.getDate()));
-            bundle.putString("event_description", event.getDescription());
-            bundle.putString("event_image_url", event.getImageUrl());
-            bundle.putString("event_doc_id", event.getDocId());
+            bundle.putSerializable("event", event);
+            bundle.putSerializable("organizer", organizer);
             fragment.setArguments(bundle);
-
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -85,17 +85,27 @@ public class OrganizerEventListFragment extends Fragment {
                     .commit();
         });
 
+
         recyclerView.setAdapter(adapter);
 
         Bundle args = getArguments();
         organizer = (Organizer) args.getSerializable("organizer");
+
+        // show loading screen if events are loading
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
 
         getEvents();
 
         return view;
     }
 
-private void getEvents() {
+
+    /**
+     * This method queries FireBase and adds all events that an Organizer has contained in their orgEvents field
+     * to the MyEvents display.
+     */
+    private void getEvents() {
 
     String uid = organizer.getUserId();
 
@@ -110,6 +120,11 @@ private void getEvents() {
 
                 if (organizerEventIds == null || organizerEventIds.isEmpty()) {
                     adapter.updateList(new ArrayList<>());
+
+                    // done loading
+                    progressBar.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+
                     return;
                 }
 
@@ -133,7 +148,12 @@ private void getEvents() {
                                     }
                                 }
                             }
+
                             adapter.updateList(filteredList);
+
+                            // done loading
+                            progressBar.setVisibility(View.GONE);
+                            recyclerView.setVisibility(View.VISIBLE);
 
                         });
             });

@@ -9,6 +9,15 @@ import com.example.zenithchance.fragments.AdminMenuFragment;
 import com.example.zenithchance.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+/**
+ * Class to simplify fragment navigation between Admin Menu and Profile tabs
+ * uses BottomNavigationView for better design and utility.
+ * This class ensures that the selected tab is being displayed.
+ * @author Kiran
+ * @version 1.0
+ * @see androidx.fragment.app.Fragment
+ * @see androidx.fragment.app.FragmentManager
+ */
 public class AdminNavigationHelper {
     public static void setupBottomNav(AppCompatActivity activity) {
         BottomNavigationView bottomNav = activity.findViewById(R.id.adminBottomNavigationView);

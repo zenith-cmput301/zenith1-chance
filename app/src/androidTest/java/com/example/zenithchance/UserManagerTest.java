@@ -9,16 +9,19 @@ import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Admin;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Organizer;
+import com.example.zenithchance.models.User;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Tests the UserManager class to ensure that Entrant, Organizer, and Admin
  * users can be added to and deleted from Firestore successfully.
+ * @author Sabrina
  */
 public class UserManagerTest {
 
@@ -174,6 +177,40 @@ public class UserManagerTest {
         DocumentSnapshot after = Tasks.await(db.collection("users").document("TEST_Admin_Delete").get());
         assertFalse(after.exists());
     }
+    /**
+     * Tests that notifications successfully send to Firestore.
+     * Creates an Entrant, adds it using addUser, and checks that the
+     * Firestore document exists with the correct name and type fields.
+     * Credit: Gemini AI tools for debugging purposes
+     * @author Lauren
+     */
+    @Test
+    public void testSendNotification() throws ExecutionException, InterruptedException {
+        Entrant e = new Entrant();
+        e.setUserId("TEST_Entrant_Add");
+        e.setType("entrant");
+        e.setName("New Entrant");
+        e.setEmail("new@entrant.com");
+        Tasks.await(users.addUser(e));
+
+        DocumentSnapshot doc = Tasks.await(db.collection("users").document("TEST_Entrant_Add").get());
+        assertTrue(doc.exists());
+        assertEquals("entrant", doc.getString("type"));
+        assertEquals("New Entrant", doc.getString("name"));
+
+        //users.sendNotification("Test Event", "Test Status", e);
+        Thread.sleep(3000); // Wait 3 seconds for Firestore to process
+
+        // Fetching the UPDATED document from Firestore to verify the change actually happened
+        DocumentSnapshot updatedDoc = Tasks.await(db.collection("users").document("TEST_Entrant_Add").get());
+
+        List<String> notifications = (List<String>) updatedDoc.get("notifications");
+
+        assertNotNull("Notifications list should not be null", notifications);
+        assertEquals("Should have 1 notification", 1, notifications.size());
+        assertTrue("Notification content mismatch", notifications.get(0).contains("Test Status"));
+        assertEquals(1, e.getNotifications().size());
+    }
 
     /**
      * Deletes all test documents created during the tests.
@@ -193,4 +230,6 @@ public class UserManagerTest {
             Tasks.await(db.collection("users").document(id).delete());
         }
     }
+
+
 }

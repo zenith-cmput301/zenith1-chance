@@ -1,7 +1,6 @@
 package com.example.zenithchance.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * For smooth display of All Event items fetched from Firebase
+ * RecyclerView Adapter for displaying a list of events in the AllEventsFragment.
+ * <p>
+ * Handles binding event data (name, date, location, image) to the list item layout.
+ * Provides click listener support for each event item.
+ * </p>
  *
  * @author Kiran
  * @version 1.0
@@ -28,7 +31,15 @@ import java.util.Locale;
  */
 public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.EventViewHolder> {
 
+    /**
+     * Interface for handling clicks on individual event items.
+     */
     public interface OnEventClickListener {
+        /**
+         * Called when an event item is clicked.
+         *
+         * @param event The clicked Event object.
+         */
         void onEventClick(Event event);
     }
 
@@ -36,23 +47,44 @@ public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.Even
     private List<Event> events;
     private OnEventClickListener listener;
 
-    SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+    private final SimpleDateFormat fmt = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
 
+    /**
+     * Constructor for the AllEventsAdapter.
+     *
+     * @param context  The context in which the adapter is used.
+     * @param events   The list of Event objects to display.
+     * @param listener Listener for handling clicks on events.
+     */
     public AllEventsAdapter(Context context, List<Event> events, OnEventClickListener listener) {
         this.context = context;
         this.events = events;
         this.listener = listener;
     }
 
+    /**
+     * Updates the adapter's data with a new list of events.
+     *
+     * @param newList The new list of Event objects.
+     */
     public void updateList(List<Event> newList) {
         this.events = newList;
         notifyDataSetChanged();
     }
 
+    /**
+     * ViewHolder for an individual event item.
+     * Holds references to the UI elements for reuse.
+     */
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         TextView nameText, dateText, locationText, statusText;
         ImageView imageView;
 
+        /**
+         * Constructor for the ViewHolder.
+         *
+         * @param itemView The view representing a single event item.
+         */
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
             nameText = itemView.findViewById(R.id.event_name);
@@ -80,7 +112,7 @@ public class AllEventsAdapter extends RecyclerView.Adapter<AllEventsAdapter.Even
 
         Glide.with(context)
                 .load(event.getImageUrl())
-                .placeholder(R.drawable.ic_my_events)
+                .placeholder(R.drawable.celebration_placeholder)
                 .into(holder.imageView);
 
         holder.itemView.setOnClickListener(v -> {

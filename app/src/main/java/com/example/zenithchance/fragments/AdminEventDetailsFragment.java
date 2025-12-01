@@ -19,18 +19,40 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Fragment used by admin users to view detailed information about a single event.
+ * Admins can delete the event using the delete button, which shows
+ * a confirmation dialog before removing the event from Firestore.
+ *
+ *
+ * @author Kiran Kaur
+ * @version 1.0
+ */
 public class AdminEventDetailsFragment extends Fragment {
 
+    /**
+     * Default constructor for the fragment.
+     */
     public AdminEventDetailsFragment() {}
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate any views.
+     * @param container          If non-null, this is the parent view that the fragment's UI should attach to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
+        // Inflate the fragment layout
         View view = inflater.inflate(R.layout.admin_event_details, container, false);
 
+        // Initialize UI components
         TextView name = view.findViewById(R.id.event_name);
         TextView location = view.findViewById(R.id.location);
         TextView organizer = view.findViewById(R.id.organizer_name);
@@ -39,6 +61,7 @@ public class AdminEventDetailsFragment extends Fragment {
         ImageView image = view.findViewById(R.id.header_image);
         MaterialButton deleteBtn = view.findViewById(R.id.delete_button);
 
+        // Retrieve arguments passed from previous fragment/activity
         Bundle args = getArguments();
         if (args != null) {
             String docId = args.getString("event_doc_id");
@@ -48,17 +71,20 @@ public class AdminEventDetailsFragment extends Fragment {
             time.setText(args.getString("event_time"));
             desc.setText(args.getString("event_description"));
 
+            // Load event image using Glide with placeholder and error fallback
             String imageUrl = args.getString("event_image_url");
             Glide.with(requireContext())
                     .load(imageUrl)
-                    .placeholder(R.drawable.ic_my_events)
-                    .error(R.drawable.ic_my_events)
+                    .placeholder(R.drawable.celebration_placeholder)
+                    .error(R.drawable.celebration_placeholder)
                     .into(image);
 
-
+            // Configure toolbar back navigation
             MaterialToolbar toolbar = view.findViewById(R.id.admin_toolbar);
-            toolbar.setNavigationOnClickListener(v1 -> requireActivity().getSupportFragmentManager().popBackStack());
+            toolbar.setNavigationOnClickListener(v1 ->
+                    requireActivity().getSupportFragmentManager().popBackStack());
 
+            // Set delete button listener
             deleteBtn.setOnClickListener(v -> {
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Delete Event?")
@@ -73,13 +99,13 @@ public class AdminEventDetailsFragment extends Fragment {
                                         requireActivity().getSupportFragmentManager().popBackStack();
                                     })
                                     .addOnFailureListener(e ->
-                                            Toast.makeText(requireContext(), "Delete failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                                    );
+                                            Toast.makeText(requireContext(),
+                                                    "Delete failed: " + e.getMessage(),
+                                                    Toast.LENGTH_LONG).show());
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
             });
-
         }
 
         return view;

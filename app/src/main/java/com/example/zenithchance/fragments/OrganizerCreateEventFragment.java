@@ -1,5 +1,10 @@
 package com.example.zenithchance.fragments;
 
+import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,39 +14,71 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.NumberPicker;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.firestore.GeoPoint;
+import  com.example.zenithchance.BuildConfig;
+
+import java.util.Arrays;
+import java.util.UUID;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
-import com.example.zenithchance.OrganizerMainActivity;
+import com.bumptech.glide.Glide;
 import com.example.zenithchance.models.Event;
 import com.example.zenithchance.R;
 import com.example.zenithchance.models.Organizer;
+
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import android.location.Address;
+import android.location.Geocoder;
+
+import java.io.IOException;
+import java.util.List;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 /**
- * Class for the UI used in event creation and modification
+ * Fragment for creating and editing events with location selection via Google Maps.
+ * Handles event creation, updates, image uploads, and interactive map-based location selection.
  *
- * @author Emerson
- * @version 1.0
+ * @author Emerson, Sabrina
+ * @version 2.0
  * @see Event
  */
-public class OrganizerCreateEventFragment extends Fragment {
+public class OrganizerCreateEventFragment extends Fragment implements OnMapReadyCallback {
 
-    ImageView eventImage;
     EditText eventName;
-    EditText eventDate;
-    EditText eventRegistration;
+    Button eventDateButton;
+    Button eventRegistrationButton;
     EditText eventLocation;
-    NumberPicker eventMaxEntrants;
+    EditText eventMaxEntrants;
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
 
@@ -51,6 +88,180 @@ public class OrganizerCreateEventFragment extends Fragment {
 
     private FirebaseFirestore db;
 
+
+    // image launcher
+    private ImageView eventImage;
+    private Uri selectedImageUri;
+
+    private ActivityResultLauncher<String> pickImageLauncher;
+
+    private Double eventLat = null;
+    private Double eventLng = null;
+
+    private GoogleMap mMap;
+    private Marker eventMarker;
+
+    private ActivityResultLauncher<Intent> autocompleteLauncher;
+
+    /**
+     * Initializes image picker and location autocomplete launchers.
+     *
+     * @param savedInstanceState Previous saved state
+     */
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        selectedImageUri = uri;
+                        eventImage.setImageURI(uri);
+                    }
+                }
+        );
+
+        autocompleteLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+
+                    // Re-enable the field
+                    eventLocation.setEnabled(true);
+                    eventLocation.setHint("Event Location");
+
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Place place = Autocomplete.getPlaceFromIntent(result.getData());
+                        LatLng latLng = place.getLatLng();
+                        if (latLng != null) {
+                            eventLat = latLng.latitude;
+                            eventLng = latLng.longitude;
+
+                            // Update text field
+                            if (eventLocation != null) {
+                                // You can choose name or address; address is usually nicer
+                                eventLocation.setText(place.getAddress());
+                            }
+
+                            // Update marker + camera
+                            if (mMap != null) {
+                                if (eventMarker != null) eventMarker.remove();
+                                eventMarker = mMap.addMarker(new MarkerOptions()
+                                        .position(latLng)
+                                        .title(place.getName()));
+
+                                mMap.animateCamera(
+                                        CameraUpdateFactory.newLatLngZoom(latLng, 14f),
+                                        1000, // duration in ms
+                                        new GoogleMap.CancelableCallback() {
+                                            @Override
+                                            public void onFinish() {
+                                                // Optional: pulse the marker or show info window
+                                                eventMarker.showInfoWindow();
+                                            }
+
+                                            @Override
+                                            public void onCancel() {}
+                                        }
+                                );
+                            }
+                        }
+                    } else if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        // user backed out, ignore
+                    } else if (result.getData() != null) {
+                        Status status = Autocomplete.getStatusFromIntent(result.getData());
+                        Toast.makeText(requireContext(),
+                                "Place error: " + status.getStatusMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
+    /**
+     * Initializes the Google Map with default location or existing event location.
+     *
+     * @param googleMap The GoogleMap instance to configure
+     */
+    /*
+     The following function is from OpenAI, ChatGPT, "How to add Google maps fragment to my code?", 2025-11-30
+     */
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        LatLng defaultLatLng = new LatLng(53.5461, -113.4938);
+        float defaultZoom = 10f;
+
+        // Existing coordinates from event
+        if (eventLat != null && eventLng != null) {
+            LatLng eventLatLng = new LatLng(eventLat, eventLng);
+            eventMarker = mMap.addMarker(new MarkerOptions()
+                    .position(eventLatLng)
+                    .title("Event location"));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(eventLatLng, 14f));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLatLng, defaultZoom));
+        }
+
+        // POI clicks
+        mMap.setOnPoiClickListener(poi -> {
+            if (eventMarker != null) eventMarker.remove();
+
+            eventMarker = mMap.addMarker(new MarkerOptions()
+                    .position(poi.latLng)
+                    .title(poi.name));
+
+            eventLat = poi.latLng.latitude;
+            eventLng = poi.latLng.longitude;
+
+            // Show place name only
+            if (eventLocation != null) {
+                eventLocation.setText(poi.name);
+            }
+
+            // Show info window for visual feedback
+            if (eventMarker != null) {
+                eventMarker.showInfoWindow();
+            }
+        });
+
+        // Map click fallback
+        mMap.setOnMapClickListener(latLng -> {
+            if (eventMarker != null) eventMarker.remove();
+
+            eventMarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title("Pinned location"));
+
+            eventLat = latLng.latitude;
+            eventLng = latLng.longitude;
+
+            updateLocationFieldFromLatLng(latLng);
+
+            // Show info window
+            if (eventMarker != null) {
+                eventMarker.showInfoWindow();
+            }
+        });
+    }
+
+
+
+    /**
+     * This method defines what happens when this fragment is created
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     * any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's
+     * UI should be attached to.  The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     *
+     * @return View to display
+     */
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // inflates fragment
@@ -58,7 +269,6 @@ public class OrganizerCreateEventFragment extends Fragment {
 
         // gets input arguments
         Bundle args = getArguments();
-
         organizerId = (Organizer) args.getSerializable("organizer");
 
         db = FirebaseFirestore.getInstance();
@@ -66,51 +276,83 @@ public class OrganizerCreateEventFragment extends Fragment {
         // Initializing views that may require modification
         eventImage = root.findViewById(R.id.organizer_event_image);
         eventName = root.findViewById(R.id.event_name_box);
-        eventDate = root.findViewById(R.id.event_date_box);
-        eventRegistration = root.findViewById(R.id.event_registration_box);
+        eventDateButton = root.findViewById(R.id.event_date_button);
+        eventRegistrationButton = root.findViewById(R.id.event_registration_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
         eventDescription = root.findViewById(R.id.event_description_box);
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
+        attachDateTimePicker(eventDateButton);
+        attachDateTimePicker(eventRegistrationButton);
+
         // Initializing buttons
         discardButton = root.findViewById(R.id.event_creation_discard_button);
         submitButton = root.findViewById(R.id.event_creation_save_button);
 
-        // Sets bounds for numberpicker
-        eventMaxEntrants.setMinValue(0);
-        eventMaxEntrants.setMaxValue(100);
+        // tap the image button to view from gallery
+        eventImage.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
 
         // Updated fields to display existing values if they exist
         updateToExisting(args);
-
-
         setupDiscardButton();
         setupSubmitButton();
 
+        // Setup the map fragment
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.event_map);
+        if (mapFragment != null) { mapFragment.getMapAsync(this); }
+
+        if (!Places.isInitialized()) {
+            Places.initialize(requireContext(), BuildConfig.MAPS_API_KEY);
+
+        }
+        PlacesClient placesClient = Places.createClient(requireContext());
+
+        eventLocation.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_search, 0);
+
+        // Show progress when launching
+        eventLocation.setOnClickListener(v -> {
+            eventLocation.setEnabled(false);
+            eventLocation.setHint("Opening location search...");
+
+            List<Place.Field> fields = Arrays.asList(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.ADDRESS,
+                    Place.Field.LAT_LNG
+            );
+
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY,
+                    fields
+            ).setInitialQuery(eventLocation.getText().toString()) // Pre-fill with current text
+                    .build(requireContext());
+
+            autocompleteLauncher.launch(intent);
+        });
 
         return root;
+
+
     }
 
     /**
-     * This method sets up the submit button to for creation or updating
+     * Configures the submit button to create a new event or update an existing one.
      */
-    private void setupSubmitButton(){
-
-        Bundle args = getArguments();
-
+    private void setupSubmitButton() {
         submitButton.setOnClickListener(v -> {
-            if (args.getSerializable("event") != null){
+            Bundle args = getArguments();
+            if (args != null && args.getSerializable("event") != null) {
                 updateEventFields(args);
             } else {
                 createNewEvent();
             }
         });
-
     }
 
+
     /**
-     * This method sets up the discard button to  return the user to the events fragment
+     * Configures the discard button to return to the events list.
      */
     private void setupDiscardButton() {
         discardButton.setOnClickListener(v -> {
@@ -120,98 +362,356 @@ public class OrganizerCreateEventFragment extends Fragment {
                     .commit();
         });
     }
+
+
     /**
-     * Updates the text within the selection boxes to the pre-existing values if they exist
+     * Reverse geocodes coordinates to a human-readable address.
+     * Updates the location field with the address on the main thread.
+     *
+     * @param latLng The coordinates to convert to an address
+     */
+    /*
+     The following function is from Anthropic, Claude, "How to add Google maps fragment to my code?", 2025-11-30
+     */
+    private void updateLocationFieldFromLatLng(LatLng latLng) {
+        if (latLng == null || eventLocation == null) return;
+
+        eventLocation.setText("Finding address...");
+
+        // Run geocoding in background thread to avoid blocking UI
+        new Thread(() -> {
+            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+            String finalAddress;
+
+            try {
+                List<Address> addresses = geocoder.getFromLocation(
+                        latLng.latitude,
+                        latLng.longitude,
+                        1
+                );
+
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address address = addresses.get(0);
+                    StringBuilder addrStr = new StringBuilder();
+
+                    if (address.getThoroughfare() != null) {
+                        addrStr.append(address.getThoroughfare()).append(" ");
+                    }
+                    if (address.getSubThoroughfare() != null) {
+                        addrStr.append(address.getSubThoroughfare()).append(", ");
+                    }
+                    if (address.getLocality() != null) {
+                        addrStr.append(address.getLocality()).append(", ");
+                    }
+                    if (address.getAdminArea() != null) {
+                        addrStr.append(address.getAdminArea()).append(" ");
+                    }
+                    if (address.getPostalCode() != null) {
+                        addrStr.append(address.getPostalCode());
+                    }
+
+                    finalAddress = addrStr.toString().trim();
+                    if (finalAddress.isEmpty() && address.getFeatureName() != null) {
+                        finalAddress = address.getFeatureName();
+                    }
+                } else {
+                    finalAddress = String.format(Locale.getDefault(),
+                            "%.6f, %.6f",
+                            latLng.latitude,
+                            latLng.longitude);
+                }
+            } catch (IOException e) {
+                finalAddress = String.format(Locale.getDefault(),
+                        "%.6f, %.6f",
+                        latLng.latitude,
+                        latLng.longitude);
+            }
+
+            // Update UI on main thread
+            String addressToSet = finalAddress;
+            requireActivity().runOnUiThread(() -> {
+                eventLocation.setText(addressToSet);
+            });
+        }).start();
+    }
+
+    /**
+     * Updates the text within the selection boxes to the pre-existing values if they exist.
+     * @param args the bundle of arguments passed to the fragment
      */
 
     private void updateToExisting(Bundle args) {
+        if (args == null || args.getSerializable("event") == null) {
+            return;
+        }
 
-        if (args.getSerializable("event") != null) {
-            Event event = (Event) getArguments().getSerializable("event");
+        Event event = (Event) args.getSerializable("event");
+        if (event == null) return;
 
-//            eventImage = PLACEHOLDER;
+        eventName.setText(event.getName());
+        eventLocation.setText(event.getLocation()); // String, no cast needed
+        eventMaxEntrants.setText(String.valueOf(event.getMaxEntrants()));
+        eventDescription.setText(event.getDescription());
+        eventGeolocationRequired.setChecked(event.getGeolocationRequired());
 
-            eventName.setText(event.getName());
-            eventDate.setText(event.getDate().toString());
-            eventRegistration.setText(event.getRegistrationDate().toString());
-            eventLocation.setText(event.getLocation());
-            eventMaxEntrants.setValue(event.getMaxEntrants());
-            eventDescription.setText(event.getDescription());
-            if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
+        // get coordinates from locationPoint
+        GeoPoint point = event.getLocationPoint();
+        if (point != null) {
+            eventLat = point.getLatitude();
+            eventLng = point.getLongitude();
+
+        }
+
+        SimpleDateFormat fmt =
+                new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+
+        if (event.getDate() != null) {
+            eventDateButton.setText(fmt.format(event.getDate()));
+        }
+
+        if (event.getRegistrationDate() != null) {
+            eventRegistrationButton.setText(fmt.format(event.getRegistrationDate()));
+        }
+
+        if (event.getImageUrl() != null) {
+            Glide.with(this)
+                    .load(event.getImageUrl())
+                    .into(eventImage);
         }
     }
+
+
 
     /**
-     * Updates the event values to the field values currently selected
+     * Updates the event values to the field values currently selected.
+     * @param args the bundle of arguments passed to the fragment
      */
+
     private void updateEventFields(Bundle args) {
-
-        if (args.getSerializable("event") != null) {
-            Event event = (Event) getArguments().getSerializable("event");
-
-//            eventImage = PLACEHOLDER;
-
-            event.setName(eventName.toString());
-            eventDate.setText(event.getDate().toString());
-            eventRegistration.setText(event.getRegistrationDate().toString());
-            event.setLocation(eventLocation.toString());
-            event.setMaxEntrants(eventMaxEntrants.getValue());
-            eventDescription.setText(event.getDescription());
-            if (event.getGeolocationRequired()) { eventGeolocationRequired.setChecked(true); }
+        if (args == null || args.getSerializable("event") == null) {
+            return;
         }
-    }
-    private void createNewEvent() {
 
-        String expectedFormat = "MMMM d, yyyy 'at' h:mm:ss a z";
-        SimpleDateFormat fmt = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+        String locText = eventLocation.getText().toString().trim();
+        if (eventLat == null || eventLng == null || locText.isEmpty()) {
+            eventLocation.setError("Location is required");
+            eventLocation.requestFocus();
+            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        // Get the text from the EditText fields
-        String eventDateString = eventDate.getText().toString();
-        String registrationDateString = eventRegistration.getText().toString();
+        Event event = (Event) args.getSerializable("event");
+        if (event == null) return;
 
-        Date eventdate;
-        Date registrationdate;
+        SimpleDateFormat fmt =
+                new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
 
         try {
-            eventdate = fmt.parse(eventDate.getText().toString());
-            registrationdate = fmt.parse(eventRegistration.getText().toString());
-            Log.d("to string", eventDate.getText().toString());
+            Date eventDate = fmt.parse(eventDateButton.getText().toString());
+            Date registrationDate = fmt.parse(eventRegistrationButton.getText().toString());
+            if (eventDate != null) event.setDate(eventDate);
+            if (registrationDate != null) event.setRegistrationDate(registrationDate);
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // Constructs event based on inputted data
+        event.setName(eventName.getText().toString());
+        event.setLocation(locText);
+        event.setDescription(eventDescription.getText().toString());
+        event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
-        Log.d("organizer name", organizerId.getName());
+        String text = eventMaxEntrants.getText().toString().trim();
+        int maxEntrants = 0;
+        if (!text.isEmpty()) {
+            try {
+                maxEntrants = Integer.parseInt(text);
+            } catch (NumberFormatException ignored) {}
+        }
+        event.setMaxEntrants(maxEntrants);
 
-        Event newEvent = new Event(eventdate,
+        // always save GeoPoint
+        event.setLocationPoint(new GeoPoint(eventLat, eventLng));
+
+        if (selectedImageUri != null) {
+            uploadImageAndUpdateEvent(event);
+        } else {
+            saveUpdatedEventToFirestore(event);
+        }
+    }
+
+
+    /**
+     * Creates a new event from form inputs and saves to Firestore.
+     * Validates required fields before creation.
+     */
+    private void createNewEvent() {
+        // location must be set
+        String locText = eventLocation.getText().toString().trim();
+        if (eventLat == null || eventLng == null || locText.isEmpty()) {
+            eventLocation.setError("Location is required");
+            eventLocation.requestFocus();
+            Toast.makeText(getContext(), "Please select a location", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        SimpleDateFormat fmt =
+                new SimpleDateFormat("MMMM d, yyyy 'at' h:mm:ss a z", Locale.getDefault());
+
+        Date eventdate;
+        Date registrationdate;
+
+        try {
+            eventdate = fmt.parse(eventDateButton.getText().toString());
+            registrationdate = fmt.parse(eventRegistrationButton.getText().toString());
+        } catch (ParseException e) {
+            Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String text = eventMaxEntrants.getText().toString().trim();
+        int maxEntrants = 0;
+
+        if (!text.isEmpty()) {
+            try {
+                maxEntrants = Integer.parseInt(text);
+            } catch (NumberFormatException ignored) {}
+        }
+
+        Event newEvent = new Event(
+                eventdate,
                 eventName.getText().toString(),
-                eventLocation.getText().toString(),
+                locText,
                 "waiting",
                 organizerId.getName(),
                 eventDescription.getText().toString(),
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
                 registrationdate,
-                eventMaxEntrants.getValue());
+                maxEntrants
+        );
 
+        if (eventLat != null && eventLng != null) {
+            newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        }
 
-        // Adds event to firebase
+        if (selectedImageUri != null) {
+            uploadImageAndCreateEvent(newEvent);
+        } else {
+            saveNewEventToFirestore(newEvent);
+        }
+    }
 
+    /**
+     * Attaches date and time picker dialogs to a button.
+     * Shows date picker followed by time picker.
+     *
+     * @param targetButton The button to attach the picker to
+     */
+    private void attachDateTimePicker(Button targetButton) {
+
+        targetButton.setOnClickListener(v -> {
+
+            final Calendar calendar = Calendar.getInstance();
+
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            // Pick date
+            DatePickerDialog datePicker = new DatePickerDialog(
+                    requireContext(),
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+
+                        calendar.set(Calendar.YEAR, selectedYear);
+                        calendar.set(Calendar.MONTH, selectedMonth);
+                        calendar.set(Calendar.DAY_OF_MONTH, selectedDay);
+
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+
+                        // Pick time
+                        TimePickerDialog timePicker = new TimePickerDialog(
+                                requireContext(),
+                                (tpView, selectedHour, selectedMinute) -> {
+
+                                    calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
+                                    calendar.set(Calendar.MINUTE, selectedMinute);
+                                    calendar.set(Calendar.SECOND, 0);
+
+                                    SimpleDateFormat fmt =
+                                            new SimpleDateFormat(
+                                                    "MMMM d, yyyy 'at' h:mm:ss a z",
+                                                    Locale.getDefault()
+                                            );
+
+                                    // Final formatted string
+                                    String formatted = fmt.format(calendar.getTime());
+                                    targetButton.setText(formatted);
+                                },
+                                hour,
+                                minute,
+                                false
+                        );
+
+                        timePicker.show();
+
+                    },
+                    year,
+                    month,
+                    day
+            );
+
+            datePicker.show();
+        });
+    }
+
+    /**
+     * Uploads event image to Firebase Storage and creates the event.
+     *
+     * @param newEvent The event to create after image upload
+     */
+    private void uploadImageAndCreateEvent(Event newEvent) {
+        if (selectedImageUri == null) {
+            saveNewEventToFirestore(newEvent);
+            return;
+        }
+
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
+                        imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                            newEvent.setImageUrl(uri.toString());
+                            saveNewEventToFirestore(newEvent);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    saveNewEventToFirestore(newEvent);
+                });
+    }
+
+    /**
+     * Saves a new event to Firestore and updates the organizer's event list.
+     *
+     * @param newEvent The event to save
+     */
+    private void saveNewEventToFirestore(Event newEvent) {
         db.collection("events")
                 .add(newEvent)
-
                 .addOnSuccessListener(documentReference -> {
 
                     String docId = documentReference.getId();
 
+                    // Updates docId field to include the unique docId
+
+                    documentReference.update("docId", docId);
+
                     Toast.makeText(getContext(), "Event Created!", Toast.LENGTH_SHORT).show();
 
-                    // Returns to Events fragment
-
                     ArrayList<String> organizerEventList = organizerId.getOrgEvents();
-
                     organizerEventList.add(docId);
 
                     db.collection("users")
@@ -225,11 +725,56 @@ public class OrganizerCreateEventFragment extends Fragment {
                             .replace(R.id.fragmentContainer, fragment)
                             .commit();
                 })
-
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Error creating event. Please try again.", Toast.LENGTH_LONG).show();
                 });
     }
 
+    /**
+     * Uploads event image to Firebase Storage and updates the event.
+     *
+     * @param event The event to update after image upload
+     */
+    private void uploadImageAndUpdateEvent(Event event) {
+        if (selectedImageUri == null) {
+            saveUpdatedEventToFirestore(event);
+            return;
+        }
 
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+        StorageReference imgRef = storageRef.child("event_images/" + UUID.randomUUID() + ".jpg");
+
+        imgRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
+                        imgRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                            event.setImageUrl(uri.toString());
+                            saveUpdatedEventToFirestore(event);
+                        })
+                )
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    saveUpdatedEventToFirestore(event);
+                });
+    }
+
+    /**
+     * Saves an updated event to Firestore.
+     *
+     * @param event The event to save
+     */
+    private void saveUpdatedEventToFirestore(Event event) {
+        db.collection("events")
+                .document(event.getDocId())
+                .set(event)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(getContext(), "Event updated", Toast.LENGTH_SHORT).show();
+                    selectedImageUri = null;  // Reset after successful save
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(),
+                            "Error updating event: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+    }
 }
