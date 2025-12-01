@@ -99,7 +99,14 @@ public class AllEventsFragment extends Fragment {
         endDateButton.setOnClickListener(v -> showDatePicker(false));
         clearDatesButton.setOnClickListener(v -> clearDateFilters());
 
-        scannerButton.setOnClickListener(v -> {
+        // Hides scanner for Admins
+        User user = null;
+        if (requireActivity() instanceof UserProviderInterface) user = ((UserProviderInterface) requireActivity()).getCurrentUser();
+        if ("admin".equalsIgnoreCase(user.getType())){
+            scannerButton.setVisibility(View.INVISIBLE);
+        }
+
+            scannerButton.setOnClickListener(v -> {
             QRScannerFragment createFragment = new QRScannerFragment();
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, createFragment)
