@@ -195,7 +195,7 @@
 
             <ImageView
                 android:id="@+id/qr_placeholder"
-                android:layout_width="328dp"
+                android:layout_width="match_parent"
                 android:layout_height="109dp"
                 android:layout_margin="20dp"
                 android:background="@drawable/rounded_qr_background"
