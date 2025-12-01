@@ -12,7 +12,6 @@
         android:supportsRtl="true"
 
         android:theme="@style/Theme.EntrantsProfilePage">
-        <activity android:name=".PeopleActivity" />
         <activity
             android:name=".activities.NotificationsActivity"
             android:exported="false" />
