@@ -39,4 +39,11 @@
     <string name="event_name">Event Name</string>
     <string name="zenithchance">ZenithChance</string>
     <string name="date_and_time">Date and time:</string>
+    <string name="location">Location</string>
+    <string name="registration_deadline">Registration Deadline</string>
+    <string name="delete_event">Delete Event</string>
+    <string name="update_event">Update Event</string>
+    <string name="maximum_entrants">Maximum Entrants</string>
+    <string name="geolocation_required">Geolocation Required</string>
+    <string name="view_entrants_map">View Entrants Map</string>
 </resources>

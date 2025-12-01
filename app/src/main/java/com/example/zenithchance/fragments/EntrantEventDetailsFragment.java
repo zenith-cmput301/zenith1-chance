@@ -1,12 +1,20 @@
 package com.example.zenithchance.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +26,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
+import com.example.zenithchance.managers.LocationHelper;
 import com.example.zenithchance.managers.QRManager;
 import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
@@ -27,10 +36,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.GeoPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This fragment displays details of the selected event.
@@ -46,6 +58,19 @@ public class EntrantEventDetailsFragment extends Fragment {
     private TextView waitingCountView;
     private int waitingCount = -1;
 
+    private static final float MAX_DISTANCE_METERS = 50000f; // distance from actual event location (allows for some flexibility)
+
+    private Event eventForLocal;
+
+    // For handling permission request
+    private ActivityResultLauncher<String> locationPermissionRequest;
+    private MaterialButton pendingActionButton;
+    private String pendingEventDocId;
+    private Event pendingEvent;
+    private Boolean pendingGeoRequired;
+
+
+    private LocationHelper locationHelper;
     public EntrantEventDetailsFragment() { }
 
     /**
@@ -66,7 +91,57 @@ public class EntrantEventDetailsFragment extends Fragment {
         if (currentEntrant == null && context instanceof EntrantProviderInterface) {
             currentEntrant = ((EntrantProviderInterface) context).getCurrentEntrant();
         }
+
+        locationHelper = new LocationHelper(context.getApplicationContext());
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Register permission request launcher
+        locationPermissionRequest = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d("Permission", "Location permission granted");
+                        // Permission granted, proceed with enrollment
+                        if (pendingActionButton != null
+                                && pendingEventDocId != null
+                                && pendingEvent != null
+                                && pendingGeoRequired != null) {
+
+                            proceedWithLocationCheck(
+                                    pendingEventDocId,
+                                    pendingActionButton,
+                                    pendingEvent,
+                                    pendingGeoRequired
+                            );
+                        }
+                    } else {
+                        Log.d("Permission", "Location permission denied");
+                        // Permission denied
+                        if (pendingActionButton != null) {
+                            pendingActionButton.setText("Enroll");
+                            pendingActionButton.setEnabled(true);
+                        }
+
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Location Permission Required")
+                                .setMessage("This event requires location access to record where you joined from. Please grant location permission to join.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                    }
+
+                    // Clear pending
+                    pendingActionButton = null;
+                    pendingEventDocId = null;
+                    pendingEvent = null;
+                    pendingGeoRequired = null;
+                }
+        );
+    }
+
 
     /**
      * This method defines what happens when this fragment is created
@@ -84,8 +159,8 @@ public class EntrantEventDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                              @Nullable ViewGroup container,
+                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_details, container, false);
 
         TextView name = view.findViewById(R.id.event_name);
@@ -102,65 +177,100 @@ public class EntrantEventDetailsFragment extends Fragment {
         ImageButton infoBtn = view.findViewById(R.id.info_button);
         ImageView qr = view.findViewById(R.id.qr);
 
-        Event event;
-        String eventName = null;
-        String eventDocId = null;
-        String imageUrl = null;
-        String eventLocation = null;
-        String eventOrganizer = null;
-        String eventTime = null;
-        Long eventDateMillis = null;
-        String eventDesc = null;
+        if (currentEntrant == null) {
+            Toast.makeText(requireContext(),
+                    "Error: no current entrant found.",
+                    Toast.LENGTH_LONG).show();
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Unavailable");
+            waitingCountView.setText("Waiting list: --");
+            return view;
+        }
 
         Bundle args = getArguments();
+        String eventDocId = null;
         if (args != null) {
-            event = (Event) args.getSerializable("event");
-            eventName = args.getString("event_name");
-            eventLocation = args.getString("event_location");
-            eventOrganizer = args.getString("event_organizer");
-            eventTime = args.getString("event_time");
-            eventDateMillis = args.getLong("event_date_millis");
-            eventDesc = args.getString("event_description");
-            imageUrl = args.getString("event_image_url");
             eventDocId = args.getString("event_doc_id");
-
-            name.setText(eventName);
-            location.setText(eventLocation);
-            organizer.setText(eventOrganizer);
-            time.setText(eventTime);
-            desc.setText(eventDesc);
-
-            // QR
-            QRManager manager = new QRManager();
-            manager.updateImageView(qr, event);
-
-            Glide.with(this)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.celebration_placeholder)
-                    .into(image);
         }
 
-        // wiring action buttons, first create holder event
-        Event eventForLocal = new Event();
-        eventForLocal.setName(eventName);
-        eventForLocal.setLocation(eventLocation);
-        eventForLocal.setDescription(eventDesc);
-        eventForLocal.setDate(new Date(eventDateMillis));
-
-        // this code is so event detail is refreshed every time it's accessed
-        if (eventDocId != null) {
-            loadWaitingListCount(eventDocId, eventForLocal);
-            refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
-        } else {
+        if (eventDocId == null) {
+            Toast.makeText(requireContext(),
+                    "No event specified.",
+                    Toast.LENGTH_LONG).show();
+            actionBtn.setEnabled(false);
+            actionBtn.setText("Event not available");
             waitingCountView.setText("Waiting list: --");
-            // backup plan -> local states (copy got from when app first boot)
-            bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
+            return view;
         }
 
-        // clicks on info button to show how lottery is drawn
+        // Load full Event from Firestore
+        String finalEventDocId = eventDocId;
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventDocId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    eventForLocal = snapshot.toObject(Event.class);
+
+                    if (eventForLocal == null) {
+                        Toast.makeText(requireContext(),
+                                "Event not found.",
+                                Toast.LENGTH_LONG).show();
+                        actionBtn.setEnabled(false);
+                        actionBtn.setText("Event not available");
+                        waitingCountView.setText("Waiting list: --");
+                        return;
+                    }
+
+                    // Populate UI with fresh data
+                    name.setText(eventForLocal.getName());
+                    location.setText(eventForLocal.getLocation());
+                    organizer.setText(eventForLocal.getOrganizer());
+                    time.setText(formatEventDateTime(eventForLocal.getDate()));
+                    desc.setText(eventForLocal.getDescription());
+
+                    // QR
+                    QRManager manager = new QRManager();
+                    manager.updateImageView(qr, eventForLocal);
+
+                    // Image
+                    String imageUrl = eventForLocal.getImageUrl();
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(imageUrl)
+                                .placeholder(R.drawable.celebration_placeholder)
+                                .into(image);
+                    } else {
+                        image.setImageResource(R.drawable.celebration_placeholder);
+                    }
+
+                    // Wire buttons with fresh event data
+                    loadWaitingListCount(finalEventDocId, eventForLocal);
+                    refreshEntrantListsAndBind(finalEventDocId, eventForLocal,
+                            inviteActions, actionBtn, acceptBtn, declineBtn);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(),
+                            "Failed to load event: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    actionBtn.setEnabled(false);
+                    actionBtn.setText("Event not available");
+                    waitingCountView.setText("Waiting list: --");
+                });
+
+        // Info button
         infoBtn.setOnClickListener(v -> showDrawInfoDialog());
 
         return view;
+    }
+
+    // Add this helper method
+    private String formatEventDateTime(Date date) {
+        if (date == null) {
+            return "Date not set";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+        return formatter.format(date);
     }
 
     /**
@@ -281,35 +391,30 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Allows entrant to enroll an event's waiting list
-     *
-     * @param eventDocId        Firestore id of event
-     * @param actionBtn         Button to wire
-     * @param eventForLocal     Event to enroll
+     * Checks if entrant can enroll in event's waiting list.
+     * Requests location permission if needed.
      */
-    public void enrollWaiting(String eventDocId, MaterialButton actionBtn,
-                              Event eventForLocal) {
+    public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+        actionBtn.setOnClickListener(v -> {
 
-        actionBtn.setOnClickListener( v -> {
-            actionBtn.setEnabled(false);   // prevent double taps during transition
-            actionBtn.setText("Enrolling...");
-            actionBtn.setTextColor(Color.WHITE);
+            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
 
-            currentEntrant.enrollInWaiting(
-                    eventForLocal,
-                    eventDocId,
-                    // success
-                    () -> {
-                        actionBtn.setText("Drop Waiting List");
-                        actionBtn.setTextColor(Color.WHITE);
-                        actionBtn.setEnabled(true);
+            // Always require permission, regardless of geoRequired
+            if (!hasLocationPermission()) {
+                // Save pending action so you can retry after permission result
+                pendingActionButton = actionBtn;
+                pendingEventDocId = eventDocId;
+                pendingEvent = eventForLocal;
+                pendingGeoRequired = geoRequired;
 
-                        // bind to dropping list behaviour on next click
-                        dropWaitingList(eventDocId, actionBtn, eventForLocal);
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+                return;
+            }
 
-                        // increment #entrants
-                        waitingCount++;
-                        updateWaitingCountLabel();
+            // Permission already granted; always go through location check
+            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, geoRequired);
+        });
+    }
 
                         // send enrollemnt notification
                         UserManager.getInstance().sendNotification(eventDocId, "enrolled", currentEntrant.getUserId());
@@ -324,6 +429,36 @@ public class EntrantEventDetailsFragment extends Fragment {
                     }
             );
         });
+    }
+
+
+    /**
+     * Performs the actual enrollment
+     */
+    private void performEnrollment(String eventDocId, MaterialButton actionBtn,
+                                   Event eventForLocal, GeoPoint location) {
+        currentEntrant.enrollInWaiting(
+                eventForLocal,
+                eventDocId,
+                location,
+                // Success
+                () -> {
+                    actionBtn.setText("Drop Waiting List");
+                    actionBtn.setEnabled(true);
+                    dropWaitingList(eventDocId, actionBtn, eventForLocal);
+
+                    waitingCount++;
+                    updateWaitingCountLabel();
+
+                    Toast.makeText(requireContext(), "✓ Added to waiting list", Toast.LENGTH_SHORT).show();
+                },
+                // Failure
+                e -> {
+                    actionBtn.setText("Enroll");
+                    actionBtn.setEnabled(true);
+                    Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+        );
     }
 
     /**

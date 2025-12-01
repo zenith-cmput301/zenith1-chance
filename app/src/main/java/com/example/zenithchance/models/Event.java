@@ -1,5 +1,7 @@
 package com.example.zenithchance.models;
 
+import com.google.firebase.firestore.GeoPoint;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,18 +10,23 @@ import java.util.Date;
  * The representative class for all Events.
  * All information pertaining to an event should be found here.
  *
- * @author Percy
+ * @author Percy, Sabrina
  * @version 1.1
  */
 
 public class Event implements Serializable {
     private Date date;
     private String name;
-    private String location;
     private String organizer; // name of organizer, not document id
     private String status;
     private String description;
     private Boolean geolocation_required;
+
+    private String location; // readable location String (e.g. "University of Alberta")
+
+    private Double latitude;   // latitude and longitude for location geopoint
+    private Double longitude;  //
+
     private Date registration_date;
     private Date finalDeadline;
     private Integer max_entrants;
@@ -129,9 +136,6 @@ public class Event implements Serializable {
         return name;
     }
 
-    public String getLocation() {
-        return location;
-    }
 
     public String getOrganizer() {
         return organizer;
@@ -195,9 +199,46 @@ public class Event implements Serializable {
         return docId;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
+    public GeoPoint getLocationPoint() {
+        if (latitude != null && longitude != null) {
+            return new GeoPoint(latitude, longitude);
+        }
+        return null;
+    }
+
+    // Also add individual getters/setters for Firestore
+    public Double getLatitude() { return latitude; }
+
+    public Double getLongitude() { return longitude; }
+
     /**
      * Setters
      */
+
+    // Setter that accepts GeoPoint
+    public void setLocationPoint(GeoPoint geoPoint) {
+        if (geoPoint != null) {
+            this.latitude = geoPoint.getLatitude();
+            this.longitude = geoPoint.getLongitude();
+        } else {
+            this.latitude = null;
+            this.longitude = null;
+        }
+    }
+
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+
 
     public void setDate(Date date) {
         this.date = date;
@@ -207,9 +248,7 @@ public class Event implements Serializable {
         this.name = name;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+
 
     public void setOrganizer(String organizer) {
         this.organizer = organizer;
