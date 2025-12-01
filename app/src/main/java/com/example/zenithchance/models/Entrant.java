@@ -116,24 +116,23 @@ public class Entrant extends User implements Serializable {
         batch.update(userRef, "onWaiting", FieldValue.arrayUnion(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
-        // Create waiting list entry with location data if location is provided
-        if (location != null) {
-            // Get event location
-            GeoPoint eventLocation = event != null ? event.getLocationPoint() : null;
+        // Create waiting list entry with location data
 
-            // Create entry in waitingListEntries collection
-            WaitingListEntry entry = new WaitingListEntry(
-                    eventDocId,
-                    uid,
-                    eventLocation,
-                    location
-            );
+        // Get event location
+        GeoPoint eventLocation = event != null ? event.getLocationPoint() : null;
 
-            // Use composite key "eventId_userId" (for querying)
-            String entryId = eventDocId + "_" + uid;
-            DocumentReference entryRef = db.collection("waitingListEntries").document(entryId);
-            batch.set(entryRef, entry);
-        }
+        // Create entry in waitingListEntries collection
+        WaitingListEntry entry = new WaitingListEntry(
+                eventDocId,
+                uid,
+                eventLocation,
+                location
+        );
+
+        // Use composite key "eventId_userId" (for querying)
+        String entryId = eventDocId + "_" + uid;
+        DocumentReference entryRef = db.collection("waitingListEntries").document(entryId);
+        batch.set(entryRef, entry);
 
         // Commit the batch and handle success/failure
         batch.commit()
