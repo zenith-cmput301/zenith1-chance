@@ -65,19 +65,20 @@ public class LocationHelper {
     }
 
     /**
-     * Distance between two GeoPoints in meters.
+     * Calculate distance in meters between two GeoPoints.
      */
-    public static float distanceMeters(@Nullable GeoPoint a, @Nullable GeoPoint b) {
-        if (a == null || b == null) return Float.MAX_VALUE;
+    public static float distanceMeters(GeoPoint point1, GeoPoint point2) {
+        if (point1 == null || point2 == null) return Float.MAX_VALUE;
 
         float[] results = new float[1];
-        android.location.Location.distanceBetween(
-                a.getLatitude(), a.getLongitude(),
-                b.getLatitude(), b.getLongitude(),
+        Location.distanceBetween(
+                point1.getLatitude(), point1.getLongitude(),
+                point2.getLatitude(), point2.getLongitude(),
                 results
         );
         return results[0];
     }
+
 
     public interface LocationCallback {
         void onLocationResult(@Nullable Location location);

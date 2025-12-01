@@ -1,14 +1,20 @@
 package com.example.zenithchance.fragments;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,9 +37,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This fragment displays details of the selected event.
@@ -50,6 +58,15 @@ public class EntrantEventDetailsFragment extends Fragment {
     private int waitingCount = -1;
 
     private static final float MAX_DISTANCE_METERS = 500f; // distance from actual event location (allows for some flexibility)
+
+    private Event eventForLocal;
+
+    // For handling permission request
+    private ActivityResultLauncher<String> locationPermissionRequest;
+    private MaterialButton pendingActionButton;
+    private String pendingEventDocId;
+    private Event pendingEvent;
+
 
     private LocationHelper locationHelper;
     public EntrantEventDetailsFragment() { }
@@ -76,6 +93,44 @@ public class EntrantEventDetailsFragment extends Fragment {
         locationHelper = new LocationHelper(context.getApplicationContext());
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Register permission request launcher
+        locationPermissionRequest = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d("Permission", "Location permission granted");
+                        // Permission granted, proceed with enrollment
+                        if (pendingActionButton != null && pendingEventDocId != null && pendingEvent != null) {
+                            proceedWithLocationCheck(pendingEventDocId, pendingActionButton, pendingEvent);
+                        }
+                    } else {
+                        Log.d("Permission", "Location permission denied");
+                        // Permission denied
+                        if (pendingActionButton != null) {
+                            pendingActionButton.setText("Enroll");
+                            pendingActionButton.setEnabled(true);
+                        }
+
+                        new MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("Location Permission Required")
+                                .setMessage("This event requires location access to verify you're at the event location. Please grant location permission to join.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                    }
+
+                    // Clear pending
+                    pendingActionButton = null;
+                    pendingEventDocId = null;
+                    pendingEvent = null;
+                }
+        );
+    }
+
     /**
      * This method defines what happens when this fragment is created
      *
@@ -92,8 +147,8 @@ public class EntrantEventDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+                              @Nullable ViewGroup container,
+                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.entrant_event_details, container, false);
 
         TextView name = view.findViewById(R.id.event_name);
@@ -110,16 +165,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         ImageButton infoBtn = view.findViewById(R.id.info_button);
         ImageView qr = view.findViewById(R.id.qr);
 
-        Event event;
-        String eventName = null;
-        String eventDocId = null;
-        String imageUrl = null;
-        String eventLocation = null;
-        String eventOrganizer = null;
-        String eventTime = null;
-        Long eventDateMillis = null;
-        String eventDesc = null;
-
         if (currentEntrant == null) {
             Toast.makeText(requireContext(),
                     "Error: no current entrant found.",
@@ -131,74 +176,89 @@ public class EntrantEventDetailsFragment extends Fragment {
         }
 
         Bundle args = getArguments();
+        String eventDocId = null;
         if (args != null) {
-            event = (Event) args.getSerializable("event");
-            eventName = args.getString("event_name");
-            eventLocation = args.getString("event_location");
-            eventOrganizer = args.getString("event_organizer");
-            eventTime = args.getString("event_time");
-            eventDateMillis = args.getLong("event_date_millis");
-            eventDesc = args.getString("event_description");
-            imageUrl = args.getString("event_image_url");
             eventDocId = args.getString("event_doc_id");
-
-            name.setText(eventName);
-            location.setText(eventLocation);
-            organizer.setText(eventOrganizer);
-            time.setText(eventTime);
-            desc.setText(eventDesc);
-
-            // QR
-            QRManager manager = new QRManager();
-            manager.updateImageView(qr, event);
-
-            Glide.with(this)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.celebration_placeholder)
-                    .into(image);
         }
 
-        // Use the real Event from arguments if available
-        Event eventForLocal = null;
-
-        if (args != null) {
-            Event eventFromArgs = (Event) args.getSerializable("event");
-            if (eventFromArgs != null) {
-                eventForLocal = eventFromArgs;
-            } else {
-                // fallback: build a partial event just from strings
-                eventForLocal = new Event();
-                eventForLocal.setName(eventName);
-                eventForLocal.setLocation(eventLocation);
-                eventForLocal.setDescription(eventDesc);
-                if (eventDateMillis != null) {
-                    eventForLocal.setDate(new Date(eventDateMillis));
-                }
-            }
-        }
-
-// If we *still* don’t have an event, disable actions
-        if (eventForLocal == null) {
+        if (eventDocId == null) {
+            Toast.makeText(requireContext(),
+                    "No event specified.",
+                    Toast.LENGTH_LONG).show();
             actionBtn.setEnabled(false);
             actionBtn.setText("Event not available");
             waitingCountView.setText("Waiting list: --");
             return view;
         }
 
-        // this code is so event detail is refreshed every time it's accessed
-        if (eventDocId != null) {
-            loadWaitingListCount(eventDocId, eventForLocal);
-            refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
-        } else {
-            waitingCountView.setText("Waiting list: --");
-            // backup plan -> local states (copy got from when app first boot)
-            bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
-        }
+        // Load full Event from Firestore
+        String finalEventDocId = eventDocId;
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventDocId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    eventForLocal = snapshot.toObject(Event.class);
 
-        // clicks on info button to show how lottery is drawn
+                    if (eventForLocal == null) {
+                        Toast.makeText(requireContext(),
+                                "Event not found.",
+                                Toast.LENGTH_LONG).show();
+                        actionBtn.setEnabled(false);
+                        actionBtn.setText("Event not available");
+                        waitingCountView.setText("Waiting list: --");
+                        return;
+                    }
+
+                    // Populate UI with fresh data
+                    name.setText(eventForLocal.getName());
+                    location.setText(eventForLocal.getLocation());
+                    organizer.setText(eventForLocal.getOrganizer());
+                    time.setText(formatEventDateTime(eventForLocal.getDate()));
+                    desc.setText(eventForLocal.getDescription());
+
+                    // QR
+                    QRManager manager = new QRManager();
+                    manager.updateImageView(qr, eventForLocal);
+
+                    // Image
+                    String imageUrl = eventForLocal.getImageUrl();
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(imageUrl)
+                                .placeholder(R.drawable.celebration_placeholder)
+                                .into(image);
+                    } else {
+                        image.setImageResource(R.drawable.celebration_placeholder);
+                    }
+
+                    // Wire buttons with fresh event data
+                    loadWaitingListCount(finalEventDocId, eventForLocal);
+                    refreshEntrantListsAndBind(finalEventDocId, eventForLocal,
+                            inviteActions, actionBtn, acceptBtn, declineBtn);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(requireContext(),
+                            "Failed to load event: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    actionBtn.setEnabled(false);
+                    actionBtn.setText("Event not available");
+                    waitingCountView.setText("Waiting list: --");
+                });
+
+        // Info button
         infoBtn.setOnClickListener(v -> showDrawInfoDialog());
 
         return view;
+    }
+
+    // Add this helper method
+    private String formatEventDateTime(Date date) {
+        if (date == null) {
+            return "Date not set";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("EEE, MMM d • h:mm a", Locale.getDefault());
+        return formatter.format(date);
     }
 
     /**
@@ -319,110 +379,143 @@ public class EntrantEventDetailsFragment extends Fragment {
     }
 
     /**
-     * Checks if entrant can enroll an event's waiting list.
-     * If geolocationRequired is true, and an entrant's location matches, entrant can enroll.
-     * Otherwise, entrant cannot enroll.
-     *
-     * @param eventDocId        Firestore id of event
-     * @param actionBtn         Button to wire
-     * @param eventForLocal     Event to enroll
+     * Checks if entrant can enroll in event's waiting list.
+     * Requests location permission if needed.
      */
-
     public void enrollWaiting(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
-
         actionBtn.setOnClickListener(v -> {
-            actionBtn.setEnabled(false);
-            actionBtn.setText("Enrolling...");
-            actionBtn.setTextColor(Color.WHITE);
+            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
 
-            if (locationHelper == null) {
-                locationHelper = new LocationHelper(requireContext().getApplicationContext());
-            }
-            if (locationHelper == null) {
-                actionBtn.setText("Enroll");
-                actionBtn.setEnabled(true);
-                Toast.makeText(requireContext(),
-                        "Location service unavailable. Please try again.",
-                        Toast.LENGTH_LONG).show();
+            if (!geoRequired) {
+                // No geolocation required - enroll directly
+                actionBtn.setEnabled(false);
+                actionBtn.setText("Enrolling...");
+                performEnrollment(eventDocId, actionBtn, eventForLocal, null);
                 return;
             }
 
+            // Geolocation IS required - check permission first
+            if (!hasLocationPermission()) {
+                // Store pending action
+                pendingActionButton = actionBtn;
+                pendingEventDocId = eventDocId;
+                pendingEvent = eventForLocal;
 
-            boolean geoRequired = Boolean.TRUE.equals(eventForLocal.getGeolocationRequired());
+                // Request permission
+                locationPermissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+                return;
+            }
 
-            // Always try to get current location (we assume permission is already granted app-wide)
-            locationHelper.getCurrentLocation(location -> {
-                GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
-
-                if (geoRequired) {
-                    GeoPoint eventPoint = eventForLocal.getLocationPoint();
-
-                    if (eventPoint == null) {
-                        // Event says geolocation required but has no location set
-                        actionBtn.setText("Enroll");
-                        actionBtn.setEnabled(true);
-                        Toast.makeText(requireContext(),
-                                "Event location not set. Contact organizer.",
-                                Toast.LENGTH_LONG).show();
-                        return;
-                    }
-
-                    if (entrantPoint == null) {
-                        actionBtn.setText("Enroll");
-                        actionBtn.setEnabled(true);
-                        Toast.makeText(requireContext(),
-                                "Could not get your location. Please enable location services.",
-                                Toast.LENGTH_LONG).show();
-                        return;
-                    }
-
-                    float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
-                    if (distance > MAX_DISTANCE_METERS) {
-                        actionBtn.setText("Enroll");
-                        actionBtn.setEnabled(true);
-                        Toast.makeText(requireContext(),
-                                "You must be near the event location to join.",
-                                Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                }
-
-                // If geolocation not required OR all checks passed, enroll
-                performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
-            });
+            // Permission already granted, proceed
+            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
         });
     }
 
     /**
-     * Performs the entrant's enrollment in an event.
-     *
-     * @param eventDocId        Firestore id of event
-     * @param actionBtn         Button to wire
-     * @param eventForLocal     Event to enroll
+     * Check if we have location permission
      */
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
 
+    /**
+     * Proceed with getting location and checking distance
+     */
+    private void proceedWithLocationCheck(String eventDocId, MaterialButton actionBtn, Event eventForLocal) {
+        actionBtn.setEnabled(false);
+        actionBtn.setText("Checking location...");
+        actionBtn.setTextColor(Color.WHITE);
+
+        if (locationHelper == null) {
+            locationHelper = new LocationHelper(requireContext().getApplicationContext());
+        }
+
+        locationHelper.getCurrentLocation(location -> {
+            GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
+            GeoPoint eventPoint = eventForLocal.getLocationPoint();
+
+            // Check if event has location set
+            if (eventPoint == null) {
+                actionBtn.setText("Enroll");
+                actionBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Event Location Not Set")
+                        .setMessage("This event requires you to be at a specific location, but the organizer hasn't set it yet.")
+                        .setPositiveButton("OK", null)
+                        .show();
+                return;
+            }
+
+            // Check if we got user's location
+            if (entrantPoint == null) {
+                actionBtn.setText("Enroll");
+                actionBtn.setEnabled(true);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Location Unavailable")
+                        .setMessage("Could not get your current location. Please make sure location services are enabled and try again.")
+                        .setPositiveButton("Retry", (dialog, which) -> {
+                            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                return;
+            }
+
+            // Check distance
+            float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
+            Log.d("Enrollment", "Distance: " + distance + "m (max: " + MAX_DISTANCE_METERS + "m)");
+
+            if (distance > MAX_DISTANCE_METERS) {
+                actionBtn.setText("Enroll");
+                actionBtn.setEnabled(true);
+
+                String distanceText = distance > 1000
+                        ? String.format("%.1f km", distance / 1000)
+                        : String.format("%.0f meters", distance);
+
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Too Far From Event")
+                        .setMessage("You must be within " + MAX_DISTANCE_METERS + " meters of the event location.\n\n" +
+                                "You are currently " + distanceText + " away from:\n" +
+                                eventForLocal.getLocation())
+                        .setPositiveButton("OK", null)
+                        .setNeutralButton("Retry", (dialog, which) -> {
+                            proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal);
+                        })
+                        .show();
+                return;
+            }
+
+            // All checks passed - enroll!
+            actionBtn.setText("Enrolling...");
+            performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
+        });
+    }
+
+    /**
+     * Performs the actual enrollment
+     */
     private void performEnrollment(String eventDocId, MaterialButton actionBtn,
                                    Event eventForLocal, GeoPoint location) {
         currentEntrant.enrollInWaiting(
                 eventForLocal,
                 eventDocId,
                 location,
-                // success
+                // Success
                 () -> {
                     actionBtn.setText("Drop Waiting List");
-                    actionBtn.setTextColor(Color.WHITE);
                     actionBtn.setEnabled(true);
-
-                    // bind to dropping list behaviour on next click
                     dropWaitingList(eventDocId, actionBtn, eventForLocal);
 
-                    // increment #entrants
                     waitingCount++;
                     updateWaitingCountLabel();
 
-                    Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "✓ Added to waiting list", Toast.LENGTH_SHORT).show();
                 },
-                // fail to enroll
+                // Failure
                 e -> {
                     actionBtn.setText("Enroll");
                     actionBtn.setEnabled(true);

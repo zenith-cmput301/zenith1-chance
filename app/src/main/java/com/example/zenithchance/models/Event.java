@@ -23,7 +23,9 @@ public class Event implements Serializable {
     private Boolean geolocation_required;
 
     private String location; // readable location String (e.g. "University of Alberta")
-    private GeoPoint locationPoint; // actual coordinates of location
+
+    private Double latitude;   // latitude and longitude for location geopoint
+    private Double longitude;  //
 
     private Date registration_date;
     private Date finalDeadline;
@@ -198,20 +200,40 @@ public class Event implements Serializable {
     }
 
     public GeoPoint getLocationPoint() {
-        return locationPoint;
+        if (latitude != null && longitude != null) {
+            return new GeoPoint(latitude, longitude);
+        }
+        return null;
     }
+
+    // Also add individual getters/setters for Firestore
+    public Double getLatitude() { return latitude; }
+
+    public Double getLongitude() { return longitude; }
 
     /**
      * Setters
      */
 
+    // Setter that accepts GeoPoint
+    public void setLocationPoint(GeoPoint geoPoint) {
+        if (geoPoint != null) {
+            this.latitude = geoPoint.getLatitude();
+            this.longitude = geoPoint.getLongitude();
+        } else {
+            this.latitude = null;
+            this.longitude = null;
+        }
+    }
+
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
     public void setLocation(String location) {
         this.location = location;
     }
 
-    public void setLocationPoint(GeoPoint locationPoint) {
-        this.locationPoint = locationPoint;
-    }
 
 
     public void setDate(Date date) {

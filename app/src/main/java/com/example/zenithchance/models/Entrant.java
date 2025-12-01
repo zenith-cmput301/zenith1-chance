@@ -97,10 +97,12 @@ public class Entrant extends User implements Serializable {
      *
      * @param event         Event to enroll in
      * @param eventDocId    Event's Firestore document id
-     * @param onSuccess
-     * @param onError
+     * @param location      User's GeoPoint location (can be null)
+     * @param onSuccess     Callback to run on success
+     * @param onError       Callback to run on error
      */
-    public void enrollInWaiting(Event event, String eventDocId, GeoPoint location, Runnable onSuccess,
+    public void enrollInWaiting(Event event, String eventDocId, GeoPoint location,
+                                Runnable onSuccess,
                                 java.util.function.Consumer<Exception> onError) {
 
         String uid = getUserId();
@@ -114,7 +116,7 @@ public class Entrant extends User implements Serializable {
         batch.update(userRef, "onWaiting", FieldValue.arrayUnion(eventDocId));
         batch.update(eventRef, "waitingList", FieldValue.arrayUnion(uid));
 
-        // Create waiting list entry with location data
+        // Create waiting list entry with location data if location is provided
         if (location != null) {
             // Get event location
             GeoPoint eventLocation = event != null ? event.getLocationPoint() : null;
@@ -133,11 +135,28 @@ public class Entrant extends User implements Serializable {
             batch.set(entryRef, entry);
         }
 
-        batch.commit().addOnSuccessListener(v -> {
-            if (!onWaiting.contains(eventDocId)) onWaiting.add(eventDocId);
-            if (event != null) event.addWaitingList(uid);
-            if (onSuccess != null) onSuccess.run();
-        }).addOnFailureListener(e -> { if (onError != null) onError.accept(e); });
+        // Commit the batch and handle success/failure
+        batch.commit()
+                .addOnSuccessListener(aVoid -> {
+                    // Update local state
+                    if (!onWaiting.contains(eventDocId)) {
+                        onWaiting.add(eventDocId);
+                    }
+                    if (event != null) {
+                        event.addWaitingList(uid);
+                    }
+
+                    // Call success callback
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Call error callback
+                    if (onError != null) {
+                        onError.accept(e);
+                    }
+                });
     }
 
     /**

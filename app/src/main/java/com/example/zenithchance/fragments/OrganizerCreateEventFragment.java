@@ -577,7 +577,9 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 maxEntrants
         );
 
-        newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        if (eventLat != null && eventLng != null) {
+            newEvent.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        }
 
         if (selectedImageUri != null) {
             uploadImageAndCreateEvent(newEvent);
