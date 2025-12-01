@@ -11,7 +11,7 @@ import java.util.List;
  * This class represents a User object.
  * This class is the superclass for entrants, organizers, and admins.
  *
- * @author Sabrina
+ * @author Sabrina, Lauren
  */
 public abstract class User {
 
