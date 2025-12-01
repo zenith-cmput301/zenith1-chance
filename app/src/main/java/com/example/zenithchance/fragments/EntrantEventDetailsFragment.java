@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,6 +113,8 @@ public class EntrantEventDetailsFragment extends Fragment {
         Long eventDateMillis = null;
         String eventDesc = null;
 
+        Event eventForLocal = new Event();
+
         Bundle args = getArguments();
         if (args != null) {
             event = (Event) args.getSerializable("event");
@@ -129,6 +132,7 @@ public class EntrantEventDetailsFragment extends Fragment {
             organizer.setText(eventOrganizer);
             time.setText(eventTime);
             desc.setText(eventDesc);
+            eventForLocal = event;
 
             // QR
             QRManager manager = new QRManager();
@@ -141,7 +145,6 @@ public class EntrantEventDetailsFragment extends Fragment {
         }
 
         // wiring action buttons, first create holder event
-        Event eventForLocal = new Event();
         eventForLocal.setName(eventName);
         eventForLocal.setLocation(eventLocation);
         eventForLocal.setDescription(eventDesc);
@@ -152,6 +155,7 @@ public class EntrantEventDetailsFragment extends Fragment {
             loadWaitingListCount(eventDocId, eventForLocal);
             refreshEntrantListsAndBind(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
         } else {
+            loadWaitingListCount(eventDocId, eventForLocal);
             waitingCountView.setText("Waiting list: --");
             // backup plan -> local states (copy got from when app first boot)
             bindActionForState(eventDocId, eventForLocal, inviteActions, actionBtn, acceptBtn, declineBtn);
@@ -236,8 +240,18 @@ public class EntrantEventDetailsFragment extends Fragment {
             return;
         }
 
+        // Case 0: Waiting List Full
+        Log.d("help", "why" + eventForLocal.getWaitingList());
+        Log.d("max", "max waiting list = " + eventForLocal.getMaxMaitingList());
+        if (!currentEntrant.isInAnyList(eventDocId) && (eventForLocal.getWaitingList().size() >= eventForLocal.getMaxMaitingList())) {
+                Log.d("help", "why" + eventForLocal.getWaitingList());
+                actionBtn.setText("Waiting List Full");
+                actionBtn.setTextColor(Color.WHITE);
+                actionBtn.setEnabled(false);
+        }
+
         // Case 1: Enroll
-        if (!currentEntrant.isInAnyList(eventDocId)) {
+        else if (!currentEntrant.isInAnyList(eventDocId)) {
             actionBtn.setText("Enroll");
             actionBtn.setEnabled(true);
             enrollWaiting(eventDocId, actionBtn, eventForLocal);
@@ -495,6 +509,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     waitingCountView.setText("Waiting list: --");
+                    waitingCount = 0;
                 });
     }
 

@@ -161,7 +161,11 @@ public class Event implements Serializable {
         return max_entrants;
     }
 
-    public Integer getMaxMaitingList() {return max_waiting_list;}
+    public Integer getMaxMaitingList() {
+        // Prevents NullPointer when re-setting with FireBase
+        if (max_waiting_list == null) max_waiting_list = 0;
+        return max_waiting_list;
+    }
 
     public String getImageUrl() {
         return imageUrl;
@@ -176,6 +180,8 @@ public class Event implements Serializable {
     }
 
     public ArrayList<String> getWaitingList() {
+        // Prevents NullPointer when re-setting with FireBase
+        if (waitingList == null) waitingList = new ArrayList<>();
         return waitingList;
     }
 

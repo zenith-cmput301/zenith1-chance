@@ -69,24 +69,4 @@ public class QRManager {
         return;
     }
 
-//    public void parseQRText(String link) {
-//
-//        // Removes prefix
-//        String docId = link.replace("zenith1/", "");
-//
-//        db = FirebaseFirestore.getInstance();
-//
-//        // Grabs Event
-//        db.collection("events")
-//                .document(docId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        Event event = (Event) documentSnapshot.toObject(Event.class);
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                });
-//
-//    }
 }
