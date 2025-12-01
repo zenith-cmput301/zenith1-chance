@@ -28,6 +28,7 @@ import com.example.zenithchance.R;
 import com.example.zenithchance.interfaces.EntrantProviderInterface;
 import com.example.zenithchance.managers.LocationHelper;
 import com.example.zenithchance.managers.QRManager;
+import com.example.zenithchance.managers.UserManager;
 import com.example.zenithchance.models.Entrant;
 import com.example.zenithchance.models.Event;
 import com.google.android.material.button.MaterialButton;
@@ -415,94 +416,18 @@ public class EntrantEventDetailsFragment extends Fragment {
         });
     }
 
-    /**
-     * Check if we have location permission
-     */
-    private boolean hasLocationPermission() {
-        return ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED;
-    }
+                        // send enrollemnt notification
+                        UserManager.getInstance().sendNotification(eventDocId, "enrolled", currentEntrant.getUserId());
 
-    /**
-     * Get location, optionally enforce distance from event, then enroll.
-     *
-     * @param enforceDistance true if event requires geolocation (must be within 500m)
-     */
-    private void proceedWithLocationCheck(String eventDocId,
-                                          MaterialButton actionBtn,
-                                          Event eventForLocal,
-                                          boolean enforceDistance) {
-
-        actionBtn.setEnabled(false);
-        actionBtn.setText(enforceDistance ? "Checking location..." : "Getting location...");
-        actionBtn.setTextColor(Color.WHITE);
-
-        if (locationHelper == null) {
-            locationHelper = new LocationHelper(requireContext().getApplicationContext());
-        }
-
-        locationHelper.getCurrentLocation(location -> {
-            GeoPoint entrantPoint = LocationHelper.locationToGeoPoint(location);
-            GeoPoint eventPoint = eventForLocal.getLocationPoint();
-
-            // We MUST have entrant location for both cases
-            if (entrantPoint == null) {
-                actionBtn.setText("Enroll");
-                actionBtn.setEnabled(true);
-                new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Location Unavailable")
-                        .setMessage("Could not get your current location. Please make sure location services are enabled and try again.")
-                        .setPositiveButton("Retry", (dialog, which) ->
-                                proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, enforceDistance))
-                        .setNegativeButton("Cancel", null)
-                        .show();
-                return;
-            }
-
-            // If we need to enforce distance, we also need event location
-            if (enforceDistance) {
-                if (eventPoint == null) {
-                    actionBtn.setText("Enroll");
-                    actionBtn.setEnabled(true);
-                    new MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Event Location Not Set")
-                            .setMessage("This event requires you to be at a specific location, " +
-                                    "but the organizer hasn't set it yet. You can't join until it's fixed.")
-                            .setPositiveButton("OK", null)
-                            .show();
-                    return;
-                }
-
-                // Check distance only when enforceDistance == true
-                float distance = LocationHelper.distanceMeters(eventPoint, entrantPoint);
-                Log.d("Enrollment", "Distance: " + distance + "m (max: " + MAX_DISTANCE_METERS + "m)");
-
-                if (distance > MAX_DISTANCE_METERS) {
-                    actionBtn.setText("Enroll");
-                    actionBtn.setEnabled(true);
-
-                    String distanceText = distance > 1000
-                            ? String.format("%.1f km", distance / 1000)
-                            : String.format("%.0f meters", distance);
-
-                    new MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Too Far From Event")
-                            .setMessage("You must be within " + (int) MAX_DISTANCE_METERS + " meters of the event location.\n\n" +
-                                    "You are currently " + distanceText + " away from:\n" +
-                                    eventForLocal.getLocation())
-                            .setPositiveButton("OK", null)
-                            .setNeutralButton("Retry", (dialog, which) ->
-                                    proceedWithLocationCheck(eventDocId, actionBtn, eventForLocal, true))
-                            .show();
-                    return;
-                }
-            }
-
-            // All checks passed; enroll and always record entrantPoint
-            actionBtn.setText("Enrolling...");
-            performEnrollment(eventDocId, actionBtn, eventForLocal, entrantPoint);
+                        Toast.makeText(requireContext(), "Added to waiting list", Toast.LENGTH_SHORT).show();
+                    },
+                    // fail to enroll due to firebase shenanigans
+                    e -> {
+                        actionBtn.setText("Enroll");
+                        actionBtn.setEnabled(true);
+                        Toast.makeText(requireContext(), "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
         });
     }
 
@@ -567,6 +492,9 @@ public class EntrantEventDetailsFragment extends Fragment {
                         // decrement #entrants
                         waitingCount--;
                         updateWaitingCountLabel();
+
+                        // send notifications
+                        UserManager.getInstance().sendNotification(eventDocId, "dropped", currentEntrant.getUserId());
                     },
                     // fail to enroll due to firebase shenanigans
                     e -> {
@@ -668,6 +596,7 @@ public class EntrantEventDetailsFragment extends Fragment {
                         actionBtn.setText("Declined");
                         actionBtn.setTextColor(Color.WHITE);
                         actionBtn.setEnabled(false);
+                        UserManager.getInstance().sendNotification(eventDocId, "cancelled", currentEntrant.getUserId());
                     },
                     e -> {
                         actionBtn.setText("Cancel Spot");

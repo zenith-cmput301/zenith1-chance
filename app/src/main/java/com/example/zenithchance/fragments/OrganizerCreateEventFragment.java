@@ -76,17 +76,14 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
     EditText eventName;
     Button eventDateButton;
     Button eventRegistrationButton;
+    Button eventDeadlineButton;
     EditText eventLocation;
-    EditText eventMaxEntrants;
+    EditText eventMaxEntrants, eventMaxWaitingList;
     EditText eventDescription;
     CheckBox eventGeolocationRequired;
-
     Button discardButton, submitButton;
-
     Organizer organizerId;
-
     private FirebaseFirestore db;
-
 
     // image launcher
     private ImageView eventImage;
@@ -94,17 +91,12 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
     private ActivityResultLauncher<String> pickImageLauncher;
 
-    private Double eventLat = null;
-    private Double eventLng = null;
-
-    private GoogleMap mMap;
-    private Marker eventMarker;
-
-    private ActivityResultLauncher<Intent> autocompleteLauncher;
-
-
-
-
+    /**
+     * This function initialize the fragment when it is first accessed
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     * a previous saved state, this is the state.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -270,13 +262,16 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         eventName = root.findViewById(R.id.event_name_box);
         eventDateButton = root.findViewById(R.id.event_date_button);
         eventRegistrationButton = root.findViewById(R.id.event_registration_button);
+        eventDeadlineButton = root.findViewById(R.id.event_deadline_button);
         eventLocation = root.findViewById(R.id.event_location_box);
         eventMaxEntrants = root.findViewById(R.id.event_max_entrants_box);
+        eventMaxWaitingList = root.findViewById(R.id.event_max_waiting_box);
         eventDescription = root.findViewById(R.id.event_description_box);
         eventGeolocationRequired = root.findViewById(R.id.event_geolocation_box);
 
         attachDateTimePicker(eventDateButton);
         attachDateTimePicker(eventRegistrationButton);
+        attachDateTimePicker(eventDeadlineButton);
 
         // Initializing buttons
         discardButton = root.findViewById(R.id.event_creation_discard_button);
@@ -460,6 +455,10 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
             eventRegistrationButton.setText(fmt.format(event.getRegistrationDate()));
         }
 
+        if (event.getFinalDeadline() != null) {
+            eventDeadlineButton.setText(fmt.format(event.getFinalDeadline()));
+        }
+
         if (event.getImageUrl() != null) {
             Glide.with(this)
                     .load(event.getImageUrl())
@@ -496,8 +495,17 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         try {
             Date eventDate = fmt.parse(eventDateButton.getText().toString());
             Date registrationDate = fmt.parse(eventRegistrationButton.getText().toString());
-            if (eventDate != null) event.setDate(eventDate);
-            if (registrationDate != null) event.setRegistrationDate(registrationDate);
+            Date deadlineDate = fmt.parse(eventDeadlineButton.getText().toString());
+
+            if (eventDate != null) {
+                event.setDate(eventDate);
+            }
+            if (registrationDate != null) {
+                event.setRegistrationDate(registrationDate);
+            }
+            if (deadlineDate != null) {
+                event.setFinalDeadline(deadlineDate);
+            }
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
@@ -509,17 +517,33 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         event.setGeolocationRequired(eventGeolocationRequired.isChecked());
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;
+        int maxEntrants = 1000;   // default if empty
+
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Max Entrants, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
         event.setMaxEntrants(maxEntrants);
 
-        // always save GeoPoint
-        event.setLocationPoint(new GeoPoint(eventLat, eventLng));
+        text = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 1000;   // default if empty
 
+        if (!text.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Max Waiting List, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        event.setMaxWaitingList(maxWaitingList);
+
+        // push the updated event to Firestore
         if (selectedImageUri != null) {
             uploadImageAndUpdateEvent(event);
         } else {
@@ -546,22 +570,40 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
 
         Date eventdate;
         Date registrationdate;
+        Date finalDeadline;
 
         try {
             eventdate = fmt.parse(eventDateButton.getText().toString());
             registrationdate = fmt.parse(eventRegistrationButton.getText().toString());
+            finalDeadline = fmt.parse(eventDeadlineButton.getText().toString());
+            Log.d("to string", eventDateButton.getText().toString());
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Invalid Date, Try Again", Toast.LENGTH_LONG).show();
             return;
         }
 
         String text = eventMaxEntrants.getText().toString().trim();
-        int maxEntrants = 0;
+        int maxEntrants = 1000;   // default if empty
 
         if (!text.isEmpty()) {
             try {
                 maxEntrants = Integer.parseInt(text);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Entrants Number, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        String waitingText = eventMaxWaitingList.getText().toString().trim();
+        int maxWaitingList = 1000;   // default if empty
+
+        if (!waitingText.isEmpty()) {
+            try {
+                maxWaitingList = Integer.parseInt(waitingText);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "Invalid Waiting List Number, Try Again", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
 
         Event newEvent = new Event(
@@ -573,8 +615,9 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 eventDescription.getText().toString(),
                 eventGeolocationRequired.isChecked(),
                 registrationdate,
-                registrationdate,
-                maxEntrants
+                finalDeadline,
+                maxEntrants,
+                maxWaitingList
         );
 
         if (eventLat != null && eventLng != null) {
@@ -588,6 +631,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         }
     }
 
+    /**
+     * This method handles calendar time picker logic
+     *
+     * @param targetButton  calendar button
+     */
     private void attachDateTimePicker(Button targetButton) {
 
         targetButton.setOnClickListener(v -> {
@@ -646,6 +694,10 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         });
     }
 
+    /**
+     * This method allows uploading event poster and creating an event with it
+     * @param newEvent  Event to be created
+     */
     private void uploadImageAndCreateEvent(Event newEvent) {
         if (selectedImageUri == null) {
             saveNewEventToFirestore(newEvent);
@@ -668,7 +720,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
-
+    /**
+     * This method saves the local created event to Firebase
+     *
+     * @param newEvent  Event to be saved
+     */
     private void saveNewEventToFirestore(Event newEvent) {
         db.collection("events")
                 .add(newEvent)
@@ -701,6 +757,10 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
+    /**
+     * This method allows for editing existed event and uploading its event poster
+     * @param event Event to be updated
+     */
     private void uploadImageAndUpdateEvent(Event event) {
         if (selectedImageUri == null) {
             saveUpdatedEventToFirestore(event);
@@ -723,6 +783,11 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
                 });
     }
 
+    /**
+     * This method updates the existed event (with event poster) to Firebase
+     *
+     * @param event  Event to be saved
+     */
     private void saveUpdatedEventToFirestore(Event event) {
         db.collection("events")
                 .document(event.getDocId())
