@@ -536,7 +536,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         event.setMaxEntrants(maxEntrants);
 
         String waiting = eventMaxWaitingList.getText().toString().trim();
-        int maxWaitingList = 0;   // default if empty
+        int maxWaitingList = 1000;   // default if empty
 
         if (!waiting.isEmpty()) {
             try {
@@ -598,7 +598,7 @@ public class OrganizerCreateEventFragment extends Fragment implements OnMapReady
         }
 
         String waitingText = eventMaxWaitingList.getText().toString().trim();
-        int maxWaitingList = 0;   // default if empty
+        int maxWaitingList = 1000;   // default if empty
 
         if (!waitingText.isEmpty()) {
             try {
